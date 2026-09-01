@@ -1,0 +1,48 @@
+# --- Java / Maven ---
+target/
+!.mvn/wrapper/maven-wrapper.jar
+build/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+replay_pid*
+
+# --- IDE ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+nbproject/
+*.code-workspace
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Env / secrets (never commit credentials) ---
+.env
+.env.*
+!.env.example
+*.local.properties
+application-local.yml
+application-local.yaml
+application-local.properties
+secrets/
+
+# --- Runtime / logs ---
+*.log
+logs/
+
+# --- Swiss Ephemeris data (large binary; provisioned out of band) ---
+ephemeris/src/main/resources/ephe/*.se1
+
+# --- Agent folder: may hold auth tokens / private artifacts ---
+.claude/settings.local.json
+.claude/.credentials*

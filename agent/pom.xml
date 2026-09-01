@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.celestia</groupId>
+        <artifactId>celestia-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>agent</artifactId>
+    <name>Celestia Agent</name>
+    <description>Spring Boot application: conversation orchestrator, FSMs, guarded LLM pipeline, persistence, wiring of all modules.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.celestia</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.celestia</groupId>
+            <artifactId>ephemeris</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.celestia</groupId>
+            <artifactId>geo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.celestia</groupId>
+            <artifactId>billing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.celestia</groupId>
+            <artifactId>guardrail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.celestia</groupId>
+            <artifactId>payments-razorpay</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.celestia</groupId>
+            <artifactId>channel-whatsapp</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!--
+          Added per phase:
+            Phase 3  spring-boot-starter-data-jpa, flyway-core, flyway-mysql, mysql-connector-j, testcontainers
+            Phase 6+ spring-ai-starter-model-ollama, spring-boot-starter-security
+        -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
