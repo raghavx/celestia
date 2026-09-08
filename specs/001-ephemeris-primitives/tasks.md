@@ -70,24 +70,24 @@ Ketu opposite Rahu, `retrograde == speed < 0`.
 
 ### Tests (write first, expect failure)
 
-- [ ] T018 [P] [US1] `PositionProviderContractTest` in `ephemeris/src/test/java/com/celestia/ephemeris/PositionProviderContractTest.java` — encodes `contracts/ephemeris-api.md`: nine grahas present, longitude range, `ayanamsa == KP_NEW`, Ketu identity, retrograde rule, null instant → `EphemerisException`
-- [ ] T019 [P] [US1] `TimeScalesTest` in `ephemeris/src/test/java/com/celestia/ephemeris/TimeScalesTest.java` — `Instant` → `JulianDay`, `jdTt ≥ jdUt` for modern dates, `deltaTSeconds` sign and magnitude sane
+- [x] T018 [P] [US1] `PositionProviderContractTest` in `ephemeris/src/test/java/com/celestia/ephemeris/PositionProviderContractTest.java` — encodes `contracts/ephemeris-api.md`: nine grahas present, longitude range, `ayanamsa == KP_NEW`, Ketu identity, retrograde rule, null instant → `EphemerisException`
+- [x] T019 [P] [US1] `TimeScalesTest` in `ephemeris/src/test/java/com/celestia/ephemeris/TimeScalesTest.java` — `Instant` → `JulianDay`, `jdTt ≥ jdUt` for modern dates, `deltaTSeconds` sign and magnitude sane
 
 ### Implementation
 
-- [ ] T020 [P] [US1] `JulianDay` record (`double jdUt, double jdTt, double deltaTSeconds`) in `ephemeris/src/main/java/com/celestia/ephemeris/JulianDay.java`
-- [ ] T021 [P] [US1] `EngineVersion` record (`rules, sePort, deltaTModel, ephemerisData`, `id()`) in `ephemeris/src/main/java/com/celestia/ephemeris/EngineVersion.java`
-- [ ] T022 [P] [US1] `GrahaPosition` record in `ephemeris/src/main/java/com/celestia/ephemeris/GrahaPosition.java` — compact-constructor invariants: `longitude ∈ [0,360)`, `retrograde == (speedPerDay < 0)`
-- [ ] T023 [US1] `EphemerisResult` record in `ephemeris/src/main/java/com/celestia/ephemeris/EphemerisResult.java` — invariant: `positions.keySet()` == all nine `Graha`
-- [ ] T024 [US1] `EphemerisException` (unchecked) in `ephemeris/src/main/java/com/celestia/ephemeris/EphemerisException.java`
-- [ ] T025 [US1] `TimeScales.of(Instant)` in `ephemeris/src/main/java/com/celestia/ephemeris/TimeScales.java` — UTC → JD(UT); ΔT via the SE port's `swe_deltat`; JD(TT)
-- [ ] T026 [US1] `PositionProvider` interface in `ephemeris/src/main/java/com/celestia/ephemeris/PositionProvider.java` (Javadoc = the contract)
-- [ ] T027 [US1] `SwissEphemerisConfig` in `ephemeris/src/main/java/com/celestia/ephemeris/swisseph/SwissEphemerisConfig.java` — the ephemeris-data path is a **filesystem directory** resolved from an explicit config value / env var (`swe_set_ephe_path` cannot read files packaged inside a jar): default to the repo path in dev and test, and to a mounted/extracted directory in the `agent` container; supported range (1800–2100); Moshier toggle for when the directory is absent. Document the resolution order in `quickstart.md`.
-- [ ] T028 [US1] `SwissEphemerisPositionProvider` in `ephemeris/src/main/java/com/celestia/ephemeris/swisseph/SwissEphemerisPositionProvider.java` — `swe_set_sid_mode(SE_SIDM_KRISHNAMURTI)`, `swe_calc_ut` with `SEFLG_SIDEREAL | SEFLG_SPEED`, `SE_MEAN_NODE` for Rahu, Ketu = Rahu + 180° (mod 360), retrograde from speed sign, thread-safe access to the non-thread-safe SE handle, `Accuracy` from the range check; no SE type in any public signature
-- [ ] T029 [US1] Out-of-range handling in the provider: dates outside 1800–2100 compute via `SEFLG_MOSEPH` and return a result with `Accuracy.REDUCED` on every position — never an exception (FR-016)
-- [ ] T030 [P] [US1] `AccuracyRangeTest` in `ephemeris/src/test/java/com/celestia/ephemeris/AccuracyRangeTest.java` — in-range → `FULL`; year 1600 → `REDUCED`, no exception
-- [ ] T031 [P] [US1] `PositionProviderTest` in `ephemeris/src/test/java/com/celestia/ephemeris/PositionProviderTest.java` — Ketu exactly opposite Rahu and both retrograde; a known Mercury-retrograde instant → retrograde flag set, `speedPerDay < 0`
-- [ ] T032 [US1] Populate `EngineVersion` (SE port version, ΔT tag, `.se1` manifest hash / `"moseph"`); `EngineVersionTest` asserts stability for a fixed build+data
+- [x] T020 [P] [US1] `JulianDay` record (`double jdUt, double jdTt, double deltaTSeconds`) in `ephemeris/src/main/java/com/celestia/ephemeris/JulianDay.java`
+- [x] T021 [P] [US1] `EngineVersion` record (`rules, sePort, deltaTModel, ephemerisData`, `id()`) in `ephemeris/src/main/java/com/celestia/ephemeris/EngineVersion.java`
+- [x] T022 [P] [US1] `GrahaPosition` record in `ephemeris/src/main/java/com/celestia/ephemeris/GrahaPosition.java` — compact-constructor invariants: `longitude ∈ [0,360)`, `retrograde == (speedPerDay < 0)`
+- [x] T023 [US1] `EphemerisResult` record in `ephemeris/src/main/java/com/celestia/ephemeris/EphemerisResult.java` — invariant: `positions.keySet()` == all nine `Graha`
+- [x] T024 [US1] `EphemerisException` (unchecked) in `ephemeris/src/main/java/com/celestia/ephemeris/EphemerisException.java`
+- [x] T025 [US1] `TimeScales.of(Instant)` in `ephemeris/src/main/java/com/celestia/ephemeris/TimeScales.java` — UTC → JD(UT); ΔT via the SE port's `swe_deltat`; JD(TT)
+- [x] T026 [US1] `PositionProvider` interface in `ephemeris/src/main/java/com/celestia/ephemeris/PositionProvider.java` (Javadoc = the contract)
+- [x] T027 [US1] `SwissEphemerisConfig` in `ephemeris/src/main/java/com/celestia/ephemeris/swisseph/SwissEphemerisConfig.java` — the ephemeris-data path is a **filesystem directory** resolved from an explicit config value / env var (`swe_set_ephe_path` cannot read files packaged inside a jar): default to the repo path in dev and test, and to a mounted/extracted directory in the `agent` container; supported range (1800–2100); Moshier toggle for when the directory is absent. Document the resolution order in `quickstart.md`.
+- [x] T028 [US1] `SwissEphemerisPositionProvider` in `ephemeris/src/main/java/com/celestia/ephemeris/swisseph/SwissEphemerisPositionProvider.java` — `swe_set_sid_mode(SE_SIDM_KRISHNAMURTI)`, `swe_calc_ut` with `SEFLG_SIDEREAL | SEFLG_SPEED`, `SE_MEAN_NODE` for Rahu, Ketu = Rahu + 180° (mod 360), retrograde from speed sign, thread-safe access to the non-thread-safe SE handle, `Accuracy` from the range check; no SE type in any public signature
+- [x] T029 [US1] Out-of-range handling in the provider: dates outside 1800–2100 compute via `SEFLG_MOSEPH` and return a result with `Accuracy.REDUCED` on every position — never an exception (FR-016)
+- [x] T030 [P] [US1] `AccuracyRangeTest` in `ephemeris/src/test/java/com/celestia/ephemeris/AccuracyRangeTest.java` — in-range → `FULL`; year 1600 → `REDUCED`, no exception
+- [x] T031 [P] [US1] `PositionProviderTest` in `ephemeris/src/test/java/com/celestia/ephemeris/PositionProviderTest.java` — Ketu exactly opposite Rahu and both retrograde; a known Mercury-retrograde instant → retrograde flag set, `speedPerDay < 0`
+- [x] T032 [US1] Populate `EngineVersion` (SE port version, ΔT tag, `.se1` manifest hash / `"moseph"`); `EngineVersionTest` asserts stability for a fixed build+data
 
 **Checkpoint**: planetary positions are computable and structurally verified.
 
