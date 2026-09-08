@@ -17,6 +17,10 @@ references are acceptable where an ADR settled the choice.
 | Sub-sub lord: each sub divided the same way, in Vimshottari order from the sub lord | `core.dasha.VimshottariPartition` | KP practice (4th level of the significator hierarchy) |
 | Half-open `[start, end)` boundary convention, boundary to the higher division | `core.lordage.Longitudes`, `Span` | Design decision (research.md §5); matches common KP software |
 | 243 sub divisions tile the zodiac; the KP **249** horary table adds the splits at the 12 sign boundaries | `VimshottariPartition.subDivisions()` | KP horary (249) system; the split itself is SPEC-005 |
+| **Placidus** house cusps, sidereal, KP-New ayanamsa; polar limit 66° (config) | `SwissEphemerisHouseProvider`, `SwissEphemerisConfig.polarLimit` | ADR-0004; Placidus is undefined above the Arctic/Antarctic circle (~66°34′) |
+| Cusp 1 = the Ascendant (bit-identical) | `SwissEphemerisHouseProvider` | SPEC-002 FR-003 |
+| **Bhava** (cusp-to-cusp): a graha is in bhava _n_ iff its longitude lies in the forward arc `[cusp n, cusp n+1)` — half-open, wrap-aware. Not the Sripati midpoint method. | `core.chart.Bhavas.bhavaOf` | K. S. Krishnamurti, *KP Readers* (the cuspal system) |
+| **Rasi house** (display): whole signs from the Ascendant's sign, which is house 1 | `core.chart.Bhavas.rasiHouseOf` | standard whole-sign Rasi layout |
 
 ## Engine version bump procedure
 

@@ -9,12 +9,17 @@ Pure-Java wrapper over the Swiss Ephemeris Java port. Time handling and geocentr
 
 | Type | Purpose |
 |------|---------|
-| `PositionProvider` | `positions(Instant) -> EphemerisResult` — the entry point |
-| `SwissEphemerisPositionProvider` | the implementation (KP-New ayanamsa, mean node) |
-| `SwissEphemerisConfig` | resolves the `.se1` directory and the supported range |
+| `PositionProvider` | `positions(Instant) -> EphemerisResult` — the nine grahas |
+| `HouseProvider` | `houses(BirthData) -> HouseResult` — 12 Placidus cusps + angles; `anglesOnly(BirthData)` at any latitude |
+| `SwissEphemerisPositionProvider` / `SwissEphemerisHouseProvider` | the implementations (KP-New ayanamsa, mean node, Placidus) |
+| `SwissEphemerisConfig` | resolves the `.se1` directory, the supported range, and the polar limit |
 | `TimeScales.of(Instant)` | UTC instant -> `JulianDay` (UT + TT + &Delta;T) |
 | `Graha` | the nine grahas + Vimshottari year weights |
-| `EphemerisResult` / `GrahaPosition` / `EngineVersion` / `Ayanamsa` / `Accuracy` | value objects |
+| `BirthData` | instant + latitude + longitude (the house input) |
+| `EphemerisResult` / `HouseResult` / `GrahaPosition` / `EngineVersion` / `Ayanamsa` / `Accuracy` / `Angle` / `HouseSystem` | value objects |
+
+`houses(...)` throws `PlacidusUndefinedException` for births at `|lat| >= 66°`
+(configurable); `anglesOnly(...)` still returns the Ascendant/MC there.
 
 ## Ephemeris data
 

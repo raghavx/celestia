@@ -1,9 +1,13 @@
-# Golden charts — KP engine correctness oracle (SPEC-001)
+# Golden charts — KP engine correctness oracle (SPEC-001 + SPEC-002)
 
-These files are the reference data for the golden-chart snapshot suite
-(spec.md SC-001, SC-002). Each pins, for one birth instant, every value the
-engine must reproduce: the sidereal longitude and the full KP lord chain of all
-nine grahas.
+These files are the reference data for the golden-chart snapshot suites. Each
+pins, for one birth, every value the engine must reproduce:
+
+- **SPEC-001** (SC-001/002): the sidereal longitude and full KP lord chain of the
+  nine grahas.
+- **SPEC-002** (SC-001/002): the twelve Placidus house cusps and the
+  Ascendant/Midheaven with their lord chains, and each graha's `bhava`
+  (cusp-to-cusp) and `rasi_house` (whole sign from the Ascendant).
 
 **Nothing in `expected` is filled from memory or by hand.** Values are produced by
 an independent computation (`tools/ephe-crosscheck/`) and, for at least one chart,
@@ -20,9 +24,12 @@ _Verification protocol_ below.
 | Positions flags | `SEFLG_SIDEREAL | SEFLG_SPEED` (+ `SWIEPH`, or `MOSEPH` fallback) | research.md §1 |
 | Nakshatra span | 13°20′ from 0° Aries; pada 3°20′ | FR-007 |
 | Sub / sub-sub | Vimshottari proportion, order from the parent lord, half-open `[start,end)` | FR-009–FR-011 |
+| House system | Placidus, sidereal (`swe_houses_ex`, `hsys='P'`, `SEFLG_SIDEREAL`) | ADR-0004 / SPEC-002 |
+| Cusp 1 | = the Ascendant (`ascmc[0]`), bit-identical | SPEC-002 FR-003 |
+| Bhava | forward arc `[cusp n, cusp n+1)`, half-open, wrap-aware | SPEC-002 research §3 |
+| Rasi house | `1 + ((graha.sign − asc.sign) mod 12)` | SPEC-002 research §4 |
 
-House cusps / Ascendant are **not** in these files — SPEC-001 is positions +
-lordage only. (They arrive with SPEC-002 and its own golden data.)
+Birth `latitude` / `longitude` (decimal degrees, + = N / E) are the house inputs.
 
 ## File format
 
@@ -44,13 +51,23 @@ One JSON object per chart, `<id>.json`:
   "sources": [ { "type": "birth_record", "rodden_rating": "AA", "citation": "…", "url": "…" } ],
   "engine_settings": { "ayanamsa": "SE_SIDM_KRISHNAMURTI (5)", "node": "mean", "zodiac": "sidereal apparent geocentric" },
   "expected": {
-    "generated_by": null,          // e.g. "pyswisseph 2.10.03.2 / ephe DE441 / kp-crosscheck 0.1"
-    "generated_at": null,
+    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.2",
+    "generated_at": "…",
     "grahas": {
-      "SUN":  { "longitude": null, "sign": null, "sign_lord": null, "nakshatra": null, "pada": null,
-                "star_lord": null, "sub_lord": null, "sub_sub_lord": null, "retrograde": null },
-      "MOON": { … }, "MARS": { … }, "MERCURY": { … }, "JUPITER": { … }, "VENUS": { … },
-      "SATURN": { … }, "RAHU": { … }, "KETU": { … }
+      "SUN":  { "longitude": …, "sign": …, "sign_lord": …, "nakshatra": …, "pada": …,
+                "star_lord": …, "sub_lord": …, "sub_sub_lord": …, "retrograde": …,
+                "bhava": …,        // SPEC-002: 1..12, cusp-to-cusp
+                "rasi_house": … }, // SPEC-002: 1..12, whole sign from the Ascendant
+      "MOON": { … }, "…": { … }, "KETU": { … }
+    },
+    "cusps": [
+      { "house": 1, "longitude": …, "sign": …, "sign_lord": …, "nakshatra": …,
+        "pada": …, "star_lord": …, "sub_lord": …, "sub_sub_lord": … },
+      // … houses 2..12
+    ],
+    "angles": {
+      "ascendant": { "longitude": …, /* + lord chain */ },
+      "midheaven": { "longitude": …, /* + lord chain */ }
     }
   },
   "verification": {
@@ -66,8 +83,9 @@ snapshot is exact for `DeterminismTest` and the numeric tolerance (SC-002) is
 applied by the test, not the file.
 
 `expected.generated_at` is provenance only — it changes on every regeneration and
-is **not** read by any test. `expected.grahas` is deterministic across
-regenerations with the same pyswisseph + data version (verified).
+is **not** read by any test. `expected.grahas`, `expected.cusps` and
+`expected.angles` are deterministic across regenerations with the same pyswisseph
++ data version (verified).
 
 ## Verification protocol
 
@@ -75,11 +93,12 @@ regenerations with the same pyswisseph + data version (verified).
    well-attested time. `utc_instant` is the single input; `utc_derivation` shows
    the local→UTC step (this is SPEC-007's job in production — the golden files
    pre-compute it and document it).
-2. **Positions** — `tools/ephe-crosscheck/compute_golden.py` computes the nine
-   sidereal longitudes with **pyswisseph** (an independent binding of Swiss
-   Ephemeris) using the settings above, and fills `expected`. This is the
-   "authoritative reference" of SC-002.
-3. **Lord chain** — the same script derives the chain from the longitudes. Because
+2. **Positions & cusps** — `tools/ephe-crosscheck/compute_golden.py` computes the
+   nine sidereal longitudes and the twelve Placidus cusps + Asc/MC with
+   **pyswisseph** (an independent binding of Swiss Ephemeris) using the settings
+   above, and fills `expected`. This is the "authoritative reference" of SC-002.
+3. **Lord chain** — the same script derives every chain (graha and cusp) from the
+   longitudes, and the bhava / rasi house from the cusps. Because
    our Java implementation and the script will encode the *same* KP division rule,
    this alone does not catch a misunderstanding of the rule. So for **≥ 1 chart**,
    the Sun and Moon lord chains are also read off a published KP source (a KP
@@ -111,22 +130,24 @@ committing (it is a reference change, not a code change).
 | `obama-1961` | Barack Obama | 1961-08-05T05:24:00Z | AA (birth certificate) | expected_generated |
 
 `expected` blocks were generated by `tools/ephe-crosscheck/compute_golden.py`
-with **pyswisseph 2.10.03** and real Swiss Ephemeris data (`sepl_18.se1`,
-`semo_18.se1`, provisioned by `scripts/fetch-ephe.sh`). Sanity-checked against
-public Vedic-chart knowledge: Einstein Sun Pisces / Moon Scorpio, Jobs Sun
-Aquarius / Mercury retrograde, Obama Sun Cancer — all consistent.
+(`kp-crosscheck 0.2`) with **pyswisseph 2.10.03** and real Swiss Ephemeris data
+(`sepl_18.se1`, `semo_18.se1`, provisioned by `scripts/fetch-ephe.sh`), and now
+include the SPEC-002 cusps / angles / bhava / rasi. Sanity-checked against public
+Vedic-chart knowledge: Einstein Sun Pisces / Moon Scorpio / **Gemini Ascendant**
+/ Sun in the 10th, Jobs Sun Aquarius / Mercury retrograde / **Leo Ascendant**,
+Obama Sun Cancer / **Capricorn Ascendant** — all consistent.
 
 ### Still to do on these charts
 
-1. **`human_verified` status** — read the Sun and Moon lord chains for at least
-   one chart off a published KP source (KP textbook worked example, or two
-   agreeing mainstream KP websites set to KP ayanamsa + mean node) and record it
-   in `verification.lordchain_human_check`. This is the only check that can catch a
-   wrong *understanding* of the sub-lord division (the script and the engine both
-   encode the same rule).
-2. **4th chart (wanted):** a KP-textbook worked example where the lords are
-   printed — add as `<book-slug>.json` with the citation. Gives a fully
-   independent human reference for the lord-chain rule.
+1. **`human_verified` status** — read the Sun and Moon lord chains, and one
+   cuspal sub lord (e.g. the 10th for career), for at least one chart off a
+   published KP source (KP textbook worked example, or two agreeing mainstream KP
+   websites set to KP ayanamsa + mean node) and record it in
+   `verification.lordchain_human_check`. This is the only check that catches a
+   wrong *understanding* of the sub-lord division or the bhava rule (the script
+   and the engine encode the same rules).
+2. **4th chart (wanted):** a KP-textbook worked example where the planet + cusp
+   lords are printed — add as `<book-slug>.json` with the citation.
 
 ### Charts considered and dropped
 

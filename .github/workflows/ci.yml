@@ -43,9 +43,12 @@ jobs:
       # SPEC-001 SC-005 / FR-014: the golden-chart output must be identical
       # across OS + arch. Fingerprint the deterministic golden test's inputs
       # (positions are computed fresh each run) and compare across the matrix.
-      - name: Fingerprint golden determinism
+      - name: Golden determinism (cross-OS)
         run: |
-          ./mvnw -q -B -ntp -pl core -am test -Dtest=GoldenChartTest,DeterminismTest \
+          # The real cross-platform check is these tests asserting computed ==
+          # stored on each OS; the JSON fingerprint below is a coarse extra guard.
+          ./mvnw -q -B -ntp -pl core -am test \
+            -Dtest=GoldenChartTest,DeterminismTest,NatalChartGoldenTest,NatalChartDeterminismTest \
             -Dsurefire.failIfNoSpecifiedTests=false
           find core/src/test/resources/golden -name '*.json' -exec shasum -a 256 {} + \
             | sort > golden-fingerprint-${{ matrix.os }}.txt

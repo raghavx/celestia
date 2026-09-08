@@ -4,20 +4,29 @@ import com.celestia.ephemeris.Graha;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * One parsed golden chart (see {@code core/src/test/resources/golden/README.md}).
+ * Carries the SPEC-001 graha reference and the SPEC-002 cusp / angle reference.
  */
-public record GoldenChart(String id, Instant instant, Map<Graha, Expected> expected) {
+public record GoldenChart(
+        String id,
+        Instant instant,
+        double latitude,
+        double longitude,
+        Map<Graha, Expected> expected,
+        List<CuspRef> cusps,
+        Map<String, LordChainRef> angles) {
 
-    /** The reference values for one graha. */
+    /** Reference values for one graha (SPEC-001 + SPEC-002 bhava / rasi house). */
     public record Expected(
             double longitude,
             String sign,
@@ -27,7 +36,23 @@ public record GoldenChart(String id, Instant instant, Map<Graha, Expected> expec
             String starLord,
             String subLord,
             String subSubLord,
-            boolean retrograde) {}
+            boolean retrograde,
+            Integer bhava,
+            Integer rasiHouse) {}
+
+    /** A cusp's reference lord chain (SPEC-002). */
+    public record CuspRef(int house, LordChainRef chain) {}
+
+    /** longitude + lord chain, shared by cusps and angles. */
+    public record LordChainRef(
+            double longitude,
+            String sign,
+            String signLord,
+            String nakshatra,
+            int pada,
+            String starLord,
+            String subLord,
+            String subSubLord) {}
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -46,9 +71,12 @@ public record GoldenChart(String id, Instant instant, Map<Graha, Expected> expec
                 throw new IllegalStateException("missing golden resource " + resource);
             }
             JsonNode root = MAPPER.readTree(in);
-            Instant instant = Instant.parse(root.at("/birth/utc_instant").asText());
-            JsonNode grahas = root.at("/expected/grahas");
+            JsonNode birth = root.at("/birth");
+            Instant instant = Instant.parse(birth.get("utc_instant").asText());
+            double lat = birth.get("latitude").asDouble();
+            double lon = birth.get("longitude").asDouble();
 
+            JsonNode grahas = root.at("/expected/grahas");
             Map<Graha, Expected> expected = new EnumMap<>(Graha.class);
             for (Graha g : Graha.values()) {
                 JsonNode n = grahas.get(g.name());
@@ -65,11 +93,45 @@ public record GoldenChart(String id, Instant instant, Map<Graha, Expected> expec
                         n.get("star_lord").asText(),
                         n.get("sub_lord").asText(),
                         n.get("sub_sub_lord").asText(),
-                        n.get("retrograde").asBoolean()));
+                        n.get("retrograde").asBoolean(),
+                        optInt(n, "bhava"),
+                        optInt(n, "rasi_house")));
             }
-            return new GoldenChart(id, instant, expected);
+
+            List<CuspRef> cusps = new ArrayList<>();
+            for (JsonNode c : root.at("/expected/cusps")) {
+                cusps.add(new CuspRef(c.get("house").asInt(), chainRef(c)));
+            }
+
+            Map<String, LordChainRef> angles = new LinkedHashMap<>();
+            JsonNode anglesNode = root.at("/expected/angles");
+            for (String key : List.of("ascendant", "midheaven")) {
+                JsonNode a = anglesNode.get(key);
+                if (a != null && !a.isMissingNode()) {
+                    angles.put(key, chainRef(a));
+                }
+            }
+
+            return new GoldenChart(id, instant, lat, lon, expected, List.copyOf(cusps), Map.copyOf(angles));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static LordChainRef chainRef(JsonNode n) {
+        return new LordChainRef(
+                n.get("longitude").asDouble(),
+                n.get("sign").asText(),
+                n.get("sign_lord").asText(),
+                n.get("nakshatra").asText(),
+                n.get("pada").asInt(),
+                n.get("star_lord").asText(),
+                n.get("sub_lord").asText(),
+                n.get("sub_sub_lord").asText());
+    }
+
+    private static Integer optInt(JsonNode parent, String field) {
+        JsonNode n = parent.get(field);
+        return (n == null || n.isNull()) ? null : n.asInt();
     }
 }

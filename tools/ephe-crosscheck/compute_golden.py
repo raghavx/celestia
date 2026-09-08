@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """
-Independent reference computation for the SPEC-001 golden charts.
+Independent reference computation for the SPEC-001 / SPEC-002 golden charts.
 
-Computes, for each golden JSON's `birth.utc_instant`:
-  - the sidereal ecliptic longitude, latitude, speed and retrograde flag of the
-    nine KP grahas, using Swiss Ephemeris via **pyswisseph** (an independent
-    binding from the Java port the engine will use), and
-  - the KP lord chain (sign / sign lord / nakshatra / pada / star / sub / sub-sub)
-    derived from those longitudes with exact rational arithmetic.
+Computes, for each golden JSON's `birth.utc_instant` (+ `birth.latitude` /
+`birth.longitude` for houses):
+  - SPEC-001: the sidereal longitude, speed and retrograde flag of the nine KP
+    grahas, plus their KP lord chain (sign / sign lord / nakshatra / pada /
+    star / sub / sub-sub), using Swiss Ephemeris via **pyswisseph** (an
+    independent binding from the Java port the engine will use);
+  - SPEC-002: the twelve Placidus house cusps (sidereal, KP), the Ascendant and
+    Midheaven, each with its lord chain; and per graha its bhava (cusp-to-cusp,
+    half-open) and rasi house (whole sign from the Ascendant).
 
-This is the "authoritative reference" of spec.md SC-002 and the seed of SC-001.
+This is the "authoritative reference" of SC-002 and the seed of SC-001.
 
 Usage:
     pip install -r requirements.txt
@@ -126,7 +129,47 @@ def _jd_ut(iso_utc: str) -> float:
     return jd_ut
 
 
-def compute(chart: dict) -> tuple[dict, str]:
+def _chain_point(lon: float) -> dict:
+    """{longitude + full lord chain} for a cusp or an angle."""
+    lon %= 360.0
+    return {"longitude": round(lon, 6), **lord_chain(lon)}
+
+
+def _bhava_of(lon: float, cusps: list[float]) -> int:
+    """1..12 — the house whose forward arc [cusp n, cusp n+1) contains `lon`."""
+    lon %= 360.0
+    for n in range(12):
+        arc_to_next = (cusps[(n + 1) % 12] - cusps[n]) % 360.0
+        arc_to_lon = (lon - cusps[n]) % 360.0
+        if arc_to_lon < arc_to_next:
+            return n + 1
+    return 12  # unreachable for a valid ring
+
+
+def _rasi_house(graha_lon: float, asc_lon: float) -> int:
+    return 1 + ((int(graha_lon // 30) - int(asc_lon // 30)) % 12)
+
+
+def compute_houses(chart: dict) -> dict:
+    """SPEC-002: 12 Placidus cusps + Ascendant + Midheaven, sidereal KP."""
+    jd = _jd_ut(chart["birth"]["utc_instant"])
+    lat = chart["birth"]["latitude"]
+    lon = chart["birth"]["longitude"]
+    cusps, ascmc = swe.houses_ex(jd, lat, lon, b"P", swe.FLG_SIDEREAL)
+    cusp_list = list(cusps[:12])
+    cusp_list[0] = ascmc[0]  # cusp 1 := Ascendant, bit-identical (SPEC-002 FR-003)
+    return {
+        "cusps": [dict(house=i + 1, **_chain_point(cusp_list[i])) for i in range(12)],
+        "angles": {
+            "ascendant": _chain_point(ascmc[0]),
+            "midheaven": _chain_point(ascmc[1]),
+        },
+        "_cusp_longitudes": [c % 360.0 for c in cusp_list],
+        "_asc": ascmc[0] % 360.0,
+    }
+
+
+def compute(chart: dict) -> tuple[dict, dict, str]:
     swe.set_sid_mode(swe.SIDM_KRISHNAMURTI, 0, 0)   # ADR-0003: constant value 5
     jd = _jd_ut(chart["birth"]["utc_instant"])
 
@@ -150,8 +193,16 @@ def compute(chart: dict) -> tuple[dict, str]:
     for e in out.values():
         e.pop("_speed", None)
 
+    # SPEC-002: houses, then bhava + rasi house per graha
+    houses = compute_houses(chart)
+    cusp_lons = houses.pop("_cusp_longitudes")
+    asc = houses.pop("_asc")
+    for name, e in out.items():
+        e["bhava"] = _bhava_of(e["longitude"], cusp_lons)
+        e["rasi_house"] = _rasi_house(e["longitude"], asc)
+
     swe_ver = getattr(swe, "version", "unknown")
-    return out, f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.1"
+    return out, houses, f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.2"
 
 
 def _entry(lon: float, speed: float) -> dict:
@@ -179,8 +230,9 @@ def main() -> int:
     exit_code = 0
     for p in args.paths:
         chart = json.loads(p.read_text())
-        computed, generated_by = compute(chart)
+        computed, houses, generated_by = compute(chart)
         prior = chart.get("expected", {}).get("grahas", {})
+        prior_cusps = chart.get("expected", {}).get("cusps", [])
 
         drift = []
         for name, e in computed.items():
@@ -188,23 +240,35 @@ def main() -> int:
             if old.get("longitude") is not None:
                 if abs(old["longitude"] - e["longitude"]) > TOL_DEG:
                     drift.append(f"{name} longitude {old['longitude']} -> {e['longitude']}")
-                for k in ("sign_lord", "star_lord", "sub_lord", "sub_sub_lord", "nakshatra", "pada"):
+                for k in ("sign_lord", "star_lord", "sub_lord", "sub_sub_lord",
+                          "nakshatra", "pada", "bhava", "rasi_house"):
                     if old.get(k) is not None and old[k] != e[k]:
                         drift.append(f"{name} {k} {old[k]} -> {e[k]}")
+        for i, c in enumerate(houses["cusps"]):
+            old = prior_cusps[i] if i < len(prior_cusps) else {}
+            if old.get("longitude") is not None:
+                if abs(old["longitude"] - c["longitude"]) > 60 * TOL_DEG:  # 1 arc-minute
+                    drift.append(f"cusp {i+1} longitude {old['longitude']} -> {c['longitude']}")
+                if old.get("sub_lord") not in (None, c["sub_lord"]):
+                    drift.append(f"cusp {i+1} sub_lord {old['sub_lord']} -> {c['sub_lord']}")
 
         if args.write:
             chart["expected"] = {
                 "generated_by": generated_by,
                 "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
                 "grahas": computed,
+                "cusps": houses["cusps"],
+                "angles": houses["angles"],
             }
-            chart.setdefault("verification", {})["positions_reference"] = generated_by
-            if chart["verification"].get("status") == "birth_data_sourced":
-                chart["verification"]["status"] = "expected_generated"
+            v = chart.setdefault("verification", {})
+            v["positions_reference"] = generated_by
+            v["houses_reference"] = generated_by
+            if v.get("status") == "birth_data_sourced":
+                v["status"] = "expected_generated"
             p.write_text(json.dumps(chart, indent=2) + "\n")
             print(f"{p.name}: written ({generated_by})")
         else:
-            if any(v.get("longitude") is not None for v in prior.values()):
+            if any(vv.get("longitude") is not None for vv in prior.values()):
                 if drift:
                     exit_code = 1
                     print(f"{p.name}: DRIFT\n  " + "\n  ".join(drift))
@@ -212,8 +276,6 @@ def main() -> int:
                     print(f"{p.name}: ok ({generated_by})")
             else:
                 print(f"{p.name}: expected block is empty - run with --write")
-        if drift and not args.write:
-            pass
 
     return exit_code
 
