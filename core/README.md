@@ -13,6 +13,9 @@ horary come in later specs.
 | `VimshottariPartition.subs(Nakshatra)` / `.subSubs(Nakshatra, Graha)` / `.subDivisions()` | exact `BigFraction` sub / sub-sub spans |
 | `Sign` / `Nakshatra` / `Longitudes` | 12 signs, 27 nakshatras, normalisation + the half-open boundary rule |
 | `Span` | one ruled arc with exact rational endpoints |
+| `chart.NatalChartFactory` | `assemble(BirthData, EphemerisResult, HouseResult)` / `cast(BirthData)` -> `NatalChart` |
+| `chart.NatalChart` | positions + 12 `Cusp`s + `AnglePoint`s + `HousePlacement`s (bhava + rasi house); `cuspSubLord(h)` |
+| `chart.Bhavas` | `bhavaOf(longitude, cusps)` (cusp-to-cusp), `rasiHouseOf(grahaSign, ascSign)` |
 
 `org.apache.commons.numbers.fraction.BigFraction` is part of the public API
 (`Span.start()/end()`) — see `specs/001-ephemeris-primitives/contracts/`.

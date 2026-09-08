@@ -128,9 +128,9 @@ is consistent with `[cusp n, cusp n+1)`.
 
 ### Tests
 
-- [ ] T027 [P] [US5] `PlacidusPolarTest` in `ephemeris/src/test/java/com/celestia/ephemeris/PlacidusPolarTest.java` — `houses()` at 70°N → `PlacidusUndefinedException` naming the latitude; at 65°N → a normal `HouseResult`; at 91°N → `IllegalArgumentException` (from `BirthData`)
-- [ ] T028 [P] [US5] `anglesOnly()` at 78°N returns `ASCENDANT` + `MIDHEAVEN` without throwing (ARMC path, not Placidus); the Ascendant is a finite longitude in `[0,360)`
-- [ ] T029 [US5] `NatalChartFactory.cast` at 70°N propagates `PlacidusUndefinedException` (no partial chart)
+- [x] T027 [P] [US5] `PlacidusPolarTest` in `ephemeris/src/test/java/com/celestia/ephemeris/PlacidusPolarTest.java` — `houses()` at 70°N → `PlacidusUndefinedException` naming the latitude; at 65°N → a normal `HouseResult`; at 91°N → `IllegalArgumentException` (from `BirthData`)
+- [x] T028 [P] [US5] `anglesOnly()` at 78°N returns `ASCENDANT` + `MIDHEAVEN` without throwing (ARMC path, not Placidus); the Ascendant is a finite longitude in `[0,360)`
+- [x] T029 [US5] `NatalChartFactory.cast` at 70°N propagates `PlacidusUndefinedException` (no partial chart)
 
 **Checkpoint**: polar behaviour defined and tested.
 
@@ -143,9 +143,9 @@ rasi value on every run.
 
 ### Tasks
 
-- [ ] T030 [US6] `NatalChartGoldenTest` in `core/src/test/java/com/celestia/core/chart/NatalChartGoldenTest.java` — for each golden chart, cast via `SwissEphemerisPositionProvider` + `SwissEphemerisHouseProvider`; per cusp: longitude within 1′ of the reference (SC-001) and full lord chain exact; per graha: `bhava` and `rasiHouse` exact (SC-002); `@EnabledIf` ephemeris data present
-- [ ] T031 [P] [US6] `NatalChartDeterminismTest` — cast a golden chart twice, assert equal `NatalChart`; `cusp(1)` bit-identical to the Ascendant across runs (SC-003)
-- [ ] T032 [US6] `.github/workflows/ci.yml` — run `NatalChartGoldenTest` + `NatalChartDeterminismTest` in the OS-matrix step. (Note: the SPEC-001 "fingerprint" hashes the *static* golden JSONs, which is largely redundant — the real cross-platform check is these tests asserting `computed == stored` on each OS. Optionally have the test emit computed values to a scratch file and fingerprint that instead.)
+- [x] T030 [US6] `NatalChartGoldenTest` in `core/src/test/java/com/celestia/core/chart/NatalChartGoldenTest.java` — for each golden chart, cast via `SwissEphemerisPositionProvider` + `SwissEphemerisHouseProvider`; per cusp: longitude within 1′ of the reference (SC-001) and full lord chain exact; per graha: `bhava` and `rasiHouse` exact (SC-002); `@EnabledIf` ephemeris data present
+- [x] T031 [P] [US6] `NatalChartDeterminismTest` — cast a golden chart twice, assert equal `NatalChart`; `cusp(1)` bit-identical to the Ascendant across runs (SC-003)
+- [x] T032 [US6] `.github/workflows/ci.yml` — run `NatalChartGoldenTest` + `NatalChartDeterminismTest` in the OS-matrix step. (Note: the SPEC-001 "fingerprint" hashes the *static* golden JSONs, which is largely redundant — the real cross-platform check is these tests asserting `computed == stored` on each OS. Optionally have the test emit computed values to a scratch file and fingerprint that instead.)
 
 **Checkpoint**: natal-chart correctness is a CI gate.
 
@@ -153,12 +153,12 @@ rasi value on every run.
 
 ## Phase 9: Polish & Cross-Cutting
 
-- [ ] T033 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the bhava (cusp-to-cusp, KP Readers), rasi-house (whole sign from Asc), and Placidus/polar-limit rules
-- [ ] T034 [P] `NatalChartPerformanceTest` `@Tag("perf")` in `core/src/test/java/com/celestia/core/chart/` — full chart (positions + cusps + placements + lord chains) < 250 ms warm guard (SC-006 target 75 ms); excluded from the default run
-- [ ] T035 [P] Update `ephemeris/README.md` (+ `HouseProvider`, `BirthData`) and `core/README.md` (+ `NatalChart`, `NatalChartFactory`)
-- [ ] T036 [P] `LICENSE-NOTICES.md` unchanged check (no new deps) — note SPEC-002 uses `swe_houses` from the same port
-- [ ] T037 Run `specs/002-natal-chart-cusps/quickstart.md` end to end; fix drift
-- [ ] T038 `./mvnw -q verify` — full reactor green incl. `DeterminismArchitectureTest` / `LayeringArchitectureTest`
+- [x] T033 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the bhava (cusp-to-cusp, KP Readers), rasi-house (whole sign from Asc), and Placidus/polar-limit rules
+- [x] T034 [P] `NatalChartPerformanceTest` `@Tag("perf")` in `core/src/test/java/com/celestia/core/chart/` — full chart (positions + cusps + placements + lord chains) < 250 ms warm guard (SC-006 target 75 ms); excluded from the default run
+- [x] T035 [P] Update `ephemeris/README.md` (+ `HouseProvider`, `BirthData`) and `core/README.md` (+ `NatalChart`, `NatalChartFactory`)
+- [x] T036 [P] `LICENSE-NOTICES.md` unchanged check (no new deps) — note SPEC-002 uses `swe_houses` from the same port
+- [x] T037 Run `specs/002-natal-chart-cusps/quickstart.md` end to end; fix drift
+- [x] T038 `./mvnw -q verify` — full reactor green incl. `DeterminismArchitectureTest` / `LayeringArchitectureTest`
 
 ---
 

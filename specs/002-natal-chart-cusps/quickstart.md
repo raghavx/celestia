@@ -39,14 +39,15 @@ Expected `BUILD SUCCESS`. New coverage:
 
 | Spec scenario | Test |
 |---------------|------|
-| US1 #1 cusps + sub lords match golden | `core …chart.NatalChartGoldenTest` |
-| US1 #2 cusp 1 == Ascendant, ring ordered | `ephemeris.HouseProviderContractTest` |
-| US2 bhava assignment + consistency | `core …chart.BhavasTest`, `BhavaConsistencyPropertyTest` |
-| US3 rasi house from Ascendant sign | `core …chart.RasiHouseTest` |
-| US4 NatalChart aggregate + determinism | `core …chart.NatalChartFactoryTest` |
-| US5 polar rejection 66/65/91 | `ephemeris.PlacidusPolarTest` |
-| US6 golden determinism | `core …chart.NatalChartDeterminismTest` |
-| SC-006 performance (< 75 ms) | `core …chart.NatalChartPerformanceTest` — `@Tag("perf")` |
+| US1 cusps + cuspal sub lords match golden (SC-001) | `core.chart.NatalChartGoldenTest` (12 cusp checks/chart) |
+| US1 cusp 1 == Ascendant (bit-identical), ring ordered | `ephemeris.HouseProviderContractTest`, `core.chart.CuspsTest` |
+| US1 accuracy in/out of range | `ephemeris.HouseAccuracyTest` |
+| US2 bhava assignment + consistency (SC-002, SC-004) | `core.chart.BhavasTest`, `BhavaConsistencyPropertyTest` (jqwik), golden bhava in `NatalChartGoldenTest` |
+| US3 rasi house from the Ascendant sign | `core.chart.RasiHouseTest`, golden rasi in `NatalChartGoldenTest` |
+| US4 NatalChart aggregate + `cuspSubLord(h)` + determinism | `core.chart.NatalChartFactoryTest` |
+| US5 polar rejection 66/65/91, `anglesOnly` at 78° | `ephemeris.PlacidusPolarTest` |
+| US6 cross-run / cross-OS determinism (SC-003, SC-005) | `core.chart.NatalChartDeterminismTest`, CI `os` matrix |
+| SC-006 performance (< 75 ms) | `core.chart.NatalChartPerformanceTest` — `@Tag("perf")`, run with `-Pperf` |
 
 ## Determinism / architecture gates
 
