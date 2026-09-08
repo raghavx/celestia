@@ -46,6 +46,9 @@ __pycache__/
 .venv/
 tools/**/.venv/
 
+# --- jqwik ---
+.jqwik-database
+
 # --- Swiss Ephemeris data (large binary; provisioned out of band) ---
 ephemeris/src/main/resources/ephe/*.se1
 
