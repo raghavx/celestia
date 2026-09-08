@@ -33,12 +33,11 @@ it starts. Amending an accepted ADR requires a new ADR that supersedes it.
 | [0020](0020-grace-and-renewal-reminders.md) | Grace period & renewal reminders | proposed | Phase 6 |
 | [0021](0021-razorpay-credentials.md) | Razorpay credential management | accepted | Phase 6 |
 | [0022](0022-refund-and-cancellation-policy.md) | Refund & cancellation policy | proposed | launch |
-| [0023](0023-topic-gate-mechanism.md) | Topic-gate mechanism | proposed | Phase 7 |
+| [0023](0023-topic-gate-mechanism.md) | Topic-gate mechanism (layered: rules + small-model classifier + embedding fallback) | accepted | Phase 7 |
 
 ## Still needing an owner decision
 
 `proposed` ADRs that need input before their phase: **0001** (licensing — legal /
 commercial), **0009 / 0010** (LLM hardware — procurement), **0011 / 0012**
 (WhatsApp — Meta Business account), **0013** (geocoder API key), **0017 / 0020**
-(billing model & grace values — product), **0022** (policy pages — legal),
-**0023** (guardrail approach — confirm the recommendation).
+(billing model & grace values — product), **0022** (policy pages — legal).
