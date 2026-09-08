@@ -40,18 +40,18 @@ and see them fail before implementing.
 
 **Purpose**: the shared kernel used by every story
 
-- [ ] T006 Create `Graha` enum in `ephemeris/src/main/java/com/celestia/ephemeris/Graha.java` — 9 constants in Vimshottari order, `years()`, `next()` (wraps), `vimshottariOrder()`; unit test asserts `Σ years == 120`
-- [ ] T007 Refactor `core/src/main/java/com/celestia/core/dasha/Vimshottari.java` to source its sequence and year weights from `ephemeris.Graha`; update `core/src/test/java/com/celestia/core/dasha/VimshottariTest.java`
-- [ ] T008 [P] Create `Ayanamsa` enum (`KP_NEW` only) in `ephemeris/src/main/java/com/celestia/ephemeris/Ayanamsa.java`
-- [ ] T009 [P] Create `Accuracy` enum (`FULL`, `REDUCED`) in `ephemeris/src/main/java/com/celestia/ephemeris/Accuracy.java`
-- [ ] T010 [P] Create `Sign` enum (12 signs, `lord()` returning `Graha`, 30° each) in `core/src/main/java/com/celestia/core/lordage/Sign.java`
-- [ ] T011 [P] Create `Nakshatra` enum (27, `lord()`, `startLongitude()` = ordinal × 13°20′) in `core/src/main/java/com/celestia/core/lordage/Nakshatra.java`
-- [ ] T012 Create `Longitudes` utility (`normalize(double)` → `[0,360)`, boundary-convention constant + Javadoc: half-open `[start,end)`, boundary to higher division) in `core/src/main/java/com/celestia/core/lordage/Longitudes.java`; `LongitudesTest` covers 0, 360, −5, 365, NaN, ±Infinity
-- [ ] T013 Create `Span` record (`Graha lord, BigFraction start, BigFraction end`, `startDeg()`, `endDeg()`, `contains(double)` half-open) in `core/src/main/java/com/celestia/core/dasha/Span.java`; `SpanTest`
-- [ ] T014 Implement `VimshottariPartition.subs(Nakshatra)` in `core/src/main/java/com/celestia/core/dasha/VimshottariPartition.java` — 9 exact `BigFraction` spans, order from `nakshatra.lord()`, widths `(years/120) × 13°20′`
-- [ ] T015 Implement `VimshottariPartition.subSubs(Nakshatra, Graha subLord)` in the same file — 9 exact spans within the sub, order from `subLord`
-- [ ] T016 [P] `VimshottariPartitionTest` — sub widths equal `(years/120) × 800′` and sum to `BigFraction(40,3)` exactly; Ketu-lorded nakshatra → first sub Ketu 0°46′40″, second Venus 2°13′20″; sub-subs sum exactly to the sub width
-- [ ] T017 Create `DeterminismArchitectureTest` in `agent/src/test/java/com/celestia/agent/architecture/DeterminismArchitectureTest.java` with two rules (`allowEmptyShould(true)` so they pass before the code they guard exists):
+- [x] T006 Create `Graha` enum in `ephemeris/src/main/java/com/celestia/ephemeris/Graha.java` — 9 constants in Vimshottari order, `years()`, `next()` (wraps), `vimshottariOrder()`; unit test asserts `Σ years == 120`
+- [x] T007 Refactor `core/src/main/java/com/celestia/core/dasha/Vimshottari.java` to source its sequence and year weights from `ephemeris.Graha`; update `core/src/test/java/com/celestia/core/dasha/VimshottariTest.java`
+- [x] T008 [P] Create `Ayanamsa` enum (`KP_NEW` only) in `ephemeris/src/main/java/com/celestia/ephemeris/Ayanamsa.java`
+- [x] T009 [P] Create `Accuracy` enum (`FULL`, `REDUCED`) in `ephemeris/src/main/java/com/celestia/ephemeris/Accuracy.java`
+- [x] T010 [P] Create `Sign` enum (12 signs, `lord()` returning `Graha`, 30° each) in `core/src/main/java/com/celestia/core/lordage/Sign.java`
+- [x] T011 [P] Create `Nakshatra` enum (27, `lord()`, `startLongitude()` = ordinal × 13°20′) in `core/src/main/java/com/celestia/core/lordage/Nakshatra.java`
+- [x] T012 Create `Longitudes` utility (`normalize(double)` → `[0,360)`, boundary-convention constant + Javadoc: half-open `[start,end)`, boundary to higher division) in `core/src/main/java/com/celestia/core/lordage/Longitudes.java`; `LongitudesTest` covers 0, 360, −5, 365, NaN, ±Infinity
+- [x] T013 Create `Span` record (`Graha lord, BigFraction start, BigFraction end`, `startDeg()`, `endDeg()`, `contains(double)` half-open) in `core/src/main/java/com/celestia/core/dasha/Span.java`; `SpanTest`
+- [x] T014 Implement `VimshottariPartition.subs(Nakshatra)` in `core/src/main/java/com/celestia/core/dasha/VimshottariPartition.java` — 9 exact `BigFraction` spans, order from `nakshatra.lord()`, widths `(years/120) × 13°20′`
+- [x] T015 Implement `VimshottariPartition.subSubs(Nakshatra, Graha subLord)` in the same file — 9 exact spans within the sub, order from `subLord`
+- [x] T016 [P] `VimshottariPartitionTest` — sub widths equal `(years/120) × 800′` and sum to `BigFraction(40,3)` exactly; Ketu-lorded nakshatra → first sub Ketu 0°46′40″, second Venus 2°13′20″; sub-subs sum exactly to the sub width
+- [x] T017 Create `DeterminismArchitectureTest` in `agent/src/test/java/com/celestia/agent/architecture/DeterminismArchitectureTest.java` with two rules (`allowEmptyShould(true)` so they pass before the code they guard exists):
   - (a) fail if `com.celestia.ephemeris..` or `com.celestia.core..` reference `Instant.now`, `System.currentTimeMillis`, `System.nanoTime`, `Clock.systemUTC`, `Clock.systemDefaultZone`, `LocalDate.now`, `LocalDateTime.now`, `LocalTime.now`, `ZonedDateTime.now`, `OffsetDateTime.now`, or `new java.util.Date()` (Constitution II / FR-014).
   - (b) **encapsulation** (FR-018): fail if any `de.thmac.swisseph..` (or whichever package the chosen SE port uses) type appears in a **public** member — parameter, return, field, or thrown type — of any class in `com.celestia.ephemeris`. The SE library must stay behind `PositionProvider`. This rule only has teeth once T028 lands.
 
