@@ -52,17 +52,17 @@ reference, cuspal sub lords exact; cusp 1 == Ascendant.
 
 ### Tests (write first)
 
-- [ ] T010 [P] [US1] `HouseProviderContractTest` in `ephemeris/src/test/java/com/celestia/ephemeris/HouseProviderContractTest.java` — 12 finite cusps in `[0,360)`; `cuspLongitudes[0]` bit-identical to `angles.get(ASCENDANT)`; consecutive forward arcs all > 0; `houseSystem == PLACIDUS`; deterministic; `EngineVersion` populated
-- [ ] T011 [P] [US1] `HouseAccuracyTest` — in-range instant → `Accuracy.FULL`; year 1600 → `REDUCED`, no exception
+- [x] T010 [P] [US1] `HouseProviderContractTest` in `ephemeris/src/test/java/com/celestia/ephemeris/HouseProviderContractTest.java` — 12 finite cusps in `[0,360)`; `cuspLongitudes[0]` bit-identical to `angles.get(ASCENDANT)`; consecutive forward arcs all > 0; `houseSystem == PLACIDUS`; deterministic; `EngineVersion` populated
+- [x] T011 [P] [US1] `HouseAccuracyTest` — in-range instant → `Accuracy.FULL`; year 1600 → `REDUCED`, no exception
 
 ### Implementation
 
-- [ ] T012 [P] [US1] `HouseResult` record in `ephemeris/.../HouseResult.java` — `birthData`, `List<Double> cuspLongitudes` (size 12, `List.copyOf` in the compact constructor so the record has value equality — **not** `double[]`), `Map<Angle,Double> angles` (immutable copy), `HouseSystem`, `Accuracy`, `EngineVersion`; compact-constructor invariants (12 in `[0,360)`, monotone ring, `cuspLongitudes.get(0) == angles.get(ASCENDANT)`)
-- [ ] T013 [US1] `HouseProvider` interface in `ephemeris/.../HouseProvider.java` — `houses(BirthData)`, `anglesOnly(BirthData)` (Javadoc = the contract). `anglesOnly` computes Asc/MC from the ARMC (sidereal time), not via Placidus — defined at any latitude below ±90° (research.md §2)
-- [ ] T014 [US1] `SwissEphemerisHouseProvider` in `ephemeris/.../swisseph/SwissEphemerisHouseProvider.java` — `swe_set_sid_mode(KRISHNAMURTI)`, `swe_houses(jdUt, SEFLG_SIDEREAL, lat, lon, (int)'P', cusp[13], ascmc[10])`; set cusp 1 = `ascmc[0]`; expose the 12 cusps as `List<Double>`; **pre-check** `|lat| >= polarLimit` (from `SwissEphemerisConfig`, default 66.0) → `PlacidusUndefinedException` before any backend call; `anglesOnly` via `swe_houses_armc` Equal system / direct ARMC formula (never runs Placidus); thread-safe (synchronized handle); `Accuracy` mirrors the positions' range check; no SE type in any public member (FR-014)
-- [ ] T015 [US1] Add `polarLimit` (default 66.0) to `SwissEphemerisConfig` and its `resolve()`
-- [ ] T016 [P] [US1] `Cusps` helper in `core/src/main/java/com/celestia/core/chart/Cusps.java` — `fromHouseResult(HouseResult)` → `List<Cusp>` (12, lord chain via `KpLordage.chainFor`) and `AnglePoint` for each `Angle`
-- [ ] T017 [P] [US1] `CuspsTest` — 12 `Cusp`s house 1..12; `cusp.subLord() == cusp.lordChain().subLord()`; `AnglePoint` for ASC has `longitude == cuspLongitudes[0]`
+- [x] T012 [P] [US1] `HouseResult` record in `ephemeris/.../HouseResult.java` — `birthData`, `List<Double> cuspLongitudes` (size 12, `List.copyOf` in the compact constructor so the record has value equality — **not** `double[]`), `Map<Angle,Double> angles` (immutable copy), `HouseSystem`, `Accuracy`, `EngineVersion`; compact-constructor invariants (12 in `[0,360)`, monotone ring, `cuspLongitudes.get(0) == angles.get(ASCENDANT)`)
+- [x] T013 [US1] `HouseProvider` interface in `ephemeris/.../HouseProvider.java` — `houses(BirthData)`, `anglesOnly(BirthData)` (Javadoc = the contract). `anglesOnly` computes Asc/MC from the ARMC (sidereal time), not via Placidus — defined at any latitude below ±90° (research.md §2)
+- [x] T014 [US1] `SwissEphemerisHouseProvider` in `ephemeris/.../swisseph/SwissEphemerisHouseProvider.java` — `swe_set_sid_mode(KRISHNAMURTI)`, `swe_houses(jdUt, SEFLG_SIDEREAL, lat, lon, (int)'P', cusp[13], ascmc[10])`; set cusp 1 = `ascmc[0]`; expose the 12 cusps as `List<Double>`; **pre-check** `|lat| >= polarLimit` (from `SwissEphemerisConfig`, default 66.0) → `PlacidusUndefinedException` before any backend call; `anglesOnly` via `swe_houses_armc` Equal system / direct ARMC formula (never runs Placidus); thread-safe (synchronized handle); `Accuracy` mirrors the positions' range check; no SE type in any public member (FR-014)
+- [x] T015 [US1] Add `polarLimit` (default 66.0) to `SwissEphemerisConfig` and its `resolve()`
+- [x] T016 [P] [US1] `Cusps` helper in `core/src/main/java/com/celestia/core/chart/Cusps.java` — `fromHouseResult(HouseResult)` → `List<Cusp>` (12, lord chain via `KpLordage.chainFor`) and `AnglePoint` for each `Angle`
+- [x] T017 [P] [US1] `CuspsTest` — 12 `Cusp`s house 1..12; `cusp.subLord() == cusp.lordChain().subLord()`; `AnglePoint` for ASC has `longitude == cuspLongitudes[0]`
 
 **Checkpoint**: cusps + angles + lord chains are computable and structurally verified.
 

@@ -20,15 +20,24 @@ import java.nio.file.Path;
  * @param ephePath directory containing {@code sepl_*.se1} / {@code semo_*.se1}, or {@code null}
  * @param minYear first year of full accuracy (inclusive)
  * @param maxYear last year of full accuracy (inclusive)
+ * @param polarLimit birth latitude (absolute degrees) at or beyond which Placidus
+ *     house cusps are refused (ADR-0004); default 66.0
  */
-public record SwissEphemerisConfig(String ephePath, int minYear, int maxYear) {
+public record SwissEphemerisConfig(String ephePath, int minYear, int maxYear, double polarLimit) {
 
     private static final int DEFAULT_MIN_YEAR = 1800;
     private static final int DEFAULT_MAX_YEAR = 2100;
+    private static final double DEFAULT_POLAR_LIMIT = 66.0;
+
+    /** Range-and-path config with the default polar limit. */
+    public SwissEphemerisConfig(String ephePath, int minYear, int maxYear) {
+        this(ephePath, minYear, maxYear, DEFAULT_POLAR_LIMIT);
+    }
 
     /** Resolve from system property / env / conventional path. */
     public static SwissEphemerisConfig resolve() {
-        return new SwissEphemerisConfig(resolveEphePath(), DEFAULT_MIN_YEAR, DEFAULT_MAX_YEAR);
+        return new SwissEphemerisConfig(
+                resolveEphePath(), DEFAULT_MIN_YEAR, DEFAULT_MAX_YEAR, DEFAULT_POLAR_LIMIT);
     }
 
     public boolean hasEphemerisData() {
