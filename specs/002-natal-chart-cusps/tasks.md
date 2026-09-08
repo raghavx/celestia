@@ -25,18 +25,18 @@ Builds on SPEC-001 (merged to `master`): `PositionProvider`, `KpLordage`,
 
 - [x] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with a `swe.houses_ex(jd, lat, lon, b'P', FLG_SIDEREAL)` pass: emit `expected.cusps` (12 × {longitude + lord chain via the existing `lord_chain`}), `expected.angles` ({ascendant, midheaven} each with lord chain), and `expected.grahas[g].bhava` + `.rasi_house` (bhava = cusp-to-cusp half-open wrap-aware; rasi = whole sign from the Ascendant). Birth `latitude`/`longitude` already in each file.
 - [x] T002 Regenerate the three golden files with `--write`; verify the run is deterministic (re-run, diff `expected`); bump `verification.status` note. Update `core/src/test/resources/golden/README.md` with the new fields.
-- [ ] T003 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java` to parse `expected.cusps`, `expected.angles`, and `bhava` / `rasi_house`.
+- [x] T003 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java` to parse `expected.cusps`, `expected.angles`, and `bhava` / `rasi_house`.
 
 ---
 
 ## Phase 2: Foundational (blocking — no user story starts until this is done)
 
-- [ ] T004 [P] `BirthData` record in `ephemeris/src/main/java/com/celestia/ephemeris/BirthData.java` — `(Instant instant, double latitude, double longitude)`; compact constructor rejects null instant, `|lat| > 90`, `|lon| > 180` with `IllegalArgumentException`
-- [ ] T005 [P] `Angle` enum (`ASCENDANT`, `MIDHEAVEN`) and `HouseSystem` enum (`PLACIDUS`) in `ephemeris/src/main/java/com/celestia/ephemeris/`
-- [ ] T006 [P] `PlacidusUndefinedException extends EphemerisException` in `ephemeris/.../PlacidusUndefinedException.java` — message names the latitude and the limit
-- [ ] T007 [P] `Cusp` (`int house, double longitude, LordChain lordChain`, `subLord()`), `AnglePoint` (`Angle, double longitude, LordChain`), `HousePlacement` (`Graha, int bhava, int rasiHouse`) records in `core/src/main/java/com/celestia/core/chart/`
-- [ ] T008 `Bhavas` utility in `core/src/main/java/com/celestia/core/chart/Bhavas.java` — `bhavaOf(double longitude, List<Double> cuspLongitudes)` (forward-arc, half-open `[cusp n, cusp n+1)`, `cusp[12]→cusp[0]` wrap) and `rasiHouseOf(Sign grahaSign, Sign ascendantSign)` (`1 + Math.floorMod(ordinal diff, 12)`)
-- [ ] T009 [P] `BhavasTest` — half-open at an exact cusp; wrap across 0°/360°; two close cusps (intercepted sign); every longitude → exactly one bhava in 1..12; `rasiHouseOf` for Asc-sign → 1, next sign → 2
+- [x] T004 [P] `BirthData` record in `ephemeris/src/main/java/com/celestia/ephemeris/BirthData.java` — `(Instant instant, double latitude, double longitude)`; compact constructor rejects null instant, `|lat| > 90`, `|lon| > 180` with `IllegalArgumentException`
+- [x] T005 [P] `Angle` enum (`ASCENDANT`, `MIDHEAVEN`) and `HouseSystem` enum (`PLACIDUS`) in `ephemeris/src/main/java/com/celestia/ephemeris/`
+- [x] T006 [P] `PlacidusUndefinedException extends EphemerisException` in `ephemeris/.../PlacidusUndefinedException.java` — message names the latitude and the limit
+- [x] T007 [P] `Cusp` (`int house, double longitude, LordChain lordChain`, `subLord()`), `AnglePoint` (`Angle, double longitude, LordChain`), `HousePlacement` (`Graha, int bhava, int rasiHouse`) records in `core/src/main/java/com/celestia/core/chart/`
+- [x] T008 `Bhavas` utility in `core/src/main/java/com/celestia/core/chart/Bhavas.java` — `bhavaOf(double longitude, List<Double> cuspLongitudes)` (forward-arc, half-open `[cusp n, cusp n+1)`, `cusp[12]→cusp[0]` wrap) and `rasiHouseOf(Sign grahaSign, Sign ascendantSign)` (`1 + Math.floorMod(ordinal diff, 12)`)
+- [x] T009 [P] `BhavasTest` — half-open at an exact cusp; wrap across 0°/360°; two close cusps (intercepted sign); every longitude → exactly one bhava in 1..12; `rasiHouseOf` for Asc-sign → 1, next sign → 2
 
 **Checkpoint**: `./mvnw -pl ephemeris,core -am test` green.
 
