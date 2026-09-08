@@ -178,9 +178,9 @@ compute-twice determinism test passes.
 
 ### Tasks
 
-- [ ] T053 [P] [US5] `HistoricalDateTest` in `ephemeris/src/test/java/com/celestia/ephemeris/HistoricalDateTest.java` — instants in 1850, 1950, 2050 → `Accuracy.FULL`, longitudes within plausible bounds
-- [ ] T054 [P] [US5] `OutOfRangeTest` in `ephemeris/src/test/java/com/celestia/ephemeris/OutOfRangeTest.java` — instants in 1600 and 2200 → result returned, `REDUCED` on every position, no exception
-- [ ] T055 [US5] `DeltaTConsistencyTest` in `ephemeris/src/test/java/com/celestia/ephemeris/DeltaTConsistencyTest.java` — same instant → identical ΔT; `jdTt − jdUt` matches the tagged ΔT model
+- [x] T053 [P] [US5] `HistoricalDateTest` in `ephemeris/src/test/java/com/celestia/ephemeris/HistoricalDateTest.java` — instants in 1850, 1950, 2050 → `Accuracy.FULL`, longitudes within plausible bounds
+- [x] T054 [P] [US5] `OutOfRangeTest` in `ephemeris/src/test/java/com/celestia/ephemeris/OutOfRangeTest.java` — instants in 1600 and 2200 → result returned, `REDUCED` on every position, no exception
+- [x] T055 [US5] `DeltaTConsistencyTest` in `ephemeris/src/test/java/com/celestia/ephemeris/DeltaTConsistencyTest.java` — same instant → identical ΔT; `jdTt − jdUt` matches the tagged ΔT model
 
 **Checkpoint**: robustness verified.
 
@@ -188,12 +188,12 @@ compute-twice determinism test passes.
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T056 [P] `PerformanceSmokeTest` in `core/src/test/java/com/celestia/core/PerformanceSmokeTest.java` — nine positions + nine lord chains for one instant, warm (SC-006). `@Tag("perf")`, **excluded from the default CI run** (opt-in via a Maven profile) to avoid machine-dependent flakiness; assert a generous ceiling (e.g. < 250 ms) as a regression guard rather than the exact 50 ms target
-- [ ] T057 [P] Update `LICENSE-NOTICES.md` with the resolved Swiss Ephemeris port coordinates / pinned commit and the JitPack note
-- [ ] T058 [P] `ephemeris/README.md` and `core/README.md` — module purpose, entry points (`PositionProvider`, `KpLordage`, `VimshottariPartition`), "how to add a golden chart"
-- [ ] T059 [P] Document the Swiss Ephemeris source-vendoring fallback procedure in `docs/ephemeris-vendoring.md`
-- [ ] T060 Run `specs/001-ephemeris-primitives/quickstart.md` end to end; fix drift; tick its checklist
-- [ ] T061 `./mvnw -q verify` — full reactor green including `LayeringArchitectureTest` and `DeterminismArchitectureTest`
+- [x] T056 [P] `PerformanceSmokeTest` in `core/src/test/java/com/celestia/core/PerformanceSmokeTest.java` — nine positions + nine lord chains for one instant, warm (SC-006). `@Tag("perf")`, **excluded from the default CI run** (opt-in via a Maven profile) to avoid machine-dependent flakiness; assert a generous ceiling (e.g. < 250 ms) as a regression guard rather than the exact 50 ms target
+- [x] T057 [P] Update `LICENSE-NOTICES.md` with the resolved Swiss Ephemeris port coordinates / pinned commit and the JitPack note
+- [x] T058 [P] `ephemeris/README.md` and `core/README.md` — module purpose, entry points (`PositionProvider`, `KpLordage`, `VimshottariPartition`), "how to add a golden chart"
+- [x] T059 [P] Document the Swiss Ephemeris source-vendoring fallback procedure in `docs/ephemeris-vendoring.md`
+- [x] T060 Run `specs/001-ephemeris-primitives/quickstart.md` end to end; fix drift; tick its checklist
+- [x] T061 `./mvnw -q verify` — full reactor green including `LayeringArchitectureTest` and `DeterminismArchitectureTest`
 
 ---
 

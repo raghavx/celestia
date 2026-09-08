@@ -16,8 +16,8 @@ feature is implemented on branch `001-ephemeris-primitives`.
   4. if none exists → Moshier mode (`Accuracy.REDUCED` results only).
   Files packaged inside a jar are **not** usable — the Swiss Ephemeris port needs
   a real directory path.
-- Golden-chart files present under `core/src/test/resources/golden/` (the
-  outstanding data-gathering prerequisite).
+- Golden-chart files present under `core/src/test/resources/golden/` (3 charts,
+  `expected` blocks generated).
 
 ## Build & test
 
@@ -37,22 +37,25 @@ Expected: `BUILD SUCCESS`. The run includes:
 
 ## Scenario checks (map to spec acceptance scenarios)
 
-| Spec scenario | How to see it |
-|---------------|---------------|
-| US1 #1 positions match golden chart | `GoldenChartTest` — per-chart, per-graha longitude + lord chain |
-| US1 #2 Ketu = Rahu + 180°, both retrograde | `PositionProviderTest.ketuOppositeRahu` |
-| US2 #2 boundary belongs to higher division | `KpLordageBoundaryTest` — λ exactly on a sub boundary |
-| US2 #3 normalisation of 0/360/−5/365 | `LongitudesTest` |
-| US3 #1–#3 exact partition sums | `VimshottariPartitionTest` — `BigFraction` equality |
-| US3 #4 zodiac tiling, no gap/overlap | `ZodiacTilingPropertyTest` (jqwik) |
-| US4 #2 determinism | `DeterminismTest` — compute twice, assert `equals` |
-| US4 #3 engine-version surfacing | `EngineVersionTest` |
-| US5 out-of-range → REDUCED | `AccuracyRangeTest` |
+| Spec scenario | Test |
+|---------------|------|
+| US1 #1 positions match golden chart | `core …golden.GoldenChartTest` — per-chart, per-graha longitude + lord chain |
+| US1 #2 Ketu = Rahu + 180°, both retrograde | `ephemeris.PositionProviderContractTest.ketuIsExactlyOppositeRahuAndBothRetrograde` |
+| US1 #3 Mercury retrograde ⇒ negative speed | `ephemeris.PositionProviderTest` |
+| US2 #1 chain matches reference / #2 boundary → higher division | `core.lordage.KpLordageTableTest`, `KpLordageBoundaryAndPadaTest` |
+| US2 #3 normalisation of 0/360/−5/365 | `core.lordage.LongitudesTest`, `CoreLordageContractTest` |
+| US3 #1–#3 exact partition sums | `core.dasha.PartitionExactnessTest`, `VimshottariPartitionTest` (`BigFraction` equality) |
+| US3 #4 zodiac tiling, no gap/overlap | `core.dasha.ZodiacTilingPropertyTest` (jqwik, 20k) |
+| US4 #2 determinism | `core …golden.DeterminismTest` |
+| US4 #3 engine-version surfacing | `core …golden.EngineVersionChangeTest` |
+| US5 in-range FULL / out-of-range REDUCED | `ephemeris.HistoricalAndRangeTest`, `AccuracyRangeTest` |
+| SC-006 performance (< 50 ms) | `core.PerformanceSmokeTest` — `@Tag("perf")`, run with `-Pperf` |
 
 ## Determinism / architecture gates
 
 ```bash
-./mvnw -q -pl agent test -Dtest=DeterminismArchitectureTest,LayeringArchitectureTest
+./mvnw -q -pl agent -am test -Dtest=DeterminismArchitectureTest,LayeringArchitectureTest \
+  -Dsurefire.failIfNoSpecifiedTests=false
 ```
 
 Asserts no `Instant.now()` / `System.currentTimeMillis()` / `Clock.systemUTC()` /
@@ -69,6 +72,19 @@ snapshot needs review, not the code.
 
 ## Cross-check harness (outside CI)
 
-`tools/ephe-crosscheck/` (not built by `verify`) computes the same charts with an
-independent KP implementation and reports any longitude difference over 2
-arc-seconds — this is how the SC-002 numeric reference is maintained.
+`tools/ephe-crosscheck/` (not built by `verify`) computes the same charts with
+pyswisseph and reports any longitude difference over 2 arc-seconds — this is how
+the SC-002 numeric reference is maintained.
+
+```bash
+cd tools/ephe-crosscheck && pip install -r requirements.txt
+CELESTIA_EPHE_PATH=../../ephemeris/src/main/resources/ephe \
+  python compute_golden.py ../../core/src/test/resources/golden/*.json
+```
+
+## Verified
+
+`./mvnw verify` from the repo root: **BUILD SUCCESS**, 90 tests, 0 skipped
+(with `.se1` data provisioned). `GoldenChartTest` = 27 checks, all green — the
+engine reproduces every golden value within 3″ of the pyswisseph reference and
+the full lord chain exactly.
