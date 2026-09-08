@@ -40,6 +40,12 @@ secrets/
 *.log
 logs/
 
+# --- Python (tools/) ---
+__pycache__/
+*.pyc
+.venv/
+tools/**/.venv/
+
 # --- Swiss Ephemeris data (large binary; provisioned out of band) ---
 ephemeris/src/main/resources/ephe/*.se1
 

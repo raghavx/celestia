@@ -19,10 +19,26 @@ star lord, sub lord, cuspal sub-lord — depends on the ayanamsa to the arc-minu
 
 ## Decision
 
-Option 2. Default **KP-New** (`SE_SIDM_KRISHNAMURTI`). `Ayanamsa` is a config enum,
-recorded on every `chart` row and included in `engine_version` scope. All golden
-charts use KP-New. Non-default values are available but **unsupported** (no golden
+Option 2. Default to Swiss Ephemeris **`SE_SIDM_KRISHNAMURTI`** (constant value
+**5**, name "Krishnamurti"). `Ayanamsa` is a config enum, recorded on every
+`chart` row and included in `engine_version` scope. All golden charts use this
+constant. Non-default values are available but **unsupported** (no golden
 coverage) until a dedicated spec adds them.
+
+### Clarification (added while sourcing golden charts, 2026-09-08)
+
+The KP community names its ayanamsas inconsistently ("KP Old", "KP New", "True
+KP"). What we commit to is the **Swiss Ephemeris constant**, not a label:
+
+- **`SE_SIDM_KRISHNAMURTI` (5)** — what we use. This is the ayanamsa the great
+  majority of KP software and practitioners use and call "KP" (or "KP New").
+- **`SE_SIDM_KRISHNAMURTI_VP291` (42)** — the Senthilathiban precession-corrected
+  variant ("True KP" / VP291). We do **not** use this.
+
+The two differ by roughly a quarter of an arc-minute near 2000 — occasionally
+enough to move a cuspal sub-lord. Because the label is ambiguous, golden charts
+and any independent cross-check tool MUST be configured with the numeric constant
+`5`, and the reference tool's ayanamsa setting is recorded in each golden file.
 
 ## Consequences
 

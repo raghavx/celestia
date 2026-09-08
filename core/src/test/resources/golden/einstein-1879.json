@@ -1,0 +1,137 @@
+{
+  "id": "einstein-1879",
+  "subject": "Albert Einstein",
+  "birth": {
+    "local_datetime": "1879-03-14T11:30:00",
+    "local_time_basis": "Local Mean Time at Ulm (Germany used LMT until standard time in 1893). Birth certificate: '...before noon at eleven and a half...'",
+    "place": "Ulm, Kingdom of Wurttemberg, German Empire",
+    "latitude": 48.39841,
+    "longitude": 9.99155,
+    "utc_instant": "1879-03-14T10:50:02Z",
+    "utc_derivation": "11:30:00 LMT minus (9.99155 deg E / 15 = 0h39m58s) = 10:50:02 UT1. Pre-1972: UT1 treated as the engine's UTC input; delta-T is applied by the engine."
+  },
+  "sources": [
+    {
+      "type": "birth_record",
+      "rodden_rating": "AA",
+      "citation": "AstroDatabank: 'Einstein, Albert' - Rodden Rating AA. Birth certificate in hand from the Einstein Archive (update 28 Aug 2013): born 14 March 1879 'before noon at eleven and a half'.",
+      "url": "https://www.astro.com/astro-databank/Einstein,_Albert"
+    }
+  ],
+  "engine_settings": {
+    "ayanamsa": "SE_SIDM_KRISHNAMURTI (5)",
+    "node": "mean (SE_MEAN_NODE); Ketu = Rahu + 180",
+    "zodiac": "sidereal, geocentric, apparent",
+    "position_flags": "SEFLG_SIDEREAL | SEFLG_SPEED (SWIEPH, MOSEPH fallback)"
+  },
+  "expected": {
+    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.1",
+    "generated_at": "2026-09-08T06:29:28+00:00",
+    "grahas": {
+      "SUN": {
+        "longitude": 331.430382,
+        "sign": "PISCES",
+        "sign_lord": "JUPITER",
+        "nakshatra": "PURVA_BHADRAPADA",
+        "pada": 4,
+        "star_lord": "JUPITER",
+        "sub_lord": "RAHU",
+        "sub_sub_lord": "RAHU",
+        "retrograde": false
+      },
+      "MOON": {
+        "longitude": 232.448845,
+        "sign": "SCORPIO",
+        "sign_lord": "MARS",
+        "nakshatra": "JYESHTHA",
+        "pada": 2,
+        "star_lord": "MERCURY",
+        "sub_lord": "MOON",
+        "sub_sub_lord": "RAHU",
+        "retrograde": false
+      },
+      "MARS": {
+        "longitude": 274.836851,
+        "sign": "CAPRICORN",
+        "sign_lord": "SATURN",
+        "nakshatra": "UTTARA_ASHADHA",
+        "pada": 3,
+        "star_lord": "SUN",
+        "sub_lord": "SATURN",
+        "sub_sub_lord": "JUPITER",
+        "retrograde": false
+      },
+      "MERCURY": {
+        "longitude": 341.066542,
+        "sign": "PISCES",
+        "sign_lord": "JUPITER",
+        "nakshatra": "UTTARA_BHADRAPADA",
+        "pada": 3,
+        "star_lord": "SATURN",
+        "sub_lord": "MOON",
+        "sub_sub_lord": "MOON",
+        "retrograde": false
+      },
+      "JUPITER": {
+        "longitude": 305.406717,
+        "sign": "AQUARIUS",
+        "sign_lord": "SATURN",
+        "nakshatra": "DHANISHTA",
+        "pada": 4,
+        "star_lord": "MARS",
+        "sub_lord": "SUN",
+        "sub_sub_lord": "KETU",
+        "retrograde": false
+      },
+      "VENUS": {
+        "longitude": 354.90765,
+        "sign": "PISCES",
+        "sign_lord": "JUPITER",
+        "nakshatra": "REVATI",
+        "pada": 3,
+        "star_lord": "MERCURY",
+        "sub_lord": "RAHU",
+        "sub_sub_lord": "SATURN",
+        "retrograde": false
+      },
+      "SATURN": {
+        "longitude": 342.112443,
+        "sign": "PISCES",
+        "sign_lord": "JUPITER",
+        "nakshatra": "UTTARA_BHADRAPADA",
+        "pada": 3,
+        "star_lord": "SATURN",
+        "sub_lord": "MARS",
+        "sub_sub_lord": "MARS",
+        "retrograde": false
+      },
+      "RAHU": {
+        "longitude": 279.402975,
+        "sign": "CAPRICORN",
+        "sign_lord": "SATURN",
+        "nakshatra": "UTTARA_ASHADHA",
+        "pada": 4,
+        "star_lord": "SUN",
+        "sub_lord": "VENUS",
+        "sub_sub_lord": "SATURN",
+        "retrograde": true
+      },
+      "KETU": {
+        "longitude": 99.402975,
+        "sign": "CANCER",
+        "sign_lord": "MOON",
+        "nakshatra": "PUSHYA",
+        "pada": 2,
+        "star_lord": "SATURN",
+        "sub_lord": "VENUS",
+        "sub_sub_lord": "JUPITER",
+        "retrograde": true
+      }
+    }
+  },
+  "verification": {
+    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.1",
+    "lordchain_human_check": "pending",
+    "status": "expected_generated"
+  }
+}

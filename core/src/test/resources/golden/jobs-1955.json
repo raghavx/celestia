@@ -1,0 +1,137 @@
+{
+  "id": "jobs-1955",
+  "subject": "Steve Jobs",
+  "birth": {
+    "local_datetime": "1955-02-24T19:15:00",
+    "local_time_basis": "Pacific Standard Time (UTC-8:00). California observed no daylight saving on this February date.",
+    "place": "San Francisco, California, USA",
+    "latitude": 37.77493,
+    "longitude": -122.41942,
+    "utc_instant": "1955-02-25T03:15:00Z",
+    "utc_derivation": "1955-02-24 19:15:00 -08:00 = 1955-02-25 03:15:00 UTC."
+  },
+  "sources": [
+    {
+      "type": "birth_record",
+      "rodden_rating": "AA",
+      "citation": "AstroDatabank: 'Jobs, Steve' - Rodden Rating AA, sourced from the birth certificate. Born 24 February 1955, 19:15, San Francisco CA.",
+      "url": "https://www.astro.com/astro-databank/Jobs,_Steve"
+    }
+  ],
+  "engine_settings": {
+    "ayanamsa": "SE_SIDM_KRISHNAMURTI (5)",
+    "node": "mean (SE_MEAN_NODE); Ketu = Rahu + 180",
+    "zodiac": "sidereal, geocentric, apparent",
+    "position_flags": "SEFLG_SIDEREAL | SEFLG_SPEED (SWIEPH, MOSEPH fallback)"
+  },
+  "expected": {
+    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.1",
+    "generated_at": "2026-09-08T06:29:28+00:00",
+    "grahas": {
+      "SUN": {
+        "longitude": 312.609291,
+        "sign": "AQUARIUS",
+        "sign_lord": "SATURN",
+        "nakshatra": "SHATABHISHA",
+        "pada": 2,
+        "star_lord": "RAHU",
+        "sub_lord": "MERCURY",
+        "sub_sub_lord": "MERCURY",
+        "retrograde": false
+      },
+      "MOON": {
+        "longitude": 344.608486,
+        "sign": "PISCES",
+        "sign_lord": "JUPITER",
+        "nakshatra": "UTTARA_BHADRAPADA",
+        "pada": 4,
+        "star_lord": "SATURN",
+        "sub_lord": "RAHU",
+        "sub_sub_lord": "MOON",
+        "retrograde": false
+      },
+      "MARS": {
+        "longitude": 5.951643,
+        "sign": "ARIES",
+        "sign_lord": "MARS",
+        "nakshatra": "ASHWINI",
+        "pada": 2,
+        "star_lord": "KETU",
+        "sub_lord": "RAHU",
+        "sub_sub_lord": "JUPITER",
+        "retrograde": false
+      },
+      "MERCURY": {
+        "longitude": 291.222885,
+        "sign": "CAPRICORN",
+        "sign_lord": "SATURN",
+        "nakshatra": "SHRAVANA",
+        "pada": 4,
+        "star_lord": "MOON",
+        "sub_lord": "VENUS",
+        "sub_sub_lord": "MARS",
+        "retrograde": true
+      },
+      "JUPITER": {
+        "longitude": 87.369116,
+        "sign": "GEMINI",
+        "sign_lord": "MERCURY",
+        "nakshatra": "PUNARVASU",
+        "pada": 3,
+        "star_lord": "JUPITER",
+        "sub_lord": "VENUS",
+        "sub_sub_lord": "RAHU",
+        "retrograde": true
+      },
+      "VENUS": {
+        "longitude": 268.033027,
+        "sign": "SAGITTARIUS",
+        "sign_lord": "JUPITER",
+        "nakshatra": "UTTARA_ASHADHA",
+        "pada": 1,
+        "star_lord": "SUN",
+        "sub_lord": "MOON",
+        "sub_sub_lord": "MERCURY",
+        "retrograde": false
+      },
+      "SATURN": {
+        "longitude": 208.023838,
+        "sign": "LIBRA",
+        "sign_lord": "VENUS",
+        "nakshatra": "VISHAKHA",
+        "pada": 3,
+        "star_lord": "JUPITER",
+        "sub_lord": "VENUS",
+        "sub_sub_lord": "SATURN",
+        "retrograde": false
+      },
+      "RAHU": {
+        "longitude": 249.366104,
+        "sign": "SAGITTARIUS",
+        "sign_lord": "JUPITER",
+        "nakshatra": "MULA",
+        "pada": 3,
+        "star_lord": "KETU",
+        "sub_lord": "SATURN",
+        "sub_sub_lord": "SATURN",
+        "retrograde": true
+      },
+      "KETU": {
+        "longitude": 69.366104,
+        "sign": "GEMINI",
+        "sign_lord": "MERCURY",
+        "nakshatra": "ARDRA",
+        "pada": 1,
+        "star_lord": "RAHU",
+        "sub_lord": "JUPITER",
+        "sub_sub_lord": "MERCURY",
+        "retrograde": true
+      }
+    }
+  },
+  "verification": {
+    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.1",
+    "lordchain_human_check": "pending",
+    "status": "expected_generated"
+  }
+}

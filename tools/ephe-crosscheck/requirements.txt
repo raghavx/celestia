@@ -1,0 +1,4 @@
+# Independent Swiss Ephemeris binding for the golden-chart reference computation.
+# A different implementation lineage from the Java port the engine uses, so
+# agreement between the two is meaningful (spec.md SC-002).
+pyswisseph>=2.10.3.2
