@@ -35,7 +35,7 @@ Builds on SPEC-001 (merged to `master`): `PositionProvider`, `KpLordage`,
 - [ ] T005 [P] `Angle` enum (`ASCENDANT`, `MIDHEAVEN`) and `HouseSystem` enum (`PLACIDUS`) in `ephemeris/src/main/java/com/celestia/ephemeris/`
 - [ ] T006 [P] `PlacidusUndefinedException extends EphemerisException` in `ephemeris/.../PlacidusUndefinedException.java` — message names the latitude and the limit
 - [ ] T007 [P] `Cusp` (`int house, double longitude, LordChain lordChain`, `subLord()`), `AnglePoint` (`Angle, double longitude, LordChain`), `HousePlacement` (`Graha, int bhava, int rasiHouse`) records in `core/src/main/java/com/celestia/core/chart/`
-- [ ] T008 `Bhavas` utility in `core/src/main/java/com/celestia/core/chart/Bhavas.java` — `bhavaOf(double longitude, double[] cuspLongitudes)` (forward-arc, half-open `[cusp n, cusp n+1)`, `cusp[12]→cusp[0]` wrap) and `rasiHouseOf(Sign grahaSign, Sign ascendantSign)` (`1 + floorMod(ordinal diff, 12)`)
+- [ ] T008 `Bhavas` utility in `core/src/main/java/com/celestia/core/chart/Bhavas.java` — `bhavaOf(double longitude, List<Double> cuspLongitudes)` (forward-arc, half-open `[cusp n, cusp n+1)`, `cusp[12]→cusp[0]` wrap) and `rasiHouseOf(Sign grahaSign, Sign ascendantSign)` (`1 + Math.floorMod(ordinal diff, 12)`)
 - [ ] T009 [P] `BhavasTest` — half-open at an exact cusp; wrap across 0°/360°; two close cusps (intercepted sign); every longitude → exactly one bhava in 1..12; `rasiHouseOf` for Asc-sign → 1, next sign → 2
 
 **Checkpoint**: `./mvnw -pl ephemeris,core -am test` green.
@@ -57,9 +57,9 @@ reference, cuspal sub lords exact; cusp 1 == Ascendant.
 
 ### Implementation
 
-- [ ] T012 [P] [US1] `HouseResult` record in `ephemeris/.../HouseResult.java` — `birthData`, `double[12] cuspLongitudes`, `Map<Angle,Double> angles` (immutable), `HouseSystem`, `Accuracy`, `EngineVersion`; compact-constructor invariants (12 in `[0,360)`, monotone ring, `cuspLongitudes[0] == angles.get(ASCENDANT)`)
-- [ ] T013 [US1] `HouseProvider` interface in `ephemeris/.../HouseProvider.java` — `houses(BirthData)`, `anglesOnly(BirthData)` (Javadoc = the contract)
-- [ ] T014 [US1] `SwissEphemerisHouseProvider` in `ephemeris/.../swisseph/SwissEphemerisHouseProvider.java` — `swe_set_sid_mode(KRISHNAMURTI)`, `swe_houses(jdUt, SEFLG_SIDEREAL, lat, lon, (int)'P', cusp[13], ascmc[10])`; set cusp 1 = `ascmc[0]`; **pre-check** `|lat| >= polarLimit` (from `SwissEphemerisConfig`, default 66.0) → `PlacidusUndefinedException` before any backend call; thread-safe (synchronized handle); `Accuracy` mirrors the positions' range check; no SE type in any public member (FR-014)
+- [ ] T012 [P] [US1] `HouseResult` record in `ephemeris/.../HouseResult.java` — `birthData`, `List<Double> cuspLongitudes` (size 12, `List.copyOf` in the compact constructor so the record has value equality — **not** `double[]`), `Map<Angle,Double> angles` (immutable copy), `HouseSystem`, `Accuracy`, `EngineVersion`; compact-constructor invariants (12 in `[0,360)`, monotone ring, `cuspLongitudes.get(0) == angles.get(ASCENDANT)`)
+- [ ] T013 [US1] `HouseProvider` interface in `ephemeris/.../HouseProvider.java` — `houses(BirthData)`, `anglesOnly(BirthData)` (Javadoc = the contract). `anglesOnly` computes Asc/MC from the ARMC (sidereal time), not via Placidus — defined at any latitude below ±90° (research.md §2)
+- [ ] T014 [US1] `SwissEphemerisHouseProvider` in `ephemeris/.../swisseph/SwissEphemerisHouseProvider.java` — `swe_set_sid_mode(KRISHNAMURTI)`, `swe_houses(jdUt, SEFLG_SIDEREAL, lat, lon, (int)'P', cusp[13], ascmc[10])`; set cusp 1 = `ascmc[0]`; expose the 12 cusps as `List<Double>`; **pre-check** `|lat| >= polarLimit` (from `SwissEphemerisConfig`, default 66.0) → `PlacidusUndefinedException` before any backend call; `anglesOnly` via `swe_houses_armc` Equal system / direct ARMC formula (never runs Placidus); thread-safe (synchronized handle); `Accuracy` mirrors the positions' range check; no SE type in any public member (FR-014)
 - [ ] T015 [US1] Add `polarLimit` (default 66.0) to `SwissEphemerisConfig` and its `resolve()`
 - [ ] T016 [P] [US1] `Cusps` helper in `core/src/main/java/com/celestia/core/chart/Cusps.java` — `fromHouseResult(HouseResult)` → `List<Cusp>` (12, lord chain via `KpLordage.chainFor`) and `AnglePoint` for each `Angle`
 - [ ] T017 [P] [US1] `CuspsTest` — 12 `Cusp`s house 1..12; `cusp.subLord() == cusp.lordChain().subLord()`; `AnglePoint` for ASC has `longitude == cuspLongitudes[0]`
@@ -77,12 +77,12 @@ is consistent with `[cusp n, cusp n+1)`.
 
 ### Tests (write first)
 
-- [ ] T018 [P] [US2] `BhavaConsistencyPropertyTest` (jqwik) in `core/src/test/java/com/celestia/core/chart/BhavaConsistencyPropertyTest.java` — for random cusp rings + a random longitude, `Bhavas.bhavaOf` returns the unique `n` whose forward arc `[cusp n, cusp n+1)` contains it
+- [ ] T018 [P] [US2] `BhavaConsistencyPropertyTest` (jqwik) in `core/src/test/java/com/celestia/core/chart/BhavaConsistencyPropertyTest.java` — generate a **valid** cusp ring (12 random positive gaps normalised to sum 360°, cumulative from a random start), pick a random longitude, and assert `Bhavas.bhavaOf` returns the unique `n` whose forward arc `[cusp n, cusp n+1)` contains it; also assert exact-cusp longitudes land in the bhava that cusp *starts*
 - [ ] T019 [P] [US2] `BhavaGoldenTest` — for each golden chart, each graha's computed bhava == `expected.grahas[g].bhava`
 
 ### Implementation
 
-- [ ] T020 [US2] Wire bhava into placement: a `Placements` helper (or in `NatalChartFactory`) computing `HousePlacement.bhava` from `position(g).longitude()` and `HouseResult.cuspLongitudes` via `Bhavas.bhavaOf`
+- [ ] T020 [US2] Wire bhava into placement inside `NatalChartFactory` (no separate helper — it already has the positions and the cusps): `HousePlacement.bhava` from `position(g).longitude()` and `HouseResult.cuspLongitudes` via `Bhavas.bhavaOf`
 
 **Checkpoint**: every graha has a verified bhava.
 
@@ -129,7 +129,7 @@ is consistent with `[cusp n, cusp n+1)`.
 ### Tests
 
 - [ ] T027 [P] [US5] `PlacidusPolarTest` in `ephemeris/src/test/java/com/celestia/ephemeris/PlacidusPolarTest.java` — `houses()` at 70°N → `PlacidusUndefinedException` naming the latitude; at 65°N → a normal `HouseResult`; at 91°N → `IllegalArgumentException` (from `BirthData`)
-- [ ] T028 [P] [US5] `anglesOnly()` at 78°N returns `ASCENDANT` + `MIDHEAVEN` without throwing
+- [ ] T028 [P] [US5] `anglesOnly()` at 78°N returns `ASCENDANT` + `MIDHEAVEN` without throwing (ARMC path, not Placidus); the Ascendant is a finite longitude in `[0,360)`
 - [ ] T029 [US5] `NatalChartFactory.cast` at 70°N propagates `PlacidusUndefinedException` (no partial chart)
 
 **Checkpoint**: polar behaviour defined and tested.
@@ -145,7 +145,7 @@ rasi value on every run.
 
 - [ ] T030 [US6] `NatalChartGoldenTest` in `core/src/test/java/com/celestia/core/chart/NatalChartGoldenTest.java` — for each golden chart, cast via `SwissEphemerisPositionProvider` + `SwissEphemerisHouseProvider`; per cusp: longitude within 1′ of the reference (SC-001) and full lord chain exact; per graha: `bhava` and `rasiHouse` exact (SC-002); `@EnabledIf` ephemeris data present
 - [ ] T031 [P] [US6] `NatalChartDeterminismTest` — cast a golden chart twice, assert equal `NatalChart`; `cusp(1)` bit-identical to the Ascendant across runs (SC-003)
-- [ ] T032 [US6] `.github/workflows/ci.yml` — extend the golden-determinism fingerprint step to include `NatalChartGoldenTest` + `NatalChartDeterminismTest`
+- [ ] T032 [US6] `.github/workflows/ci.yml` — run `NatalChartGoldenTest` + `NatalChartDeterminismTest` in the OS-matrix step. (Note: the SPEC-001 "fingerprint" hashes the *static* golden JSONs, which is largely redundant — the real cross-platform check is these tests asserting `computed == stored` on each OS. Optionally have the test emit computed values to a scratch file and fingerprint that instead.)
 
 **Checkpoint**: natal-chart correctness is a CI gate.
 

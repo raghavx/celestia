@@ -29,7 +29,7 @@ The place-name → lat/lon and local-time → UTC steps are SPEC-007.
 | Field | Type | Meaning |
 |-------|------|---------|
 | `birthData` | `BirthData` | echoed input |
-| `cuspLongitudes` | `double[12]` | sidereal longitudes of houses 1..12 (index 0 = house 1); `cuspLongitudes[0]` == the Ascendant, bit-identical |
+| `cuspLongitudes` | `List<Double>` (size 12) | sidereal longitudes of houses 1..12 (index 0 = house 1); `get(0)` == the Ascendant, bit-identical. Immutable (`List.copyOf` in the compact constructor) so the record has value equality (SC-005) — a raw `double[]` would not |
 | `angles` | `Map<Angle, Double>` | Ascendant and Midheaven longitudes, immutable |
 | `houseSystem` | `HouseSystem` | always `PLACIDUS` |
 | `accuracy` | `Accuracy` | mirrors the companion `EphemerisResult` for the same instant |
@@ -37,7 +37,7 @@ The place-name → lat/lon and local-time → UTC steps are SPEC-007.
 
 Invariants: 12 finite longitudes in `[0, 360)`; consecutive forward arcs all > 0
 (monotone around the circle with exactly one wrap); `angles.get(ASCENDANT)` ==
-`cuspLongitudes[0]`.
+`cuspLongitudes.get(0)`.
 
 ### `HouseProvider` (interface)
 
@@ -48,6 +48,8 @@ Map<Angle, Double> anglesOnly(BirthData birthData); // Ascendant + MC, defined a
 
 - `houses(...)` throws `PlacidusUndefinedException` when `|latitude| >= polarLimit`
   (default 66.0°).
+- `anglesOnly(...)` computes the Ascendant and MC from the ARMC (sidereal time),
+  **not** via Placidus, so it succeeds at any latitude below ±90° (research.md §2).
 - Deterministic, thread-safe, no SE type in the signature (FR-014).
 
 ### `PlacidusUndefinedException` (unchecked)
@@ -108,8 +110,10 @@ Invariants:
 
 ### `Bhavas` (utility)
 
-`static int bhavaOf(double longitude, double[] cuspLongitudes)` — the wrap-aware
-half-open assignment; `static int rasiHouseOf(Sign grahaSign, Sign ascendantSign)`.
+`static int bhavaOf(double longitude, List<Double> cuspLongitudes)` — the
+wrap-aware half-open assignment (forward-arc test; `cusp[12] → cusp[0]`);
+`static int rasiHouseOf(Sign grahaSign, Sign ascendantSign)` —
+`1 + Math.floorMod(grahaSign.ordinal() - ascendantSign.ordinal(), 12)`.
 
 ### `NatalChartFactory`
 

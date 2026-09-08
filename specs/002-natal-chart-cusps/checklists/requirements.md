@@ -42,4 +42,8 @@
 - Prerequisite before `/speckit-implement`: extend the golden-chart reference with
   cusp / bhava / rasi values (birth lat/lon already present; `tools/ephe-crosscheck`
   needs a `swe_houses` pass).
-- Ready for `/speckit-plan`.
+- `/speckit-analyze` (2026-09-08): 4 MEDIUM findings remediated — FR-007 scoped to
+  grahas (C1); `anglesOnly` pinned to an ARMC path, not Placidus (R1); the bhava
+  property test must generate valid cusp rings (T1); `HouseResult` uses
+  `List<Double>` not `double[]` for value equality (D1). Plus LOW wording fixes.
+- Ready for `/speckit-plan` / `/speckit-tasks` / `/speckit-implement`.

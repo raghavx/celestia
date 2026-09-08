@@ -70,9 +70,9 @@ reference, and assert consistency (a graha is in bhava _n_ iff its longitude is 
 
 ### User Story 3 - Rasi (sign-based) chart (Priority: P2)
 
-The engine also reports the traditional sign-based house of each graha and each
-cusp: house 1 is the Ascendant's whole sign, house 2 the next sign, and so on;
-a graha's rasi-house is counted from the Ascendant's sign to its own sign.
+The engine also reports the traditional sign-based house of each graha: house 1 is
+the Ascendant's whole sign, house 2 the next sign, and so on; a graha's rasi-house
+is counted in whole signs from the Ascendant's sign to its own sign.
 
 **Why this priority**: Some KP practitioners and most cross-checking tools show
 the Rasi chart; it is useful for verification and for the natal-chart display, but
@@ -190,8 +190,9 @@ that casts the same chart twice.
 - **FR-006**: The engine MUST assign each of the nine grahas to exactly one
   **bhava** in 1..12, defined by the half-open arc `[cusp n, cusp n+1)` around the
   zodiac (FR-011 boundary convention from SPEC-001 applies).
-- **FR-007**: The engine MUST assign each graha and each cusp a **rasi house** in
-  1..12, counted in whole signs from the Ascendant's sign.
+- **FR-007**: The engine MUST assign each graha a **rasi house** in 1..12, counted
+  in whole signs from the Ascendant's sign. (A cusp's whole-sign house is trivial
+  and unused; the Bhava chart, FR-006, is the judgement view.)
 - **FR-008**: The engine MUST assemble an immutable `NatalChart` aggregate
   containing the SPEC-001 positions, the cusps + Ascendant/MC with lord chains,
   the per-graha bhava and rasi house, the cuspal sub lords, the ayanamsa, and the
@@ -203,8 +204,9 @@ that casts the same chart twice.
   value > 180° MUST be rejected as invalid input.
 - **FR-011**: For identical input the engine MUST produce identical output across
   runs and platforms; no wall clock, locale, or environment dependence.
-- **FR-012**: The engine version MUST change when any cusp, bhava, or rasi rule,
-  the house system, or the ayanamsa changes; it MUST be carried on `NatalChart`.
+- **FR-012**: The engine version MUST change when any cusp, bhava, or rasi rule or
+  the ayanamsa changes, and MUST be carried on `NatalChart`. (The house system is
+  compile-time fixed to Placidus, so it cannot vary at runtime.)
 - **FR-013**: An instant outside the supported ephemeris range MUST still yield a
   chart, with `Accuracy.REDUCED` on the positions, consistent with SPEC-001
   (FR-016 there).
@@ -220,7 +222,8 @@ that casts the same chart twice.
 - **Birth data**: a UTC instant plus a geographic latitude and longitude (the
   place → lat/lon step is SPEC-007).
 - **Cusp**: a house number (1..12), a sidereal longitude, and its lord chain.
-- **Angle**: the Ascendant or Midheaven — a longitude and its lord chain.
+- **Angle point**: the Ascendant or Midheaven — a longitude and its lord chain
+  (the type `AnglePoint`; `Angle` is the enum naming which one).
 - **House placement**: for one graha — its bhava (cusp-based) and its rasi house
   (sign-based).
 - **NatalChart**: the immutable aggregate of positions, cusps, angles, placements,

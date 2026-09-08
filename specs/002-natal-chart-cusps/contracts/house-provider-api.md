@@ -23,11 +23,13 @@ public interface HouseProvider {
 
 ### `houses(...)` output — `HouseResult`
 
-- `cuspLongitudes` — 12 finite values in `[0, 360)`, sidereal (KP-New), Placidus.
-- `cuspLongitudes[0]` (house 1) is **bit-identical** to `angles.get(ASCENDANT)`.
+- `cuspLongitudes` — an immutable `List<Double>` of 12 finite values in `[0, 360)`,
+  sidereal (KP-New), Placidus. (`List<Double>`, not `double[]`, so `HouseResult`
+  has value equality — SC-005.)
+- `cuspLongitudes.get(0)` (house 1) is **bit-identical** to `angles.get(ASCENDANT)`.
 - `angles` contains `ASCENDANT` and `MIDHEAVEN`.
-- Consecutive forward arcs `cuspLongitudes[n] → cuspLongitudes[(n+1)%12]` are all
-  strictly > 0 (one wrap through 360°).
+- Consecutive forward arcs `cuspLongitudes.get(n) → cuspLongitudes.get((n+1)%12)`
+  are all strictly > 0 (one wrap through 360°).
 - `houseSystem == PLACIDUS`; `accuracy` mirrors the positions for the same instant;
   `engineVersion` fully populated.
 
@@ -44,9 +46,9 @@ result carries `Accuracy.REDUCED` (mirroring the positions).
 
 ### `anglesOnly(...)`
 
-Returns just `ASCENDANT` and `MIDHEAVEN`, **defined at any latitude** (they do not
-depend on the house system). Same input validation for `|lat|>90` / `|lon|>180`;
-does not throw `PlacidusUndefinedException`.
+Returns just `ASCENDANT` and `MIDHEAVEN`, computed from the ARMC (sidereal time),
+**not** via Placidus — so it is **defined at any latitude** below ±90°. Same input
+validation for `|lat|>90` / `|lon|>180`; never throws `PlacidusUndefinedException`.
 
 ### Guarantees
 

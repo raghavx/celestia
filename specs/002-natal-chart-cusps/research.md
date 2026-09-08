@@ -27,9 +27,16 @@ failing near the pole). We do **not** interpret that — see §2.
 **Decision**: **pre-check the latitude ourselves** — if `|lat| >= polarLimit`
 (default **66.0°**, configurable via `SwissEphemerisConfig` / the provider), throw
 `PlacidusUndefinedException` (a subclass of `EphemerisException`) that names the
-latitude, before calling `swe_houses` at all. A separate `anglesOnly(BirthData)`
-call returns just the Ascendant and MC (`swe_houses` still gives those, or they
-can be computed from ARMC) so callers that only need the Lagna are not blocked.
+latitude, before calling `swe_houses` at all.
+
+`anglesOnly(BirthData)` returns just the Ascendant and MC and **must not run
+Placidus** — `swe_houses` itself throws at high latitude (verified: pyswisseph
+raises at 78°N). Instead compute from the ARMC (sidereal time): call
+`swe_houses_armc(armc, geolat, eps, (int) 'A', cusp, ascmc)` (Equal system — never
+fails) and read `ascmc[0]` / `ascmc[1]`, or compute the Ascendant/MC directly from
+ARMC, obliquity and geographic latitude. The Ascendant and MC are defined at every
+latitude except exactly ±90°. `swe_sidtime` + `swe_get_ayanamsa_ex_ut` give the
+sidereal ARMC.
 
 **Rationale**: pyswisseph raises `swisseph.Error` at 78°N; the Java port returns a
 negative rc and fills the cusp array with a Porphyry fallback. Neither is a stable
@@ -111,8 +118,8 @@ cuspal sub lords, since the tool and the engine share the KP division rule.
 
 | # | Topic | Decision |
 |---|-------|----------|
-| 1 | House call | `swe_houses` sidereal, `hsys='P'`; cusp 1 := Ascendant (`ascmc[0]`) |
-| 2 | High latitude | pre-check `|lat| >= 66.0°` (config) → `PlacidusUndefinedException`; angles-only call available |
+| 1 | House call | `swe_houses` sidereal, `hsys='P'`; cusp 1 := Ascendant (`ascmc[0]`). Cusp ring stored as an immutable `List<Double>` (12), not a `double[]` — records need value equality (SC-005) |
+| 2 | High latitude | pre-check `|lat| >= 66.0°` (config) → `PlacidusUndefinedException`. `anglesOnly` computes Asc/MC from ARMC (Equal-system `swe_houses_armc` / direct formula) — never runs Placidus |
 | 3 | Bhava | cusp-to-cusp, half-open `[cusp n, cusp n+1)`, wrap-aware; not Sripati |
 | 4 | Rasi house | whole signs from the Ascendant's sign |
 | 5 | Data files | cusps are analytic; `Accuracy` mirrors the positions |
