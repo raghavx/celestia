@@ -275,10 +275,11 @@ and assert the reduced-accuracy indicator is set.
   Ascendant and house cusps (which do need location) are SPEC-002.
 - KP-New ayanamsa (ADR-0003) and the mean lunar node (ADR-0005) are the fixed
   defaults; both are accepted decisions.
-- The Swiss Ephemeris Java port is the intended position source (ADR-0002), used
-  behind an internal provider interface so the binding is swappable.
-  **ADR-0001 (Swiss Ephemeris licensing) must move to `accepted` before
-  `/speckit-implement` for this feature.**
+- The Swiss Ephemeris Java port is the position source (ADR-0002), used behind an
+  internal provider interface so the binding is swappable. ADR-0001 is accepted:
+  the commercial (Professional) licence will be purchased before production
+  go-live; development proceeds under AGPL until then. Implementation of this
+  feature is unblocked.
 - The supported full-accuracy date range is 1800–2100 (ADR-0002); outside it, an
   analytical (Moshier) fallback applies with reduced accuracy.
 - The boundary convention is half-open `[start, end)`, the boundary belonging to
@@ -295,10 +296,10 @@ and assert the reduced-accuracy indicator is set.
 
 ## Dependencies
 
-- **ADR-0001** — Swiss Ephemeris licensing — MUST be `accepted` before
-  implementation of this feature begins.
-- **ADR-0002** (ephemeris data source), **ADR-0003** (ayanamsa), **ADR-0005**
-  (lunar node) — accepted; this feature assumes them.
+- **ADR-0001** (Swiss Ephemeris licensing), **ADR-0002** (ephemeris data source),
+  **ADR-0003** (ayanamsa), **ADR-0005** (lunar node) — all accepted; this feature
+  assumes them. ADR-0001 carries a production go-live action (buy the commercial
+  licence) that does not block implementation.
 - **Golden-chart reference dataset** — a prerequisite deliverable for the
   correctness suite (SC-001, SC-002).
 - No dependency on any other SPEC. SPEC-002 through SPEC-005 depend on this one.

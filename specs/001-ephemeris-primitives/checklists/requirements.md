@@ -39,9 +39,11 @@
   here, and are referenced as such.
 - **SC-002** cites "an independent authoritative ephemeris reference" as the
   accuracy yardstick — a reference standard, not a project technology.
-- **Blocking dependency**: ADR-0001 (Swiss Ephemeris licensing) is still
-  `proposed`. The spec and its plan/tasks can proceed; `/speckit-implement` for
-  this feature must not start until ADR-0001 is `accepted`.
+- **Dependencies resolved**: ADR-0001 (Swiss Ephemeris licensing) is now
+  `accepted` — commercial licence, to be purchased at production go-live;
+  development proceeds under AGPL. Implementation of this feature is unblocked.
+  ADR-0002/0003/0005 were already accepted.
 - **Prerequisite deliverable**: the golden-chart reference dataset (≥ 3 charts)
-  must be sourced before the correctness suite can be written.
+  must be sourced before the correctness suite can be written — this is the one
+  remaining item before `/speckit-implement`.
 - Ready for `/speckit-clarify` (optional) or `/speckit-plan`.

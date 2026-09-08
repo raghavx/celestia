@@ -11,7 +11,7 @@ it starts. Amending an accepted ADR requires a new ADR that supersedes it.
 
 | ADR | Decision | Status | Blocks |
 |-----|----------|--------|--------|
-| [0001](0001-swiss-ephemeris-licensing.md) | Swiss Ephemeris licensing | proposed | Phase 1 |
+| [0001](0001-swiss-ephemeris-licensing.md) | Swiss Ephemeris licensing (commercial licence; buy at production go-live) | accepted | Phase 1 |
 | [0002](0002-ephemeris-data-files.md) | Ephemeris data source (`.se1` + Moshier fallback, 1800–2100) | accepted | Phase 1 |
 | [0003](0003-ayanamsa.md) | Ayanamsa (KP-New default, enum config) | accepted | Phase 1 |
 | [0004](0004-house-system.md) | House system (Placidus sidereal, fixed) | accepted | Phase 1 |
@@ -37,7 +37,13 @@ it starts. Amending an accepted ADR requires a new ADR that supersedes it.
 
 ## Still needing an owner decision
 
-`proposed` ADRs that need input before their phase: **0001** (licensing — legal /
-commercial), **0009 / 0010** (LLM hardware — procurement), **0011 / 0012**
+`proposed` ADRs that need input before their phase: **0008** (Testcontainers /
+container runtime), **0009 / 0010** (LLM hardware — procurement), **0011 / 0012**
 (WhatsApp — Meta Business account), **0013** (geocoder API key), **0017 / 0020**
 (billing model & grace values — product), **0022** (policy pages — legal).
+
+## Launch blockers (accepted, but require an action before production)
+
+- **0001** — buy the Swiss Ephemeris Professional License before serving external users.
+- **0022** — publish Terms / Privacy / Refund / Contact pages (also needed for Razorpay live activation).
+- **0019** — resolve the GST question if the business is GST-registered.
