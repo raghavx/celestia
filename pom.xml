@@ -33,7 +33,29 @@
         <archunit.version>1.5.0</archunit.version>
         <spotless.version>2.44.5</spotless.version>
         <jacoco.version>0.8.13</jacoco.version>
+
+        <!-- SPEC-001: not in any BOM, pin explicitly (tasks T001, T002) -->
+        <commons-numbers.version>1.2</commons-numbers.version>
+        <jqwik.version>1.9.2</jqwik.version>
+        <!--
+          Swiss Ephemeris Java port (Thomas Mack lineage, `de.thmac.swisseph`).
+          Not on Maven Central - built by JitPack from the krishnact/swisseph fork.
+          Pinned to an immutable JitPack build (commit 6000e46c). Verified on
+          JDK 25; agrees with pyswisseph to < 1 arcsec (SPEC-001 research.md §1,
+          T002 spike). AGPL - covered by ADR-0001. Vendoring is the documented
+          fallback (docs/ephemeris-vendoring.md, T059) if JitPack drops the build.
+        -->
+        <swisseph.version>master-6000e46cf8-1</swisseph.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -95,12 +117,38 @@
                 <version>${archunit.version}</version>
                 <scope>test</scope>
             </dependency>
+
+            <!-- SPEC-001 -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-numbers-fraction</artifactId>
+                <version>${commons-numbers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.jqwik</groupId>
+                <artifactId>jqwik</artifactId>
+                <version>${jqwik.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.krishnact</groupId>
+                <artifactId>swisseph</artifactId>
+                <version>${swisseph.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <!-- @Tag("perf") tests are machine-dependent; opt in with -Pperf -->
+                        <excludedGroups>perf</excludedGroups>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
@@ -164,4 +212,22 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <!-- run the @Tag("perf") tests too: ./mvnw test -Pperf -->
+            <id>perf</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <excludedGroups combine.self="override"/>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

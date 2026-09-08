@@ -1,0 +1,137 @@
+{
+  "id": "obama-1961",
+  "subject": "Barack Obama",
+  "birth": {
+    "local_datetime": "1961-08-04T19:24:00",
+    "local_time_basis": "Hawaii Standard Time (UTC-10:00). Hawaii has not observed daylight saving; HST has been UTC-10:00 since 1947.",
+    "place": "Honolulu, Hawaii, USA (Kapiolani Maternity and Gynecological Hospital)",
+    "latitude": 21.30694,
+    "longitude": -157.85833,
+    "utc_instant": "1961-08-05T05:24:00Z",
+    "utc_derivation": "1961-08-04 19:24:00 -10:00 = 1961-08-05 05:24:00 UTC. AstroDatabank records the same: '5 August 1961 - 05:24 (+10:00h)'."
+  },
+  "sources": [
+    {
+      "type": "birth_record",
+      "rodden_rating": "AA",
+      "citation": "AstroDatabank: 'Obama, Barack' - Rodden Rating AA (changed to AA June 2008), sourced from the birth certificate.",
+      "url": "https://www.astro.com/astro-databank/Obama,_Barack"
+    }
+  ],
+  "engine_settings": {
+    "ayanamsa": "SE_SIDM_KRISHNAMURTI (5)",
+    "node": "mean (SE_MEAN_NODE); Ketu = Rahu + 180",
+    "zodiac": "sidereal, geocentric, apparent",
+    "position_flags": "SEFLG_SIDEREAL | SEFLG_SPEED (SWIEPH, MOSEPH fallback)"
+  },
+  "expected": {
+    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.1",
+    "generated_at": "2026-09-08T06:29:28+00:00",
+    "grahas": {
+      "SUN": {
+        "longitude": 109.326425,
+        "sign": "CANCER",
+        "sign_lord": "MOON",
+        "nakshatra": "ASHLESHA",
+        "pada": 1,
+        "star_lord": "MERCURY",
+        "sub_lord": "KETU",
+        "sub_sub_lord": "MERCURY",
+        "retrograde": false
+      },
+      "MOON": {
+        "longitude": 40.135938,
+        "sign": "TAURUS",
+        "sign_lord": "VENUS",
+        "nakshatra": "ROHINI",
+        "pada": 1,
+        "star_lord": "MOON",
+        "sub_lord": "MOON",
+        "sub_sub_lord": "MARS",
+        "retrograde": false
+      },
+      "MARS": {
+        "longitude": 149.355104,
+        "sign": "LEO",
+        "sign_lord": "SUN",
+        "nakshatra": "UTTARA_PHALGUNI",
+        "pada": 1,
+        "star_lord": "SUN",
+        "sub_lord": "RAHU",
+        "sub_sub_lord": "RAHU",
+        "retrograde": false
+      },
+      "MERCURY": {
+        "longitude": 99.110112,
+        "sign": "CANCER",
+        "sign_lord": "MOON",
+        "nakshatra": "PUSHYA",
+        "pada": 2,
+        "star_lord": "SATURN",
+        "sub_lord": "VENUS",
+        "sub_sub_lord": "RAHU",
+        "retrograde": false
+      },
+      "JUPITER": {
+        "longitude": 277.637128,
+        "sign": "CAPRICORN",
+        "sign_lord": "SATURN",
+        "nakshatra": "UTTARA_ASHADHA",
+        "pada": 4,
+        "star_lord": "SUN",
+        "sub_lord": "KETU",
+        "sub_sub_lord": "SATURN",
+        "retrograde": true
+      },
+      "VENUS": {
+        "longitude": 68.567862,
+        "sign": "GEMINI",
+        "sign_lord": "MERCURY",
+        "nakshatra": "ARDRA",
+        "pada": 1,
+        "star_lord": "RAHU",
+        "sub_lord": "RAHU",
+        "sub_sub_lord": "MARS",
+        "retrograde": false
+      },
+      "SATURN": {
+        "longitude": 272.10925,
+        "sign": "CAPRICORN",
+        "sign_lord": "SATURN",
+        "nakshatra": "UTTARA_ASHADHA",
+        "pada": 2,
+        "star_lord": "SUN",
+        "sub_lord": "JUPITER",
+        "sub_sub_lord": "VENUS",
+        "retrograde": true
+      },
+      "RAHU": {
+        "longitude": 124.671058,
+        "sign": "LEO",
+        "sign_lord": "SUN",
+        "nakshatra": "MAGHA",
+        "pada": 2,
+        "star_lord": "KETU",
+        "sub_lord": "MOON",
+        "sub_sub_lord": "VENUS",
+        "retrograde": true
+      },
+      "KETU": {
+        "longitude": 304.671058,
+        "sign": "AQUARIUS",
+        "sign_lord": "SATURN",
+        "nakshatra": "DHANISHTA",
+        "pada": 4,
+        "star_lord": "MARS",
+        "sub_lord": "VENUS",
+        "sub_sub_lord": "MERCURY",
+        "retrograde": true
+      }
+    }
+  },
+  "verification": {
+    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.1",
+    "lordchain_human_check": "pending",
+    "status": "expected_generated"
+  }
+}

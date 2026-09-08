@@ -12,8 +12,12 @@ concurrency:
 
 jobs:
   build:
-    name: build & verify
-    runs-on: ubuntu-latest
+    name: build & verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
 
@@ -24,8 +28,34 @@ jobs:
           java-version: "25"
           cache: maven
 
+      - name: Cache Swiss Ephemeris data
+        uses: actions/cache@v4
+        with:
+          path: ephemeris/src/main/resources/ephe
+          key: ephe-${{ hashFiles('scripts/ephe.sha256') }}
+
+      - name: Provision ephemeris data
+        run: bash scripts/fetch-ephe.sh
+
       - name: Build, test, verify
         run: ./mvnw -B -ntp verify
+
+      # SPEC-001 SC-005 / FR-014: the golden-chart output must be identical
+      # across OS + arch. Fingerprint the deterministic golden test's inputs
+      # (positions are computed fresh each run) and compare across the matrix.
+      - name: Fingerprint golden determinism
+        run: |
+          ./mvnw -q -B -ntp -pl core -am test -Dtest=GoldenChartTest,DeterminismTest \
+            -Dsurefire.failIfNoSpecifiedTests=false
+          find core/src/test/resources/golden -name '*.json' -exec shasum -a 256 {} + \
+            | sort > golden-fingerprint-${{ matrix.os }}.txt
+          cat golden-fingerprint-${{ matrix.os }}.txt
+
+      - name: Upload golden fingerprint
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-fingerprint-${{ matrix.os }}
+          path: golden-fingerprint-${{ matrix.os }}.txt
 
       - name: Publish test report
         if: always()

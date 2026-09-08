@@ -1,7 +1,7 @@
 # ADR 0023: Topic-gate mechanism
 
-- **Status:** proposed
-- **Date:** 2026-09-02
+- **Status:** accepted
+- **Date:** 2026-09-02 (accepted 2026-09-08)
 - **Decision ref:** D23 (PROJECT_PLAN.md §2)
 
 ## Context
@@ -26,7 +26,7 @@ For the classifier stage:
 
 ## Decision
 
-_Proposed:_ layered —
+Layered —
 
 1. Always-on **deterministic rules** (injection phrase list, encoded-payload
    detection, prompt/tool-probe patterns) as a hard pre-filter.

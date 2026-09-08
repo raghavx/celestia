@@ -12,13 +12,16 @@
 
     <artifactId>ephemeris</artifactId>
     <name>Celestia Ephemeris</name>
-    <description>Thin wrapper over Swiss Ephemeris (Java): Julian Day / delta-T, sidereal positions, Placidus cusps.</description>
+    <description>Thin wrapper over Swiss Ephemeris (Java): Julian Day / delta-T, sidereal positions. Pure Java - no Spring, no DB, no network.</description>
 
-    <!--
-      TODO(D1): add the Swiss Ephemeris Java port dependency once the licence
-      decision (AGPL vs. commercial) is recorded as an ADR.
-    -->
     <dependencies>
+        <!-- Swiss Ephemeris Java port (ADR-0001, ADR-0002). Wrapped by PositionProvider;
+             the de.thmac.swisseph type must never appear in a public signature (FR-018). -->
+        <dependency>
+            <groupId>com.github.krishnact</groupId>
+            <artifactId>swisseph</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -27,6 +30,11 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.jqwik</groupId>
+            <artifactId>jqwik</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
