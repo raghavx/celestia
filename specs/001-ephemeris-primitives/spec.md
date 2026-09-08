@@ -165,9 +165,9 @@ and assert the reduced-accuracy indicator is set.
   the 9 × 9 divisions — boundaries must tile exactly.
 - A birth instant outside the bundled ephemeris data range → analytical fallback
   plus the reduced-accuracy indicator; this is not an error.
-- A request for any ayanamsa other than KP-New, for grahas beyond the nine, or for
-  a lordage level beyond sub-sub → rejected as out of scope; no silent partial
-  answer.
+- Other ayanamsas, additional grahas, and deeper lordage levels are not part of
+  the API surface (compile-time exclusion), so there is no runtime request to
+  reject and no silent partial answer to guard against.
 
 ## Requirements *(mandatory)*
 
@@ -214,9 +214,12 @@ and assert the reduced-accuracy indicator is set.
 - **FR-016**: For instants within the supported ephemeris date range the engine
   MUST produce full-accuracy results; outside the range it MUST still produce a
   result and set a reduced-accuracy indicator.
-- **FR-017**: A request for any ayanamsa other than KP-New, for grahas beyond the
-  nine, or for a lordage level beyond sub-sub MUST be rejected as out of scope (no
-  silent partial answer).
+- **FR-017**: The public API surface MUST NOT expose other ayanamsas, additional
+  grahas, or lordage levels beyond sub-sub — they are excluded at compile time,
+  not offered and then rejected at runtime. Concretely: the `Ayanamsa` type has
+  the single value `KP_NEW`; the position call always returns exactly the nine
+  grahas; the lord-chain call always resolves through sub-sub. There is therefore
+  no "out-of-scope request" for the engine to handle.
 - **FR-018**: The engine's public outputs MUST be immutable value objects
   consumable by later specs without exposing the underlying ephemeris library's
   types.

@@ -39,6 +39,10 @@
   here, and are referenced as such.
 - **SC-002** cites "an independent authoritative ephemeris reference" as the
   accuracy yardstick — a reference standard, not a project technology.
+- **FR-017** reworded after `/speckit-analyze` (finding A1): the exclusion of
+  other ayanamsas / grahas / lordage levels is compile-time (the API never accepts
+  such a request), not a runtime rejection — so it is testable by the type surface,
+  not by a rejection path.
 - **Dependencies resolved**: ADR-0001 (Swiss Ephemeris licensing) is now
   `accepted` — commercial licence, to be purchased at production go-live;
   development proceeds under AGPL. Implementation of this feature is unblocked.

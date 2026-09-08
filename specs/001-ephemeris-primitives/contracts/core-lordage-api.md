@@ -69,6 +69,13 @@ public record Span(Graha lord, BigFraction start, BigFraction end) {
 }
 ```
 
+**Public-API commitment**: `org.apache.commons.numbers.fraction.BigFraction` is
+part of `core`'s public contract (it is what makes the exact-tiling guarantee
+real — see research.md §3). Consumers that do not need exactness use `startDeg()`
+/ `endDeg()` and never touch the type. Downstream specs (SPEC-002, SPEC-005)
+inherit this dependency; it is a small, pure, stable library and is accepted
+deliberately rather than wrapped.
+
 ## Zodiac-wide guarantee (SC-004)
 
 Concatenating `subs(n)` for `n` in nakshatra order produces 243 contiguous spans

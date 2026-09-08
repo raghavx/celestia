@@ -80,7 +80,7 @@ this feature.
 | VI Deterministic conversation flows | no | N/A |
 | VII Identity / consent / PII | no | N/A — no personal data handled here (an instant + a longitude) |
 | VIII Payments from the gateway | no | N/A |
-| IX Adapters at the edge | partial | PASS — the Swiss Ephemeris binding sits behind `PositionProvider` in `ephemeris`; the SE library type is never exposed in a public signature (FR-018) |
+| IX Adapters at the edge | partial | PASS — the Swiss Ephemeris binding sits behind `PositionProvider` in `ephemeris`; the SE library type is never exposed in a public signature (FR-018), **enforced** by `DeterminismArchitectureTest` rule (b) (task T017) |
 | Tech constraints (Java 25, Maven, amounts, Flyway) | partial | PASS — Java 25; no money, no DB in scope |
 | ADR gate | yes | PASS — ADR-0001 accepted (go-live action noted), ADR-0002/0003/0005 accepted |
 
@@ -157,6 +157,8 @@ See [research.md](./research.md). Open items to resolve there:
 
 1. Swiss Ephemeris Java port — distribution (JitPack fork vs vendored source),
    API surface, thread-safety, sidereal/Moshier/speed flags, `SE_SIDM_KRISHNAMURTI`.
+   The fork choice + JitPack-on-JDK-25 verification is task **T002(a)**, a spike
+   gating the SE-dependent US1 work.
 2. `.se1` data set for 1800–2100 — which files, provisioning script, checksums,
    Docker layering, and the minimal subset (or Moshier) usable in CI.
 3. Exact-rational arithmetic — Commons Numbers `Fraction`/`BigFraction` vs a

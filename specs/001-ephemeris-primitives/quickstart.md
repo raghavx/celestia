@@ -9,6 +9,13 @@ feature is implemented on branch `001-ephemeris-primitives`.
 - Ephemeris data: `scripts/fetch-ephe.sh` downloads the `.se1` files for
   1800–2100 into `ephemeris/src/main/resources/ephe/` and verifies them against
   `scripts/ephe.sha256`. (Skip if running the golden suite in Moshier mode.)
+  The engine reads this as a **filesystem directory**, resolved in this order:
+  1. explicit config value / `CELESTIA_EPHE_PATH` env var;
+  2. `ephemeris/src/main/resources/ephe/` when running from the source tree (dev, test);
+  3. a directory mounted into the `agent` container in production;
+  4. if none exists → Moshier mode (`Accuracy.REDUCED` results only).
+  Files packaged inside a jar are **not** usable — the Swiss Ephemeris port needs
+  a real directory path.
 - Golden-chart files present under `core/src/test/resources/golden/` (the
   outstanding data-gathering prerequisite).
 
