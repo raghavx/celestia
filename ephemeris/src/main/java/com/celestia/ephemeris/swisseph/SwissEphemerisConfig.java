@@ -49,10 +49,15 @@ public record SwissEphemerisConfig(String ephePath, int minYear, int maxYear) {
         if (isReadableDir(fromEnv)) {
             return fromEnv;
         }
-        // conventional source-tree locations: repo root, or the ephemeris module dir
-        for (String conventional : new String[] {"ephemeris/src/main/resources/ephe", "src/main/resources/ephe"}) {
+        // conventional source-tree locations, whether run from the repo root, the
+        // ephemeris module dir, or a sibling module dir (e.g. core tests)
+        for (String conventional : new String[] {
+            "ephemeris/src/main/resources/ephe",
+            "src/main/resources/ephe",
+            "../ephemeris/src/main/resources/ephe"
+        }) {
             if (isReadableDir(conventional)) {
-                return Path.of(conventional).toAbsolutePath().toString();
+                return Path.of(conventional).toAbsolutePath().normalize().toString();
             }
         }
         return null;

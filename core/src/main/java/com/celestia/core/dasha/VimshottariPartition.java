@@ -38,6 +38,20 @@ public final class VimshottariPartition {
     }
 
     /**
+     * All 243 sub-spans across the whole zodiac, in longitude order. The KP horary
+     * table of 249 entries (SPEC-005) is these spans further split at the 12 sign
+     * boundaries; the exact {@link Span#start()} / {@link Span#end()} make that
+     * split lossless.
+     */
+    public static List<Span> subDivisions() {
+        List<Span> all = new ArrayList<>(243);
+        for (Nakshatra n : Nakshatra.values()) {
+            all.addAll(subs(n));
+        }
+        return all;
+    }
+
+    /**
      * The nine sub-sub-spans of the given sub, in Vimshottari order from
      * {@code subLord}, covering that sub exactly.
      *
