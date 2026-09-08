@@ -77,12 +77,12 @@ is consistent with `[cusp n, cusp n+1)`.
 
 ### Tests (write first)
 
-- [ ] T018 [P] [US2] `BhavaConsistencyPropertyTest` (jqwik) in `core/src/test/java/com/celestia/core/chart/BhavaConsistencyPropertyTest.java` — generate a **valid** cusp ring (12 random positive gaps normalised to sum 360°, cumulative from a random start), pick a random longitude, and assert `Bhavas.bhavaOf` returns the unique `n` whose forward arc `[cusp n, cusp n+1)` contains it; also assert exact-cusp longitudes land in the bhava that cusp *starts*
-- [ ] T019 [P] [US2] `BhavaGoldenTest` — for each golden chart, each graha's computed bhava == `expected.grahas[g].bhava`
+- [x] T018 [P] [US2] `BhavaConsistencyPropertyTest` (jqwik) in `core/src/test/java/com/celestia/core/chart/BhavaConsistencyPropertyTest.java` — generate a **valid** cusp ring (12 random positive gaps normalised to sum 360°, cumulative from a random start), pick a random longitude, and assert `Bhavas.bhavaOf` returns the unique `n` whose forward arc `[cusp n, cusp n+1)` contains it; also assert exact-cusp longitudes land in the bhava that cusp *starts*
+- [x] T019 [P] [US2] `BhavaGoldenTest` — for each golden chart, each graha's computed bhava == `expected.grahas[g].bhava`
 
 ### Implementation
 
-- [ ] T020 [US2] Wire bhava into placement inside `NatalChartFactory` (no separate helper — it already has the positions and the cusps): `HousePlacement.bhava` from `position(g).longitude()` and `HouseResult.cuspLongitudes` via `Bhavas.bhavaOf`
+- [x] T020 [US2] Wire bhava into placement inside `NatalChartFactory` (no separate helper — it already has the positions and the cusps): `HousePlacement.bhava` from `position(g).longitude()` and `HouseResult.cuspLongitudes` via `Bhavas.bhavaOf`
 
 **Checkpoint**: every graha has a verified bhava.
 
@@ -94,11 +94,11 @@ is consistent with `[cusp n, cusp n+1)`.
 
 ### Tests (write first)
 
-- [ ] T021 [P] [US3] `RasiHouseTest` in `core/src/test/java/com/celestia/core/chart/RasiHouseTest.java` — Asc sign → 1; graha one/two signs ahead → 2/3; wrap (graha behind the Asc sign) → 11/12; matches `expected.grahas[g].rasi_house` for the golden charts
+- [x] T021 [P] [US3] `RasiHouseTest` in `core/src/test/java/com/celestia/core/chart/RasiHouseTest.java` — Asc sign → 1; graha one/two signs ahead → 2/3; wrap (graha behind the Asc sign) → 11/12; matches `expected.grahas[g].rasi_house` for the golden charts
 
 ### Implementation
 
-- [ ] T022 [US3] Wire `HousePlacement.rasiHouse` from `position(g)`'s sign and the Ascendant's sign via `Bhavas.rasiHouseOf`
+- [x] T022 [US3] Wire `HousePlacement.rasiHouse` from `position(g)`'s sign and the Ascendant's sign via `Bhavas.rasiHouseOf`
 
 **Checkpoint**: rasi houses verified.
 
@@ -110,13 +110,13 @@ is consistent with `[cusp n, cusp n+1)`.
 
 ### Tests (write first)
 
-- [ ] T023 [P] [US4] `NatalChartApiTest` in `core/src/test/java/com/celestia/core/chart/NatalChartApiTest.java` — encodes `contracts/natal-chart-api.md`: 12 cusps in order; `cusp(1).longitude() == ascendant().longitude()`; `cuspSubLord(h) == cusp(h).lordChain().subLord()` for all h; `placements().keySet()` == nine grahas; every `bhava`/`rasiHouse` in 1..12
-- [ ] T024 [P] [US4] `NatalChartFactoryTest` — `assemble(birthData, positions, houses)` is deterministic (equal inputs → equal `NatalChart`); `cast(birthData)` wires the providers and propagates `PlacidusUndefinedException`
+- [x] T023 [P] [US4] `NatalChartApiTest` in `core/src/test/java/com/celestia/core/chart/NatalChartApiTest.java` — encodes `contracts/natal-chart-api.md`: 12 cusps in order; `cusp(1).longitude() == ascendant().longitude()`; `cuspSubLord(h) == cusp(h).lordChain().subLord()` for all h; `placements().keySet()` == nine grahas; every `bhava`/`rasiHouse` in 1..12
+- [x] T024 [P] [US4] `NatalChartFactoryTest` — `assemble(birthData, positions, houses)` is deterministic (equal inputs → equal `NatalChart`); `cast(birthData)` wires the providers and propagates `PlacidusUndefinedException`
 
 ### Implementation
 
-- [ ] T025 [US4] `NatalChart` record/aggregate in `core/.../chart/NatalChart.java` — fields per data-model.md; accessors `position`, `cusp`, `cuspSubLord`, `ascendant`, `midheaven`, `placement`, `cusps`, `placements`, `ayanamsa`, `accuracy`, `engineVersion`; compact-constructor invariants
-- [ ] T026 [US4] `NatalChartFactory` in `core/.../chart/NatalChartFactory.java` — `static assemble(BirthData, EphemerisResult, HouseResult)` (pure); instance `NatalChartFactory(PositionProvider, HouseProvider)` + `cast(BirthData)`; `accuracy` from the positions
+- [x] T025 [US4] `NatalChart` record/aggregate in `core/.../chart/NatalChart.java` — fields per data-model.md; accessors `position`, `cusp`, `cuspSubLord`, `ascendant`, `midheaven`, `placement`, `cusps`, `placements`, `ayanamsa`, `accuracy`, `engineVersion`; compact-constructor invariants
+- [x] T026 [US4] `NatalChartFactory` in `core/.../chart/NatalChartFactory.java` — `static assemble(BirthData, EphemerisResult, HouseResult)` (pure); instance `NatalChartFactory(PositionProvider, HouseProvider)` + `cast(BirthData)`; `accuracy` from the positions
 
 **Checkpoint**: `NatalChart` assembled and invariant-checked.
 
