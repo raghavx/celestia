@@ -24,6 +24,15 @@ jobs:
           java-version: "25"
           cache: maven
 
+      - name: Cache Swiss Ephemeris data
+        uses: actions/cache@v4
+        with:
+          path: ephemeris/src/main/resources/ephe
+          key: ephe-${{ hashFiles('scripts/ephe.sha256') }}
+
+      - name: Provision ephemeris data
+        run: scripts/fetch-ephe.sh
+
       - name: Build, test, verify
         run: ./mvnw -B -ntp verify
 

@@ -25,14 +25,14 @@ and see them fail before implementing.
 
 **Purpose**: dependencies and data provisioning
 
-- [ ] T001 Add `org.apache.commons:commons-numbers-fraction` and `net.jqwik:jqwik` to `pom.xml` — pin explicit `<commons-numbers.version>` and `<jqwik.version>` properties (neither is in the Spring Boot / Spring AI BOMs; confirm jqwik's JUnit-platform version matches the BOM's JUnit 5) and manage both in `dependencyManagement`; add fraction as a compile dep in `core/pom.xml`, jqwik as a test dep in `core/pom.xml` and `ephemeris/pom.xml`
-- [ ] T002 Add the Swiss Ephemeris Java port. **Blocked on sub-step (a).**
-  - (a) **Spike**: choose the port source (a maintained `de.thmac.swisseph`-lineage fork), verify a JitPack build succeeds against a **JDK 25** toolchain, and pin the exact commit; record the choice and the verification result in `research.md` §1 and in `LICENSE-NOTICES.md`.
-  - (b) Add the `jitpack.io` repository to `pom.xml` and the pinned dependency to `ephemeris/pom.xml`; confirm `./mvnw -pl ephemeris -am dependency:resolve`.
-  - (c) If the JitPack build fails on JDK 25, fall back to vendoring the source per `docs/ephemeris-vendoring.md` (T059) instead of (b).
+- [x] T001 `commons-numbers-fraction` 1.2 + `jqwik` 1.9.2 pinned as version properties and managed in the parent `pom.xml`; fraction is a compile dep of `core`, jqwik a test dep of `core` and `ephemeris`. Resolved OK against the Spring Boot 4.1.1 JUnit 5.
+- [x] T002 Swiss Ephemeris Java port added.
+  - (a) **Spike DONE**: `krishnact/swisseph` via JitPack, pinned `com.github.krishnact:swisseph:master-6000e46cf8-1` (SE 2.01.00). Compiles + runs on JDK 25; agrees with pyswisseph to 0.83″. Recorded in `research.md` §1, `LICENSE-NOTICES.md`.
+  - (b) `jitpack.io` repo added to `pom.xml`; dep on `ephemeris`; resolves.
+  - (c) Vendoring fallback documented (T059) — not needed.
 - [x] T003 [P] `scripts/fetch-ephe.sh` + `scripts/ephe.sha256` — download `sepl_18.se1` + `semo_18.se1` (cover 1800–2399) from the aloistr/swisseph mirror into `ephemeris/src/main/resources/ephe/` and verify SHA-256. Verified working; `.se1` are git-ignored
-- [ ] T004 [P] Add a Moshier-mode test profile so CI can run without the full data set: `ephemeris/src/test/resources/ephemeris-test.properties` + a short note in `ephemeris/src/test/resources/README.md`
-- [ ] T005 [P] Update `.github/workflows/ci.yml` to cache `ephemeris/src/main/resources/ephe/` between runs (matrix determinism job is added in T050)
+- [x] T004 [P] Moshier-mode fallback documented for tests so CI can run without the full data set: `ephemeris/src/test/resources/ephemeris-test.properties` + a short note in `ephemeris/src/test/resources/README.md`
+- [x] T005 [P] `.github/workflows/ci.yml`: caches + provisions `.se1`; matrix job still to add in T050. Original: cache `ephemeris/src/main/resources/ephe/` between runs (matrix determinism job is added in T050)
 
 ---
 

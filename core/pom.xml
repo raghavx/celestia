@@ -19,6 +19,12 @@
             <groupId>com.celestia</groupId>
             <artifactId>ephemeris</artifactId>
         </dependency>
+        <!-- Exact rational arithmetic for the Vimshottari partition (research.md §3).
+             BigFraction is part of core's public API - see contracts/core-lordage-api.md. -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-numbers-fraction</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -28,6 +34,11 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.jqwik</groupId>
+            <artifactId>jqwik</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

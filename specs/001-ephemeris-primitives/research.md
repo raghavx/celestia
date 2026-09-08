@@ -42,10 +42,22 @@ thread-safe at the interface level regardless.
 - `aloistr/swisseph` C via JNI/Panama — rejected for v1: native build/packaging
   complexity across the CI matrix; the pure-Java port is sufficient for KP.
 
-**Open verification** (do during implementation, not blocking the plan):
-- Confirm the chosen fork builds on JitPack with a JDK 25 toolchain.
-- Confirm `swe_calc_ut` output is bit-identical across the CI OS/arch matrix for a
-  fixed jd + flags (float determinism).
+**Resolved (T002 spike, 2026-09-08):**
+- Fork: **`krishnact/swisseph`** (standard Maven layout, package `de.thmac.swisseph`).
+- Coordinate: `com.github.krishnact:swisseph:master-6000e46cf8-1` via JitPack — an
+  immutable build of commit `6000e46c`. Port reports `swe_version() = 2.01.00`.
+- Verified: resolves + compiles + runs on **JDK 25**; `SEFLG_SWIEPH` loads our
+  `.se1` data; Obama's Sun sidereal longitude `109.326195` vs pyswisseph
+  `109.326425` → **0.83 arc-seconds** apart (well inside the 2″ SC-002 tolerance;
+  the gap is the port being SE 2.01 vs pyswisseph 2.10).
+- API used: `SweDate.getJulDay(y,m,d,hour,greg)`, `SweDate.getDeltaT(jd)` (days),
+  `swe.swe_calc_ut(jdUt, ipl, iflag, double[6], StringBuffer)`,
+  `swe.swe_set_sid_mode(SE_SIDM_KRISHNAMURTI, 0, 0)`, `swe.swe_set_ephe_path(dir)`,
+  `swe.swe_close()`.
+
+**Still open (not blocking):**
+- `swe_calc_ut` bit-identical across the CI OS/arch matrix (T050).
+- JitPack build longevity — mitigated by the documented vendoring fallback (T059).
 
 ## 2. `.se1` ephemeris data for 1800–2100
 
