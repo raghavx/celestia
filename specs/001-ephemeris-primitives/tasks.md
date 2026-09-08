@@ -103,16 +103,16 @@ sub-sub lord}` with a single documented boundary rule.
 
 ### Tests (write first, expect failure)
 
-- [ ] T033 [P] [US2] `CoreLordageContractTest` in `core/src/test/java/com/celestia/core/lordage/CoreLordageContractTest.java` — encodes `contracts/core-lordage-api.md`: total function after normalisation, `NaN`/`Infinity` → `IllegalArgumentException`, boundary → higher division, `chainFor(0.0)` result
-- [ ] T034 [P] [US2] `KpLordageTableTest` in `core/src/test/java/com/celestia/core/lordage/KpLordageTableTest.java` — a hand-built table of longitude → full lord chain rows taken from KP reference material
+- [x] T033 [P] [US2] `CoreLordageContractTest` in `core/src/test/java/com/celestia/core/lordage/CoreLordageContractTest.java` — encodes `contracts/core-lordage-api.md`: total function after normalisation, `NaN`/`Infinity` → `IllegalArgumentException`, boundary → higher division, `chainFor(0.0)` result
+- [x] T034 [P] [US2] `KpLordageTableTest` in `core/src/test/java/com/celestia/core/lordage/KpLordageTableTest.java` — a hand-built table of longitude → full lord chain rows taken from KP reference material
 
 ### Implementation
 
-- [ ] T035 [P] [US2] `LordChain` record in `core/src/main/java/com/celestia/core/lordage/LordChain.java`
-- [ ] T036 [US2] `KpLordage.chainFor(double)` in `core/src/main/java/com/celestia/core/lordage/KpLordage.java` — normalise; sign + sign lord; nakshatra + pada + star lord; sub lord and sub-sub lord by locating the containing `Span` from `VimshottariPartition` (half-open)
-- [ ] T037 [P] [US2] `KpLordageBoundaryTest` in `core/src/test/java/com/celestia/core/lordage/KpLordageBoundaryTest.java` — longitudes exactly on sign / nakshatra / pada / sub / sub-sub boundaries resolve to the higher division
-- [ ] T038 [P] [US2] `PadaTest` in `core/src/test/java/com/celestia/core/lordage/PadaTest.java` — each of the 27 nakshatra start longitudes → pada 1; each pada spans exactly 3°20′
-- [ ] T039 [US2] `LordChainConsistencyPropertyTest` (jqwik) in `core/src/test/java/com/celestia/core/lordage/LordChainConsistencyPropertyTest.java` — for sampled λ, `chainFor(λ).subLord` equals the `lord` of the containing span in `subs(chainFor(λ).nakshatra)`; same for sub-sub
+- [x] T035 [P] [US2] `LordChain` record in `core/src/main/java/com/celestia/core/lordage/LordChain.java`
+- [x] T036 [US2] `KpLordage.chainFor(double)` in `core/src/main/java/com/celestia/core/lordage/KpLordage.java` — normalise; sign + sign lord; nakshatra + pada + star lord; sub lord and sub-sub lord by locating the containing `Span` from `VimshottariPartition` (half-open)
+- [x] T037 [P] [US2] `KpLordageBoundaryTest` in `core/src/test/java/com/celestia/core/lordage/KpLordageBoundaryTest.java` — longitudes exactly on sign / nakshatra / pada / sub / sub-sub boundaries resolve to the higher division
+- [x] T038 [P] [US2] `PadaTest` in `core/src/test/java/com/celestia/core/lordage/PadaTest.java` — each of the 27 nakshatra start longitudes → pada 1; each pada spans exactly 3°20′
+- [x] T039 [US2] `LordChainConsistencyPropertyTest` (jqwik) in `core/src/test/java/com/celestia/core/lordage/LordChainConsistencyPropertyTest.java` — for sampled λ, `chainFor(λ).subLord` equals the `lord` of the containing span in `subs(chainFor(λ).nakshatra)`; same for sub-sub
 
 **Checkpoint**: any longitude yields a verified KP lord chain.
 
