@@ -25,8 +25,8 @@
     "position_flags": "SEFLG_SIDEREAL | SEFLG_SPEED (SWIEPH, MOSEPH fallback)"
   },
   "expected": {
-    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.1",
-    "generated_at": "2026-09-08T06:29:28+00:00",
+    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.2",
+    "generated_at": "2026-09-08T09:31:07+00:00",
     "grahas": {
       "SUN": {
         "longitude": 331.430382,
@@ -37,7 +37,9 @@
         "star_lord": "JUPITER",
         "sub_lord": "RAHU",
         "sub_sub_lord": "RAHU",
-        "retrograde": false
+        "retrograde": false,
+        "bhava": 10,
+        "rasi_house": 10
       },
       "MOON": {
         "longitude": 232.448845,
@@ -48,7 +50,9 @@
         "star_lord": "MERCURY",
         "sub_lord": "MOON",
         "sub_sub_lord": "RAHU",
-        "retrograde": false
+        "retrograde": false,
+        "bhava": 6,
+        "rasi_house": 6
       },
       "MARS": {
         "longitude": 274.836851,
@@ -59,7 +63,9 @@
         "star_lord": "SUN",
         "sub_lord": "SATURN",
         "sub_sub_lord": "JUPITER",
-        "retrograde": false
+        "retrograde": false,
+        "bhava": 7,
+        "rasi_house": 8
       },
       "MERCURY": {
         "longitude": 341.066542,
@@ -70,7 +76,9 @@
         "star_lord": "SATURN",
         "sub_lord": "MOON",
         "sub_sub_lord": "MOON",
-        "retrograde": false
+        "retrograde": false,
+        "bhava": 10,
+        "rasi_house": 10
       },
       "JUPITER": {
         "longitude": 305.406717,
@@ -81,7 +89,9 @@
         "star_lord": "MARS",
         "sub_lord": "SUN",
         "sub_sub_lord": "KETU",
-        "retrograde": false
+        "retrograde": false,
+        "bhava": 9,
+        "rasi_house": 9
       },
       "VENUS": {
         "longitude": 354.90765,
@@ -92,7 +102,9 @@
         "star_lord": "MERCURY",
         "sub_lord": "RAHU",
         "sub_sub_lord": "SATURN",
-        "retrograde": false
+        "retrograde": false,
+        "bhava": 10,
+        "rasi_house": 10
       },
       "SATURN": {
         "longitude": 342.112443,
@@ -103,7 +115,9 @@
         "star_lord": "SATURN",
         "sub_lord": "MARS",
         "sub_sub_lord": "MARS",
-        "retrograde": false
+        "retrograde": false,
+        "bhava": 10,
+        "rasi_house": 10
       },
       "RAHU": {
         "longitude": 279.402975,
@@ -114,7 +128,9 @@
         "star_lord": "SUN",
         "sub_lord": "VENUS",
         "sub_sub_lord": "SATURN",
-        "retrograde": true
+        "retrograde": true,
+        "bhava": 8,
+        "rasi_house": 8
       },
       "KETU": {
         "longitude": 99.402975,
@@ -125,13 +141,172 @@
         "star_lord": "SATURN",
         "sub_lord": "VENUS",
         "sub_sub_lord": "JUPITER",
-        "retrograde": true
+        "retrograde": true,
+        "bhava": 2,
+        "rasi_house": 2
+      }
+    },
+    "cusps": [
+      {
+        "house": 1,
+        "longitude": 79.567508,
+        "sign": "GEMINI",
+        "sign_lord": "MERCURY",
+        "nakshatra": "ARDRA",
+        "pada": 4,
+        "star_lord": "RAHU",
+        "sub_lord": "MARS",
+        "sub_sub_lord": "SATURN"
+      },
+      {
+        "house": 2,
+        "longitude": 96.538979,
+        "sign": "CANCER",
+        "sign_lord": "MOON",
+        "nakshatra": "PUSHYA",
+        "pada": 1,
+        "star_lord": "SATURN",
+        "sub_lord": "MERCURY",
+        "sub_sub_lord": "RAHU"
+      },
+      {
+        "house": 3,
+        "longitude": 115.730197,
+        "sign": "CANCER",
+        "sign_lord": "MOON",
+        "nakshatra": "ASHLESHA",
+        "pada": 3,
+        "star_lord": "MERCURY",
+        "sub_lord": "RAHU",
+        "sub_sub_lord": "SUN"
+      },
+      {
+        "house": 4,
+        "longitude": 140.762376,
+        "sign": "LEO",
+        "sign_lord": "SUN",
+        "nakshatra": "PURVA_PHALGUNI",
+        "pada": 3,
+        "star_lord": "VENUS",
+        "sub_lord": "JUPITER",
+        "sub_sub_lord": "MERCURY"
+      },
+      {
+        "house": 5,
+        "longitude": 176.255251,
+        "sign": "VIRGO",
+        "sign_lord": "MERCURY",
+        "nakshatra": "CHITRA",
+        "pada": 1,
+        "star_lord": "MARS",
+        "sub_lord": "JUPITER",
+        "sub_sub_lord": "JUPITER"
+      },
+      {
+        "house": 6,
+        "longitude": 221.030809,
+        "sign": "SCORPIO",
+        "sign_lord": "MARS",
+        "nakshatra": "ANURADHA",
+        "pada": 3,
+        "star_lord": "SATURN",
+        "sub_lord": "MOON",
+        "sub_sub_lord": "MOON"
+      },
+      {
+        "house": 7,
+        "longitude": 259.567508,
+        "sign": "SAGITTARIUS",
+        "sign_lord": "JUPITER",
+        "nakshatra": "PURVA_ASHADHA",
+        "pada": 2,
+        "star_lord": "VENUS",
+        "sub_lord": "RAHU",
+        "sub_sub_lord": "VENUS"
+      },
+      {
+        "house": 8,
+        "longitude": 276.538979,
+        "sign": "CAPRICORN",
+        "sign_lord": "SATURN",
+        "nakshatra": "UTTARA_ASHADHA",
+        "pada": 3,
+        "star_lord": "SUN",
+        "sub_lord": "MERCURY",
+        "sub_sub_lord": "JUPITER"
+      },
+      {
+        "house": 9,
+        "longitude": 295.730197,
+        "sign": "CAPRICORN",
+        "sign_lord": "SATURN",
+        "nakshatra": "DHANISHTA",
+        "pada": 1,
+        "star_lord": "MARS",
+        "sub_lord": "RAHU",
+        "sub_sub_lord": "SUN"
+      },
+      {
+        "house": 10,
+        "longitude": 320.762376,
+        "sign": "AQUARIUS",
+        "sign_lord": "SATURN",
+        "nakshatra": "PURVA_BHADRAPADA",
+        "pada": 1,
+        "star_lord": "JUPITER",
+        "sub_lord": "JUPITER",
+        "sub_sub_lord": "MERCURY"
+      },
+      {
+        "house": 11,
+        "longitude": 356.255251,
+        "sign": "PISCES",
+        "sign_lord": "JUPITER",
+        "nakshatra": "REVATI",
+        "pada": 3,
+        "star_lord": "MERCURY",
+        "sub_lord": "JUPITER",
+        "sub_sub_lord": "JUPITER"
+      },
+      {
+        "house": 12,
+        "longitude": 41.030809,
+        "sign": "TAURUS",
+        "sign_lord": "VENUS",
+        "nakshatra": "ROHINI",
+        "pada": 1,
+        "star_lord": "MOON",
+        "sub_lord": "MOON",
+        "sub_sub_lord": "VENUS"
+      }
+    ],
+    "angles": {
+      "ascendant": {
+        "longitude": 79.567508,
+        "sign": "GEMINI",
+        "sign_lord": "MERCURY",
+        "nakshatra": "ARDRA",
+        "pada": 4,
+        "star_lord": "RAHU",
+        "sub_lord": "MARS",
+        "sub_sub_lord": "SATURN"
+      },
+      "midheaven": {
+        "longitude": 320.762376,
+        "sign": "AQUARIUS",
+        "sign_lord": "SATURN",
+        "nakshatra": "PURVA_BHADRAPADA",
+        "pada": 1,
+        "star_lord": "JUPITER",
+        "sub_lord": "JUPITER",
+        "sub_sub_lord": "MERCURY"
       }
     }
   },
   "verification": {
-    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.1",
+    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.2",
     "lordchain_human_check": "pending",
-    "status": "expected_generated"
+    "status": "expected_generated",
+    "houses_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.2"
   }
 }

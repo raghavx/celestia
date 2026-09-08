@@ -1,15 +1,19 @@
 # ephe-crosscheck
 
-An **independent** reference computation for the SPEC-001 golden charts. Not built
-by `./mvnw verify` and not shipped — a developer tool.
+An **independent** reference computation for the SPEC-001 / SPEC-002 golden
+charts. Not built by `./mvnw verify` and not shipped — a developer tool.
 
 It uses **pyswisseph** (a Python binding of Swiss Ephemeris, a different
-implementation lineage from the Java port the engine will use) to compute the nine
-grahas' sidereal longitudes, and derives the KP lord chain from them with exact
-rational arithmetic. Agreement between this tool and the Java engine is the
-"authoritative reference" of spec.md **SC-002**; disagreement on a lord chain
-(where both encode the same KP rule) is caught instead by the human check
-described in `core/src/test/resources/golden/README.md`.
+implementation lineage from the Java port the engine will use) to compute:
+
+- the nine grahas' sidereal longitudes + KP lord chain (SPEC-001);
+- the twelve Placidus cusps + Ascendant/MC with their lord chains, and each
+  graha's bhava (cusp-to-cusp) and rasi house (SPEC-002).
+
+Agreement between this tool and the Java engine is the "authoritative reference"
+of **SC-002**; disagreement on a lord chain or bhava (where both encode the same
+KP rule) is caught instead by the human check described in
+`core/src/test/resources/golden/README.md`.
 
 ## Settings (must match ADR-0003 / ADR-0005 and the engine)
 
@@ -17,7 +21,8 @@ described in `core/src/test/resources/golden/README.md`.
 |---|---|
 | Ayanamsa | `swe.SIDM_KRISHNAMURTI` (constant **5**) |
 | Node | `swe.MEAN_NODE`; Ketu = Rahu + 180° |
-| Flags | `FLG_SIDEREAL | FLG_SPEED` + `SWIEPH` (`MOSEPH` fallback) |
+| Position flags | `FLG_SIDEREAL | FLG_SPEED` + `SWIEPH` (`MOSEPH` fallback) |
+| Houses | `swe.houses_ex(jd, lat, lon, b'P', FLG_SIDEREAL)`; cusp 1 := `ascmc[0]` |
 
 ## Use
 

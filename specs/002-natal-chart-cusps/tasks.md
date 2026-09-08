@@ -23,8 +23,8 @@ Builds on SPEC-001 (merged to `master`): `PositionProvider`, `KpLordage`,
 
 ## Phase 1: Setup
 
-- [ ] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with a `swe.houses_ex(jd, lat, lon, b'P', FLG_SIDEREAL)` pass: emit `expected.cusps` (12 × {longitude + lord chain via the existing `lord_chain`}), `expected.angles` ({ascendant, midheaven} each with lord chain), and `expected.grahas[g].bhava` + `.rasi_house` (bhava = cusp-to-cusp half-open wrap-aware; rasi = whole sign from the Ascendant). Birth `latitude`/`longitude` already in each file.
-- [ ] T002 Regenerate the three golden files with `--write`; verify the run is deterministic (re-run, diff `expected`); bump `verification.status` note. Update `core/src/test/resources/golden/README.md` with the new fields.
+- [x] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with a `swe.houses_ex(jd, lat, lon, b'P', FLG_SIDEREAL)` pass: emit `expected.cusps` (12 × {longitude + lord chain via the existing `lord_chain`}), `expected.angles` ({ascendant, midheaven} each with lord chain), and `expected.grahas[g].bhava` + `.rasi_house` (bhava = cusp-to-cusp half-open wrap-aware; rasi = whole sign from the Ascendant). Birth `latitude`/`longitude` already in each file.
+- [x] T002 Regenerate the three golden files with `--write`; verify the run is deterministic (re-run, diff `expected`); bump `verification.status` note. Update `core/src/test/resources/golden/README.md` with the new fields.
 - [ ] T003 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java` to parse `expected.cusps`, `expected.angles`, and `bhava` / `rasi_house`.
 
 ---
@@ -90,7 +90,7 @@ is consistent with `[cusp n, cusp n+1)`.
 
 ## Phase 5: User Story 3 — Rasi (sign-based) house (P2)
 
-**Goal**: each graha (and cusp) gets a whole-sign house counted from the Ascendant.
+**Goal**: each graha gets a whole-sign house counted from the Ascendant's sign.
 
 ### Tests (write first)
 
