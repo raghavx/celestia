@@ -4,7 +4,7 @@ Pure-Java KP domain. No Spring, no DB, no network, no wall clock (enforced by
 `DeterminismArchitectureTest`). Delivered: longitude decomposition and the
 Vimshottari partition (SPEC-001), the natal chart with cusps and bhavas
 (SPEC-002), the four-step significators and ruling planets (SPEC-003), the
-Vimshottari dasha timeline (SPEC-004). Horary comes in a later spec.
+Vimshottari dasha timeline (SPEC-004), the KP horary 1–249 chart (SPEC-005).
 
 ## Public API
 
@@ -24,6 +24,9 @@ Vimshottari dasha timeline (SPEC-004). Horary comes in a later spec.
 | `dasha.DashaTimelineFactory.at(BirthData)` / `dasha.DashaTimeline.from(...)` | the Vimshottari timeline: `balanceAtBirth()`, `running(instant, depth)`, `periods(level, from, to)` |
 | `dasha.VimshottariSplit.of(BigFraction, Graha)` | the exact nine-way weight split (shared by the nakshatra sub-lords and the dasha subdivision) |
 | `dasha.DashaLevel` / `DashaPeriod` / `DashaBalance` / `RunningDasha` | value objects (5 levels: Mahadasha &rarr; Antardasha &rarr; Pratyantardasha &rarr; Sookshma &rarr; Prana) |
+| `horary.Horary249.arc(int)` / `.arcs()` | the KP horary 1–249 map — number &rarr; `HoraryArc` (bounds, sign, lord chain; sub lord = the answer's determinant) |
+| `horary.HoraryChartFactory` | `ascendant(number)` (clock-independent) / `cast(number, BirthData)` &rarr; `NatalChart` (cusp 1 = the number's Ascendant) |
+| `horary.HoraryRulingPlanets.at(...)` | SPEC-003 ruling planets with the number's Ascendant for the lagna lords |
 
 `org.apache.commons.numbers.fraction.BigFraction` is part of the public API
 (`Span.start()/end()`) — see `specs/001-ephemeris-primitives/contracts/`.

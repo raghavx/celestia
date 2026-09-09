@@ -30,6 +30,9 @@ references are acceptable where an ADR settled the choice.
 | **Balance of dasha at birth**: the birth Mahadasha lord is the lord of the Moon's nakshatra; the fraction of the nakshatra the Moon has traversed is the fraction of that Mahadasha already elapsed | `core.dasha.DashaTimeline.balanceAtBirth` | K. S. Krishnamurti, *KP Readers* II (balance of dasa) |
 | **Nested subdivision**: each period splits into nine, in Vimshottari order **from that period's own lord**, each child = parent &times; childYears / 120; five levels Mahadasha &rarr; Antardasha (Bhukti) &rarr; Pratyantardasha (Antara) &rarr; Sookshma &rarr; Prana | `core.dasha.VimshottariSplit`, `DashaLevel` | K. S. Krishnamurti, *KP Readers* II; standard Vimshottari sub-period rule |
 | **1 Vimshottari year = 365.25 days** (Julian year) for converting dasha lengths to dates | `core.dasha.DashaTimeline` | K. S. Krishnamurti, *KP Readers* dasa tables; the mainstream KP-software convention (`specs/004-vimshottari-dasha/research.md` §7) |
+| **KP horary 1–249 table**: the 243 nakshatra sub-lord divisions, each split wherever it crosses a 30&deg; sign boundary, numbered in longitude order — exactly 249 arcs | `core.horary.Horary249` | K. S. Krishnamurti, *Krishnamurti Padhdhati* (horary / *Prasna* volume); the 249 table |
+| **Horary Ascendant = the midpoint of the number's arc** — the sub lord (the judged quantity) is constant over the arc, so the choice is judgement-neutral | `core.horary.HoraryChartFactory.ascendant` | KP horary practice (the number fixes the Ascendant sub) |
+| **Horary house cusps**: cusp 1 = the number's Ascendant; cusps 2–12 = Placidus from the RAMC that yields that Ascendant at the judgment latitude — closed-form inversion of the Ascendant equation, sidereal&harr;tropical via the instant's ayanamsa | `ephemeris.swisseph.SwissEphemerisHoraryHouseProvider` | J. Meeus, *Astronomical Algorithms* (2nd ed.) ch. 13 & the house-cusp formulae |
 
 ## Engine version bump procedure
 
@@ -38,7 +41,8 @@ whenever any rule above changes -- including rules that live in `core`
 (`Sign`, `Nakshatra`, `VimshottariPartition`, `KpLordage`, `Longitudes`,
 `judgement.SignificatorTable`, `judgement.RulingPlanetsFactory`,
 `judgement.KpWeekday`, `dasha.VimshottariSplit`, `dasha.DashaTimeline` — including
-the 365.25-day year). `core`
+the 365.25-day year — and `horary.Horary249` / `horary.HoraryChartFactory`, plus
+`ephemeris.swisseph.SwissEphemerisHoraryHouseProvider`'s RAMC inversion). `core`
 cannot reference `EngineVersion` (no dependency back to nothing -- `ephemeris` is
 the lower layer), so the coupling is a documented manual step. A change without a
 bump is caught by the golden-chart snapshot suite drifting with no version change.

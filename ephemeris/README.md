@@ -12,7 +12,8 @@ Pure-Java wrapper over the Swiss Ephemeris Java port. Time handling and geocentr
 | `PositionProvider` | `positions(Instant) -> EphemerisResult` — the nine grahas |
 | `HouseProvider` | `houses(BirthData) -> HouseResult` — 12 Placidus cusps + angles; `anglesOnly(BirthData)` at any latitude |
 | `SunriseProvider` | `sunriseBefore(Instant, lat, lon) -> Optional<Instant>` — the local sunrise that began the KP day; `Optional.empty()` on a polar day/night |
-| `SwissEphemerisPositionProvider` / `SwissEphemerisHouseProvider` / `SwissEphemerisSunriseProvider` | the implementations (KP-New ayanamsa, mean node, Placidus) |
+| `HoraryHouseProvider` | `housesFor(BirthData judgment, double ascendantLongitude) -> HouseResult` — Placidus cusps from a **given** Ascendant (KP horary), not from an instant |
+| `SwissEphemerisPositionProvider` / `SwissEphemerisHouseProvider` / `SwissEphemerisSunriseProvider` / `SwissEphemerisHoraryHouseProvider` | the implementations (KP-New ayanamsa, mean node, Placidus) |
 | `SwissEphemerisConfig` | resolves the `.se1` directory, the supported range, and the polar limit |
 | `TimeScales.of(Instant)` / `.instantFromJulianDayUt(double)` | UTC instant &harr; `JulianDay` (UT + TT + &Delta;T) |
 | `Graha` | the nine grahas + Vimshottari year weights |

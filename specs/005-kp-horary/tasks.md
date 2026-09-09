@@ -234,21 +234,21 @@ Ascendant.
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T026 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the 249
+- [x] T026 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the 249
   table derivation (243 sub-spans split at the twelve sign cusps; cite KSK's
   *Krishnamurti Padhdhati* horary volume), the Ascendant-midpoint rule, and the
   RAMC-from-Ascendant inversion (cite Meeus, *Astronomical Algorithms* 2nd ed.
   ch. 13 / house formulae); add
   `horary.Horary249` / `horary.HoraryChartFactory` and
   `swisseph.SwissEphemerisHoraryHouseProvider` to the `EngineVersion` bump list
-- [ ] T027 [P] `HoraryPerformanceTest` `@Tag("perf")` in
+- [x] T027 [P] `HoraryPerformanceTest` `@Tag("perf")` in
   `core/src/test/java/com/celestia/core/horary/HoraryPerformanceTest.java` — a
   cast chart under a 200 ms warm guard (SC-005 target 75 ms) and
   `Horary249.arcs()` first build under 20 ms; excluded from the default run
-- [ ] T028 [P] Update `ephemeris/README.md` (+ `HoraryHouseProvider`) and
+- [x] T028 [P] Update `ephemeris/README.md` (+ `HoraryHouseProvider`) and
   `core/README.md` (+ `Horary249`, `HoraryChartFactory`, `HoraryRulingPlanets`)
-- [ ] T029 Run `specs/005-kp-horary/quickstart.md` end to end; fix drift
-- [ ] T030 `./mvnw -q verify` — full reactor green incl.
+- [x] T029 Run `specs/005-kp-horary/quickstart.md` end to end; fix drift
+- [x] T030 `./mvnw -q verify` — full reactor green incl.
   `DeterminismArchitectureTest` / `LayeringArchitectureTest`
 
 ---
