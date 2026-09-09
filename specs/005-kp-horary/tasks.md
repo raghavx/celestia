@@ -115,7 +115,7 @@ sample matches KSK's table.
 
 ### Tests (write first)
 
-- [ ] T013 [P] [US2] `HoraryAscendantTest` in
+- [x] T013 [P] [US2] `HoraryAscendantTest` in
   `core/src/test/java/com/celestia/core/horary/HoraryAscendantTest.java` —
   `HoraryChartFactory.ascendant(n).longitude()` == `Horary249.arc(n).midpointDeg()`
   for every `n`; `.lordChain().subLord()` == `arc(n).subLord()`; two numbers that
@@ -124,7 +124,7 @@ sample matches KSK's table.
 
 ### Implementation
 
-- [ ] T014 [US2] `HoraryChartFactory.ascendant(int number)` in
+- [x] T014 [US2] `HoraryChartFactory.ascendant(int number)` in
   `core/src/main/java/com/celestia/core/horary/HoraryChartFactory.java` — returns
   `new AnglePoint(Angle.ASCENDANT, Horary249.arc(number).midpointDeg(),
   Horary249.arc(number).lordChain())`
