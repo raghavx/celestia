@@ -45,4 +45,9 @@
 - Prerequisite before `/speckit-implement`: extend the golden reference with
   significator tables + one RP example, and a textbook cross-check of one chart
   (SC-006).
-- Ready for `/speckit-plan`.
+- `/speckit-analyze` (2026-09-09): 3 MEDIUM remediated — FR-007 node-aspect flag
+  scoped out of v1 significators (C1); FR-011 reworded to same-sign/nakshatra, no
+  orb conjunction (I1); `KpWeekday.resolve` returns a `Resolution` record and
+  T033 compares accessor outputs (A1, D1); FR-017 out-of-range RP test added to
+  T026 (C2).
+- Ready for `/speckit-plan` / `/speckit-tasks` / `/speckit-implement`.

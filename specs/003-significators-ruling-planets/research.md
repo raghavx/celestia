@@ -54,6 +54,11 @@ the per-house lists already credit a house to a node when the node occupies it o
 is in the star of one of its effective occupants. The node's own agency
 significations are therefore `grahaSignificators(node)` with no extra step.
 
+**Node aspects — deferred.** `SignificatorTable.of(NatalChart)` takes no options
+in v1; graha aspects to the nodes are never used. When an aspect scheme is chosen
+(a later decision), it is added as a `SignificatorTable.of(chart, Options)`
+overload — the current single-arg method stays as the default.
+
 ## 3. Ruling planets — sources and node rule
 
 For a judgment `BirthData` (instant + place):
@@ -104,10 +109,14 @@ correct; note the caveat.
 **Weekday → day lord**: Sunday→Sun, Monday→Moon, Tuesday→Mars, Wednesday→Mercury,
 Thursday→Jupiter, Friday→Venus, Saturday→Saturn.
 
+**Return shape**: `KpWeekday.resolve(...)` returns a
+`record KpWeekday.Resolution(KpWeekday weekday, boolean fallback)`.
+
 **No sunrise (polar / midnight sun)**: `swe_rise_trans` returns `−2` (no rise
 within the search window). `SunriseProvider.sunriseBefore` returns
-`Optional.empty()`; `KpWeekday` falls back to the **civil** (UTC-midnight-boundary,
-LMT-adjusted) weekday and `RulingPlanets.dayLordFallback` is set true (FR-014).
+`Optional.empty()`; `resolve` falls back to the **civil** (UTC-midnight-boundary,
+LMT-adjusted) weekday, sets `Resolution.fallback = true`, and
+`RulingPlanets.dayLordFallback` is set true (FR-014).
 
 **`swe_houses_armc` obliquity / ARMC** are not needed — `swe_rise_trans` is a
 direct call.

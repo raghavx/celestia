@@ -91,9 +91,9 @@ significations match the reference.
 2. **Given** a node alone in its bhava, **When** its significations are computed,
    **Then** they are the union of the houses signified by its sign lord and its
    star lord.
-3. **Given** the aspects flag is on, **When** a graha aspects the node,
-   **Then** that graha's significations are also included; with the flag off they
-   are not.
+3. **Given** a node whose sign lord signifies houses {2, 11} and whose star lord
+   signifies {6, 10}, **When** its significations are computed, **Then** they are
+   {2, 6, 10, 11} (graha aspects to the node are not used in v1).
 
 ---
 
@@ -191,8 +191,9 @@ every run and platform.
 - **FR-007**: For **Rahu** and **Ketu**, significations MUST be derived by agency —
   the union of the houses signified by: any graha conjoined with the node in the
   same bhava, the lord of the node's occupied sign, and the lord of the node's
-  occupied star. Graha aspects to the nodes MUST be excluded unless an
-  `includeNodeAspects` flag is set.
+  occupied star. Graha aspects to the nodes are **not** used in v1; the extension
+  point is a later `SignificatorTable.of(chart, options)` overload (there is no
+  aspect scheme yet).
 - **FR-008**: A node MUST also appear as a step-2 occupant of its own bhava, and
   its agency significations MUST be merged into that bhava's significator list.
 - **FR-009**: Given a judgment instant (UTC) and a place, the engine MUST return
@@ -202,9 +203,10 @@ every run and platform.
   runs from local **sunrise** to the next local sunrise (Sun = Sunday, Moon =
   Monday, Mars = Tuesday, Mercury = Wednesday, Jupiter = Thursday, Venus = Friday,
   Saturn = Saturday).
-- **FR-011**: Rahu / Ketu MUST be added to the ruling planets when a node occupies
-  the sign or star of any ruling planet, or is conjoined with the Moon or the
-  Ascendant.
+- **FR-011**: Rahu / Ketu MUST be added to the ruling planets when the lord of the
+  sign or the star (nakshatra) the node occupies is already a ruling planet, or
+  when the node shares the sign or the nakshatra of the Moon or the Ascendant.
+  (Sign/star sharing — no orb-based conjunction.)
 - **FR-012**: Each ruling planet MUST carry its source(s) (lagna-sign, lagna-star,
   lagna-sub, moon-sign, moon-star, moon-sub, day-lord, node).
 - **FR-013**: Sub-lord inclusion in the ruling planets MUST be controlled by a

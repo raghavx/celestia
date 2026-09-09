@@ -103,9 +103,16 @@ Invariants:
 
 ### `KpWeekday` (enum + resolution)
 
-`SUNDAY..SATURDAY`, each with `Graha lord()`. `static KpWeekday resolve(Instant
-judgmentInstant, double latitude, double longitude, SunriseProvider)` → the KP
-weekday (sunrise boundary), plus a `boolean fallback` when there is no sunrise.
+`SUNDAY..SATURDAY`, each with `Graha lord()`; `static KpWeekday of(DayOfWeek)`.
+
+```java
+record Resolution(KpWeekday weekday, boolean fallback) {}
+static Resolution resolve(Instant judgmentInstant, double latitude, double longitude, SunriseProvider sunrise);
+```
+
+`resolve` returns the KP weekday at the sunrise boundary; `fallback` is true when
+there is no sunrise that day and the civil (LMT-adjusted midnight) weekday was
+used.
 
 ### `RulingPlanets` (record / aggregate)
 
@@ -141,5 +148,5 @@ record Options(boolean includeSubLords, boolean includeNodeAspects) {
    (SC-002).
 2. `SignificatorTable.of` is deterministic: equal `NatalChart` ⇒ equal table.
 3. `RulingPlanetsFactory.compute` is deterministic.
-4. `KpWeekday.resolve` at `sunrise + ε` and `sunrise − ε` differ by one day
-   (SC-004).
+4. `KpWeekday.resolve(...).weekday()` at `sunrise + ε` and `sunrise − ε` are
+   adjacent weekdays (SC-004).

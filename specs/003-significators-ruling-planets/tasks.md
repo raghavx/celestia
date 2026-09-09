@@ -133,14 +133,14 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 - [ ] T024 [P] [US4] `SunriseProviderContractTest` in `ephemeris/src/test/java/com/celestia/ephemeris/SunriseProviderContractTest.java` — `sunriseBefore(t, lat, lon)` returns an instant ≤ t and > t − 26h; two nearby instants on the same KP day return the same sunrise; polar summer latitude → `Optional.empty()`; deterministic
 - [ ] T025 [P] [US4] `KpWeekdayTest` in `core/src/test/java/com/celestia/core/judgement/KpWeekdayTest.java` — `resolve(sunrise + 1 min)` and `resolve(sunrise − 1 min)` differ by one weekday (SC-004); no-sunrise input → civil weekday + `fallback == true`
-- [ ] T026 [P] [US4] `RulingPlanetsTest` — `compute(...)` with hand-set ascendant/moon longitudes: the 6 lagna/moon lords + day lord present with correct sources; `includeSubLords=false` drops `LAGNA_SUB` / `MOON_SUB`; node added when its sign/star lord is ruling or it shares Moon/Asc sign or star; deterministic
+- [ ] T026 [P] [US4] `RulingPlanetsTest` — `compute(...)` with hand-set ascendant/moon longitudes: the 6 lagna/moon lords + day lord present with correct sources; `includeSubLords=false` drops `LAGNA_SUB` / `MOON_SUB`; node added when its occupied-sign/star lord is ruling or it shares the Moon/Asc sign or nakshatra (no orb conjunction); deterministic; a year-1600 judgment instant via `at(...)` → `RulingPlanets` with `Accuracy.REDUCED`, no exception (FR-017)
 - [ ] T027 [P] [US4] `RulingPlanetsGoldenTest` — the golden RP example: `at(judgment)` == `expected.ruling_planets` (planet set, sources, day lord, weekday, sunrise instant); `@EnabledIf` ephemeris data
 
 ### Implementation
 
 - [ ] T028 [P] [US4] `SunriseProvider` interface in `ephemeris/.../SunriseProvider.java` (Javadoc = the contract)
 - [ ] T029 [US4] `SwissEphemerisSunriseProvider` in `ephemeris/.../swisseph/SwissEphemerisSunriseProvider.java` — `swe_rise_trans(jd, SE_SUN, null, epheflag, SE_CALC_RISE, {lon,lat,0}, 0, 0, tret, serr)`; "sunrise before" = latest rise ≤ instant (start at t − 1.05d, advance ≤ 2×); rc `−2` → `Optional.empty()`; synchronized handle; no SE type in the public API (FR-018)
-- [ ] T030 [US4] `KpWeekday.resolve(Instant, double lat, double lon, SunriseProvider)` — sunrise-boundary weekday: weekday of `(sunrise + longitude/15 h)`'s UTC `LocalDate`; on `Optional.empty()` use `(instant + longitude/15 h)`'s civil `LocalDate` and set the fallback flag
+- [ ] T030 [US4] `KpWeekday.resolve(Instant, double lat, double lon, SunriseProvider)` → `KpWeekday.Resolution(weekday, fallback)` — sunrise-boundary weekday: weekday of `(sunrise + longitude/15 h)`'s UTC `LocalDate`; on `Optional.empty()` use `(instant + longitude/15 h)`'s `LocalDate` and `fallback = true`. Code comment: the `longitude/15 h` LMT offset is a stand-in for the real civil timezone (SPEC-007); wrong only for a large tz-vs-LMT offset with sunrise near midnight
 - [ ] T031 [US4] `RulingPlanets` record + `RulingPlanets.Options` (`includeSubLords` default true, `includeNodeAspects` default false) in `core/.../judgement/RulingPlanets.java`
 - [ ] T032 [US4] `RulingPlanetsFactory` in `core/.../judgement/RulingPlanetsFactory.java` — instance `at(BirthData)` wires `PositionProvider` (Moon) + `HouseProvider.anglesOnly` (Ascendant) + `SunriseProvider`; `static compute(...)` pure: the 6 lagna/moon lords + `DAY_LORD` + node additions (research.md §3); `accuracy` from the Moon position
 
@@ -150,7 +150,7 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 ## Phase 7: User Story 5 — Reproducible correctness (P2)
 
-- [ ] T033 [P] [US5] `SignificatorDeterminismTest` — `SignificatorTable.of` twice on a golden chart → equal tables (all 12 house lists + 9 graha entries)
+- [ ] T033 [P] [US5] `SignificatorDeterminismTest` — `SignificatorTable.of` twice on a golden chart; compare the **accessor outputs** (`houseSignificators(h)` for h=1..12 and `grahaSignificators(g)` for every g — these are records with value equality), since `SignificatorTable` itself is a class without `equals`
 - [ ] T034 [P] [US5] `RulingPlanetsDeterminismTest` — `compute(...)` and `at(...)` twice → equal `RulingPlanets`
 - [ ] T035 [US5] `.github/workflows/ci.yml` — add `SignificatorGoldenTest`,
   `GrahaSignificatorGoldenTest`, `NodeAgencyGoldenTest`, `RulingPlanetsGoldenTest`
@@ -164,7 +164,8 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 - [ ] T036 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the
   four-step significator rule, the node-agency rule, the ruling-planet sources +
-  node rule, and the day-lord-at-sunrise rule (cite KSK / *KP Readers*)
+  node rule, and the day-lord-at-sunrise rule (cite KSK / *KP Readers*); note that
+  a `core.judgement` rule change also bumps `EngineVersion.rules`
 - [ ] T037 [P] `SignificatorPerformanceTest` `@Tag("perf")` — all 12 houses +
   per-graha table for a chart < 200 ms warm guard (SC-005 target 20 ms); excluded
   from the default run
