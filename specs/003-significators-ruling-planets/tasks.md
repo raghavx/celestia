@@ -150,9 +150,9 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 ## Phase 7: User Story 5 — Reproducible correctness (P2)
 
-- [ ] T033 [P] [US5] `SignificatorDeterminismTest` — `SignificatorTable.of` twice on a golden chart; compare the **accessor outputs** (`houseSignificators(h)` for h=1..12 and `grahaSignificators(g)` for every g — these are records with value equality), since `SignificatorTable` itself is a class without `equals`
-- [ ] T034 [P] [US5] `RulingPlanetsDeterminismTest` — `compute(...)` and `at(...)` twice → equal `RulingPlanets`
-- [ ] T035 [US5] `.github/workflows/ci.yml` — add `SignificatorGoldenTest`,
+- [x] T033 [P] [US5] `SignificatorDeterminismTest` — `SignificatorTable.of` twice on a golden chart; compare the **accessor outputs** (`houseSignificators(h)` for h=1..12 and `grahaSignificators(g)` for every g — these are records with value equality), since `SignificatorTable` itself is a class without `equals`
+- [x] T034 [P] [US5] `RulingPlanetsDeterminismTest` — `compute(...)` and `at(...)` twice → equal `RulingPlanets`
+- [x] T035 [US5] `.github/workflows/ci.yml` — add `SignificatorGoldenTest`,
   `GrahaSignificatorGoldenTest`, `NodeAgencyGoldenTest`, `RulingPlanetsGoldenTest`
   to the OS-matrix determinism step
 
