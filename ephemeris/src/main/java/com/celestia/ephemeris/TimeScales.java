@@ -2,6 +2,7 @@ package com.celestia.ephemeris;
 
 import de.thmac.swisseph.SweDate;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
@@ -34,5 +35,21 @@ public final class TimeScales {
         double jdUt = SweDate.getJulDay(t.getYear(), t.getMonthValue(), t.getDayOfMonth(), hour, true);
         double deltaTDays = SweDate.getDeltaT(jdUt);
         return new JulianDay(jdUt, jdUt + deltaTDays, deltaTDays * SECONDS_PER_DAY);
+    }
+
+    /**
+     * The inverse of {@link #of(Instant)}'s {@code jdUt}: a Julian Day (UT) back to
+     * a UTC {@link Instant}, truncated to whole seconds. UT1≈UTC is assumed — the
+     * sub-second error is irrelevant to the only consumer (the sunrise / KP-weekday
+     * boundary).
+     */
+    public static Instant instantFromJulianDayUt(double jdUt) {
+        SweDate date = new SweDate(jdUt, true);
+        long micros = Math.round(date.getHour() * 3_600_000_000.0);
+        long wholeSeconds = Math.floorDiv(micros, 1_000_000L);
+        return LocalDate.of(date.getYear(), date.getMonth(), date.getDay())
+                .atStartOfDay(ZoneOffset.UTC)
+                .toInstant()
+                .plusSeconds(wholeSeconds);
     }
 }

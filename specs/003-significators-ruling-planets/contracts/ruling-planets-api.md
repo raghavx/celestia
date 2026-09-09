@@ -15,6 +15,7 @@ public final class RulingPlanetsFactory {
 
     public static RulingPlanets compute(
         BirthData judgment, double ascendantLongitude, double moonLongitude,
+        double rahuLongitude,
         KpWeekday weekday, boolean weekdayFallback, Accuracy accuracy,
         EngineVersion engineVersion, RulingPlanets.Options options);
 }
@@ -30,6 +31,9 @@ public final class RulingPlanetsFactory {
 ### `compute(...)` — pure
 
 Builds the ruling planets from already-resolved inputs. Deterministic.
+`rahuLongitude` is the mean north node's sidereal longitude; Ketu is
+`rahuLongitude + 180`. Both are needed for the `NODE` rule (a node's occupied
+sign / star and their lords).
 
 ### `RulingPlanets` output
 

@@ -135,6 +135,7 @@ used.
 RulingPlanets at(BirthData judgment);              // instance, wired with 3 providers
 static RulingPlanets compute(                      // pure core
     BirthData judgment, double ascendantLongitude, double moonLongitude,
+    double rahuLongitude,
     KpWeekday weekday, boolean weekdayFallback, Accuracy accuracy,
     EngineVersion engineVersion, Options options);
 record Options(boolean includeSubLords, boolean includeNodeAspects) {
