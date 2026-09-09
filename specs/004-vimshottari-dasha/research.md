@@ -39,10 +39,9 @@ exactly on **arc**. Decision:
   **`VimshottariSplit.of(BigFraction total, Graha fromLord)`** →
   `List<Portion(Graha lord, BigFraction span)>` (9 entries, spans sum to `total`
   exactly).
-- `VimshottariPartition` is *optionally* refactored to call it (pure change, no
-  behaviour delta — the SPEC-001/002 golden suites guard it; no `EngineVersion`
-  bump for a pure refactor). If the refactor looks risky during implementation,
-  skip it — `VimshottariSplit` stands alone and the duplication is nine lines.
+- `VimshottariPartition` is refactored to call it (pure change, no behaviour
+  delta — the SPEC-001/002 golden suites still pass; no `EngineVersion` bump for a
+  pure refactor). *Done in implementation (T032).*
 - The dasha timeline applies `VimshottariSplit` to **durations** (exact rational
   seconds), recursing 4 times below the Mahadasha.
 

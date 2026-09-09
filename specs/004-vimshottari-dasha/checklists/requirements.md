@@ -60,3 +60,9 @@
   updated). A4 remediated — research.md §3 shortest-Prana expression corrected.
   A3 (SC-005 5 ms vs the 50 ms guard) and A5 (no automated engine-version check)
   left as accepted LOW, consistent with SPEC-002/003.
+- `/speckit-analyze` (2026-09-09, post-implementation): A1/A2/A4 confirmed
+  resolved. B2 remediated — spec.md US3 / FR-012 now say the window is half-open
+  `[from, to)`. B3 — research.md §2 marks the `VimshottariPartition` refactor as
+  done (T032). B4 — quickstart scenario map lists `RunningDashaGoldenTest` /
+  `DashaWindowGoldenTest`. B1 (SC-006 / T003 human dasha-balance cross-check)
+  still open; B5/B6 accepted LOW.

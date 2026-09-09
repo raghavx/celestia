@@ -82,10 +82,10 @@ lords and their boundaries match a reference (KP software / textbook).
 
 ### User Story 3 - Enumerate periods over a window (Priority: P2)
 
-Given a birth, a level, and a time window `[from, to]`, the engine returns every
-period at that level that overlaps the window, in chronological order, each
-carrying its lord, its start/end instants, and the chain of parent lords it sits
-under.
+Given a birth, a level, and a half-open time window `[from, to)`, the engine
+returns every period at that level that overlaps the window, in chronological
+order, each carrying its lord, its start/end instants, and the chain of parent
+lords it sits under.
 
 **Why this priority**: Persistence (SPEC-008 `dasha_period` rows), "list my
 upcoming Bhuktis", and any UI/agent view of a span of time need the list form, not
@@ -188,10 +188,10 @@ exact-partition property test.
 - **FR-011**: The Vimshottari sequence MUST be treated as **periodic** with a
   120-year period, so queries and enumerations arbitrarily far after birth resolve
   into later cycles without error.
-- **FR-012**: Given a birth, a level, and a window `[from, to]`, the engine MUST
-  return every period at that level overlapping the window, in chronological
-  order, each carrying its lord, its `[start, end)`, and its chain of parent
-  lords.
+- **FR-012**: Given a birth, a level, and a half-open window `[from, to)`, the
+  engine MUST return every period at that level overlapping the window, in
+  chronological order, each carrying its lord, its `[start, end)`, and its chain
+  of parent lords. A period starting exactly at `to` is not included.
 - **FR-013**: At every level the nine child periods MUST **exactly partition** the
   parent — contiguous, no gap, no overlap, summing to the parent's exact duration.
 - **FR-014**: For identical inputs the engine MUST produce identical output across

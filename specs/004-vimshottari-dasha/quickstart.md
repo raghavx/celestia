@@ -38,9 +38,9 @@ New coverage:
 | Spec scenario | Test |
 |---------------|------|
 | US1 balance of dasha at birth | `core.dasha.DashaBalanceTest`, golden `DashaGoldenTest` |
-| US2 running stack for a date, depth, 2nd cycle | `core.dasha.RunningDashaTest`, golden |
+| US2 running stack for a date, depth, 2nd cycle | `core.dasha.RunningDashaTest`, golden `RunningDashaGoldenTest` |
 | US2 half-open boundary (SC-004) | `core.dasha.DashaBoundaryTest` |
-| US3 windowed enumeration + parent chains | `core.dasha.DashaWindowTest` |
+| US3 windowed enumeration + parent chains | `core.dasha.DashaWindowTest`, golden `DashaWindowGoldenTest` |
 | US3 / SC-003 children partition the parent exactly | `core.dasha.VimshottariSplitTest`, `DashaPartitionPropertyTest` (jqwik) |
 | US4 determinism | `core.dasha.DashaDeterminismTest` |
 | SC-005 performance (< 5 ms) | `core.dasha.DashaPerformanceTest` — `@Tag("perf")` |
