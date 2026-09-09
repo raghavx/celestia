@@ -1,4 +1,4 @@
-# Golden charts — KP engine correctness oracle (SPEC-001 + SPEC-002)
+# Golden charts — KP engine correctness oracle (SPEC-001 / 002 / 003)
 
 These files are the reference data for the golden-chart snapshot suites. Each
 pins, for one birth, every value the engine must reproduce:
@@ -8,6 +8,12 @@ pins, for one birth, every value the engine must reproduce:
 - **SPEC-002** (SC-001/002): the twelve Placidus house cusps and the
   Ascendant/Midheaven with their lord chains, and each graha's `bhava`
   (cusp-to-cusp) and `rasi_house` (whole sign from the Ascendant).
+- **SPEC-003** (SC-001…003): `expected.significators.by_house` (12 lists of
+  `{graha, steps}`), `expected.significators.by_graha` (the transpose),
+  `expected.node_agency` (Rahu / Ketu agents), and — in `obama-1961.json` only —
+  `expected.ruling_planets` (a fixed judgment instant + place, independent of the
+  birth data → the RP set with sources, the resolved KP weekday, day lord, and
+  sunrise instant).
 
 **Nothing in `expected` is filled from memory or by hand.** Values are produced by
 an independent computation (`tools/ephe-crosscheck/`) and, for at least one chart,
@@ -28,6 +34,9 @@ _Verification protocol_ below.
 | Cusp 1 | = the Ascendant (`ascmc[0]`), bit-identical | SPEC-002 FR-003 |
 | Bhava | forward arc `[cusp n, cusp n+1)`, half-open, wrap-aware | SPEC-002 research §3 |
 | Rasi house | `1 + ((graha.sign − asc.sign) mod 12)` | SPEC-002 research §4 |
+| Significators | 4 steps (star of effective occupants / effective occupants / star of owner / owner); a node occupant folds its agents (conjunct non-nodes + sign lord + star lord) into "effective occupants"; ordered by strongest step then Graha ordinal | SPEC-003 research §1 |
+| Ruling planets | lagna & Moon sign/star/sub lords + day lord (KP weekday, sunrise-to-sunrise) + node by shared sign/nakshatra; `include_sub_lords` on | SPEC-003 research §3–4 |
+| Sunrise | `swe_rise_trans`, `SE_CALC_RISE`, Sun's upper limb + refraction | SPEC-003 research §4 |
 
 Birth `latitude` / `longitude` (decimal degrees, + = N / E) are the house inputs.
 
@@ -139,15 +148,20 @@ Obama Sun Cancer / **Capricorn Ascendant** — all consistent.
 
 ### Still to do on these charts
 
-1. **`human_verified` status** — read the Sun and Moon lord chains, and one
-   cuspal sub lord (e.g. the 10th for career), for at least one chart off a
-   published KP source (KP textbook worked example, or two agreeing mainstream KP
-   websites set to KP ayanamsa + mean node) and record it in
-   `verification.lordchain_human_check`. This is the only check that catches a
-   wrong *understanding* of the sub-lord division or the bhava rule (the script
-   and the engine encode the same rules).
-2. **4th chart (wanted):** a KP-textbook worked example where the planet + cusp
-   lords are printed — add as `<book-slug>.json` with the citation.
+1. **`lordchain_human_check`** — read the Sun and Moon lord chains and one cuspal
+   sub lord for at least one chart off a published KP source and record it.
+2. **`significators_human_check` (SPEC-003 SC-006)** — currently `pending`. For
+   **one** chart (recommend `obama-1961`, an unambiguous AA chart), transcribe the
+   **twelve per-house significator lists** from an independent source and record
+   which houses / planets matched. An independent source must be set to
+   **KP-New ayanamsa (SE constant 5) + mean node + Placidus** — e.g. a KP textbook
+   worked example, or two agreeing mainstream KP tools (Jagannath Hora's KP
+   significators view, or an established KP website). This is the only check that
+   catches a wrong *understanding* of the four-step rule or the node-agency fold
+   (`compute_golden.py` and the Java engine encode the same rules).
+3. **4th chart (wanted):** a KP-textbook worked example where the planet + cusp
+   lords **and significators** are printed — add as `<book-slug>.json` with the
+   citation.
 
 ### Charts considered and dropped
 

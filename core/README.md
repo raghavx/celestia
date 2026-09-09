@@ -1,9 +1,10 @@
 # core
 
 Pure-Java KP domain. No Spring, no DB, no network, no wall clock (enforced by
-`DeterminismArchitectureTest`). SPEC-001 delivered: longitude decomposition and
-the Vimshottari partition. Significators, ruling planets, the dasha timeline, and
-horary come in later specs.
+`DeterminismArchitectureTest`). Delivered: longitude decomposition and the
+Vimshottari partition (SPEC-001), the natal chart with cusps and bhavas
+(SPEC-002), the four-step significators and ruling planets (SPEC-003). The dasha
+timeline and horary come in later specs.
 
 ## Public API
 
@@ -16,6 +17,10 @@ horary come in later specs.
 | `chart.NatalChartFactory` | `assemble(BirthData, EphemerisResult, HouseResult)` / `cast(BirthData)` -> `NatalChart` |
 | `chart.NatalChart` | positions + 12 `Cusp`s + `AnglePoint`s + `HousePlacement`s (bhava + rasi house); `cuspSubLord(h)` |
 | `chart.Bhavas` | `bhavaOf(longitude, cusps)` (cusp-to-cusp), `rasiHouseOf(grahaSign, ascSign)` |
+| `judgement.SignificatorTable.of(NatalChart)` | the four-step significators: `houseSignificators(h)` &times;12, `grahaSignificators(g)` (transpose), `nodeAgency(RAHU/KETU)` |
+| `judgement.RulingPlanetsFactory` | `at(BirthData)` / pure `compute(...)` -> `RulingPlanets` (lagna + Moon lords, day lord, node agency) |
+| `judgement.KpWeekday.resolve(...)` | the sunrise-to-sunrise KP weekday + day lord, with a civil-day fallback |
+| `judgement.Step` / `Significator` / `HouseSignificators` / `GrahaSignificators` / `NodeAgency` / `RpSource` / `RulingPlanet` | value objects |
 
 `org.apache.commons.numbers.fraction.BigFraction` is part of the public API
 (`Span.start()/end()`) — see `specs/001-ephemeris-primitives/contracts/`.

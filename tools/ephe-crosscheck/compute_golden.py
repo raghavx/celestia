@@ -150,6 +150,162 @@ def _rasi_house(graha_lon: float, asc_lon: float) -> int:
     return 1 + ((int(graha_lon // 30) - int(asc_lon // 30)) % 12)
 
 
+# --- SPEC-003: significators + ruling planets (see research.md) ---
+
+GRAHA_NAMES = VIMS_NAMES  # the nine, in Graha-enum (Vimshottari) order for tie-breaks
+NODES = {"RAHU", "KETU"}
+# Python date.weekday(): Mon=0 .. Sun=6
+_WEEKDAY_NAME = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]
+_WEEKDAY_LORD = ["MOON", "MARS", "MERCURY", "JUPITER", "VENUS", "SATURN", "SUN"]
+_NAK_DEG = 40.0 / 3.0
+
+
+def compute_significators(out: dict, houses: dict) -> tuple[dict, dict]:
+    """Four-step significators per house + the per-graha transpose + node agency."""
+    star_lord = {g: out[g]["star_lord"] for g in GRAHA_NAMES}
+    sign_lord = {g: out[g]["sign_lord"] for g in GRAHA_NAMES}
+    bhava = {g: out[g]["bhava"] for g in GRAHA_NAMES}
+
+    node_agency = {}
+    for node in ("RAHU", "KETU"):
+        conj = sorted(
+            (g for g in GRAHA_NAMES if g not in NODES and bhava[g] == bhava[node]),
+            key=GRAHA_NAMES.index,
+        )
+        agents = sorted(set(conj) | {sign_lord[node], star_lord[node]}, key=GRAHA_NAMES.index)
+        node_agency[node] = {
+            "conjunct_grahas": conj,
+            "sign_lord": sign_lord[node],
+            "star_lord": star_lord[node],
+            "agents": agents,
+        }
+
+    by_house = []
+    for house in range(1, 13):
+        owner = houses["cusps"][house - 1]["sign_lord"]
+        occupants = [g for g in GRAHA_NAMES if bhava[g] == house]
+
+        effective = set(occupants)
+        for node in occupants:
+            if node in NODES:
+                effective |= set(node_agency[node]["agents"])
+
+        step1 = {g for g in GRAHA_NAMES if star_lord[g] in effective}
+        step2 = set(effective)
+        step3 = {g for g in GRAHA_NAMES if star_lord[g] == owner}
+        step4 = {owner}
+
+        steps_by_graha: dict[str, set] = {}
+        for step_no, members in ((1, step1), (2, step2), (3, step3), (4, step4)):
+            for g in members:
+                steps_by_graha.setdefault(g, set()).add(step_no)
+
+        ordered = sorted(
+            steps_by_graha.items(),
+            key=lambda kv: (min(kv[1]), GRAHA_NAMES.index(kv[0])),
+        )
+        by_house.append([{"graha": g, "steps": sorted(st)} for g, st in ordered])
+
+    by_graha = {g: {} for g in GRAHA_NAMES}
+    for h_index, sigs in enumerate(by_house, start=1):
+        for s in sigs:
+            by_graha[s["graha"]][str(h_index)] = s["steps"]
+
+    return {"by_house": by_house, "by_graha": by_graha}, node_agency
+
+
+def _jd_to_iso(jd_ut: float) -> str:
+    y, m, d, hour = swe.revjul(jd_ut, swe.GREG_CAL)
+    base = dt.datetime(y, m, d, tzinfo=dt.timezone.utc) + dt.timedelta(hours=hour)
+    return base.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _sunrise_before(jd_ut: float, lat: float, lon: float):
+    """JD(UT) of the latest sunrise <= jd_ut, or None if the Sun does not rise."""
+    geopos = (lon, lat, 0.0)
+    res, tret = swe.rise_trans(jd_ut - 1.05, swe.SUN, swe.CALC_RISE, geopos)
+    if res < 0:
+        return None
+    r = tret[0]
+    for _ in range(3):
+        res, tret = swe.rise_trans(r + 1e-6, swe.SUN, swe.CALC_RISE, geopos)
+        if res < 0 or tret[0] > jd_ut:
+            break
+        r = tret[0]
+    return r if r <= jd_ut else None
+
+
+def compute_ruling_planets(judgment: dict) -> dict:
+    jd = _jd_ut(judgment["utc_instant"])
+    lat, lon = judgment["latitude"], judgment["longitude"]
+    flags = swe.FLG_SIDEREAL | swe.FLG_SPEED | swe.FLG_SWIEPH
+
+    _cusps, ascmc = swe.houses_ex(jd, lat, lon, b"P", swe.FLG_SIDEREAL)
+    asc = ascmc[0] % 360.0
+    moon = swe.calc_ut(jd, swe.MOON, flags)[0][0] % 360.0
+    rahu = swe.calc_ut(jd, swe.MEAN_NODE, flags)[0][0] % 360.0
+    ketu = (rahu + 180.0) % 360.0
+
+    ac, mc = lord_chain(asc), lord_chain(moon)
+
+    sunrise_jd = _sunrise_before(jd, lat, lon)
+    if sunrise_jd is None:
+        wd = (dt.datetime.fromisoformat(judgment["utc_instant"].replace("Z", "+00:00"))
+              + dt.timedelta(hours=lon / 15.0)).weekday()
+        sunrise_iso, fallback = None, True
+    else:
+        y, m, d, _h = swe.revjul(sunrise_jd + (lon / 15.0) / 24.0, swe.GREG_CAL)
+        wd = dt.date(y, m, d).weekday()
+        sunrise_iso, fallback = _jd_to_iso(sunrise_jd), False
+    day_lord = _WEEKDAY_LORD[wd]
+
+    sources: dict[str, set] = {}
+
+    def add(graha: str, src: str) -> None:
+        sources.setdefault(graha, set()).add(src)
+
+    add(ac["sign_lord"], "LAGNA_SIGN")
+    add(ac["star_lord"], "LAGNA_STAR")
+    add(ac["sub_lord"], "LAGNA_SUB")
+    add(mc["sign_lord"], "MOON_SIGN")
+    add(mc["star_lord"], "MOON_STAR")
+    add(mc["sub_lord"], "MOON_SUB")
+    add(day_lord, "DAY_LORD")
+
+    asc_sign, asc_nak = int(asc // 30), int(asc // _NAK_DEG)
+    moon_sign, moon_nak = int(moon // 30), int(moon // _NAK_DEG)
+    for node, nlon in (("RAHU", rahu), ("KETU", ketu)):
+        nc = lord_chain(nlon)
+        ns, nn = int(nlon // 30), int(nlon // _NAK_DEG)
+        if (nc["sign_lord"] in sources or nc["star_lord"] in sources
+                or ns in (asc_sign, moon_sign) or nn in (asc_nak, moon_nak)):
+            add(node, "NODE")
+
+    return {
+        "judgment": dict(judgment),
+        "ascendant": {"longitude": round(asc, 6), **ac},
+        "moon": {"longitude": round(moon, 6), **mc},
+        "sunrise_utc": sunrise_iso,
+        "weekday": _WEEKDAY_NAME[wd],
+        "day_lord": day_lord,
+        "day_lord_fallback": fallback,
+        "include_sub_lords": True,
+        "planets": [
+            {"graha": g, "sources": sorted(sources[g])}
+            for g in sorted(sources, key=GRAHA_NAMES.index)
+        ],
+    }
+
+
+# The one worked ruling-planet example — independent of any birth data.
+RP_JUDGMENT = {
+    "utc_instant": "2026-01-01T12:00:00Z",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "place": "New Delhi, India",
+}
+
+
 def compute_houses(chart: dict) -> dict:
     """SPEC-002: 12 Placidus cusps + Ascendant + Midheaven, sidereal KP."""
     jd = _jd_ut(chart["birth"]["utc_instant"])
@@ -169,7 +325,7 @@ def compute_houses(chart: dict) -> dict:
     }
 
 
-def compute(chart: dict) -> tuple[dict, dict, str]:
+def compute(chart: dict) -> tuple[dict, dict, dict, dict, str]:
     swe.set_sid_mode(swe.SIDM_KRISHNAMURTI, 0, 0)   # ADR-0003: constant value 5
     jd = _jd_ut(chart["birth"]["utc_instant"])
 
@@ -201,8 +357,12 @@ def compute(chart: dict) -> tuple[dict, dict, str]:
         e["bhava"] = _bhava_of(e["longitude"], cusp_lons)
         e["rasi_house"] = _rasi_house(e["longitude"], asc)
 
+    # SPEC-003: significators + node agency
+    significators, node_agency = compute_significators(out, houses)
+
     swe_ver = getattr(swe, "version", "unknown")
-    return out, houses, f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.2"
+    return (out, houses, significators, node_agency,
+            f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.3")
 
 
 def _entry(lon: float, speed: float) -> dict:
@@ -230,9 +390,10 @@ def main() -> int:
     exit_code = 0
     for p in args.paths:
         chart = json.loads(p.read_text())
-        computed, houses, generated_by = compute(chart)
+        computed, houses, significators, node_agency, generated_by = compute(chart)
         prior = chart.get("expected", {}).get("grahas", {})
         prior_cusps = chart.get("expected", {}).get("cusps", [])
+        prior_sig = chart.get("expected", {}).get("significators", {}).get("by_house", [])
 
         drift = []
         for name, e in computed.items():
@@ -251,18 +412,29 @@ def main() -> int:
                     drift.append(f"cusp {i+1} longitude {old['longitude']} -> {c['longitude']}")
                 if old.get("sub_lord") not in (None, c["sub_lord"]):
                     drift.append(f"cusp {i+1} sub_lord {old['sub_lord']} -> {c['sub_lord']}")
+        for i, sigs in enumerate(significators["by_house"], start=1):
+            old = prior_sig[i - 1] if i - 1 < len(prior_sig) else None
+            if old is not None and old != sigs:
+                drift.append(f"house {i} significators {old} -> {sigs}")
 
         if args.write:
-            chart["expected"] = {
+            expected = {
                 "generated_by": generated_by,
                 "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
                 "grahas": computed,
                 "cusps": houses["cusps"],
                 "angles": houses["angles"],
+                "significators": significators,
+                "node_agency": node_agency,
             }
+            if chart.get("expected", {}).get("ruling_planets") is not None or chart["id"] == "obama-1961":
+                expected["ruling_planets"] = compute_ruling_planets(RP_JUDGMENT)
+            chart["expected"] = expected
             v = chart.setdefault("verification", {})
             v["positions_reference"] = generated_by
             v["houses_reference"] = generated_by
+            v["significators_reference"] = generated_by
+            v.setdefault("significators_human_check", "pending - see golden/README.md (SC-006)")
             if v.get("status") == "birth_data_sourced":
                 v["status"] = "expected_generated"
             p.write_text(json.dumps(chart, indent=2) + "\n")
