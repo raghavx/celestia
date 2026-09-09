@@ -51,16 +51,16 @@ no new dependency, no new ADR.
 
 ## Phase 2: Foundational (blocking — no user story starts until this is done)
 
-- [ ] T005 [P] `HoraryArc` record (`int number, BigFraction start, BigFraction
+- [x] T005 [P] `HoraryArc` record (`int number, BigFraction start, BigFraction
   end, Sign sign, LordChain lordChain`; `double startDeg()/endDeg()/midpointDeg()`;
   `Graha subLord()`; `boolean contains(double)` half-open; compact ctor validates
   `1 ≤ number ≤ 249`, `start < end`, `Sign.at(midpointDeg()) == sign`) in
   `core/src/main/java/com/celestia/core/horary/HoraryArc.java`
-- [ ] T006 [P] `HoraryHouseProvider` interface
+- [x] T006 [P] `HoraryHouseProvider` interface
   (`HouseResult housesFor(BirthData judgment, double ascendantLongitude)`;
   Javadoc = the contract) in
   `ephemeris/src/main/java/com/celestia/ephemeris/HoraryHouseProvider.java`
-- [ ] T007 [P] `FoundationalTypesTest` in
+- [x] T007 [P] `FoundationalTypesTest` in
   `core/src/test/java/com/celestia/core/horary/FoundationalTypesTest.java` —
   `HoraryArc` rejects `number` 0 / 250 and `start ≥ end`; `contains` is half-open;
   `subLord()` == `lordChain().subLord()`
