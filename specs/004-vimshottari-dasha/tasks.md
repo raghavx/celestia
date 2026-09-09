@@ -172,21 +172,21 @@ the window, contiguous, with parent-lord chains.
 
 ### Tests (write first)
 
-- [ ] T023 [P] [US3] `DashaWindowTest` in
+- [x] T023 [P] [US3] `DashaWindowTest` in
   `core/src/test/java/com/celestia/core/dasha/DashaWindowTest.java` — Antardashas
   over a one-year window: the first entry is the one in progress at `from` (its
   `start` is before `from`); `result[i].end == result[i+1].start`; each entry's
   `[start, end)` lies within its `parentLords` Mahadasha; `from` after `to` or
   `from < birthInstant` → `IllegalArgumentException`; a Pranas-over-decades
   request → `IllegalArgumentException` (the 10 000-period safety cap)
-- [ ] T024 [P] [US3] `DashaWindowGoldenTest` — the Antardashas overlapping a fixed
+- [x] T024 [P] [US3] `DashaWindowGoldenTest` — the Antardashas overlapping a fixed
   window for one golden chart == a reference list (lords + boundaries);
   `@EnabledIf` ephemeris data
-- [ ] T025 [US3] "Next period at level L" walk in `DashaTimeline` — the next child
+- [x] T025 [US3] "Next period at level L" walk in `DashaTimeline` — the next child
   of the current parent; ascend to the parent's next sibling and descend to its
   first level-L child at a boundary; all exact-rational arithmetic (no
   re-resolution from the birth-Maha start)
-- [ ] T026 [US3] `DashaTimeline.periods(DashaLevel level, Instant from, Instant
+- [x] T026 [US3] `DashaTimeline.periods(DashaLevel level, Instant from, Instant
   to)` → `List<DashaPeriod>` — resolve the level-L period at `from`, walk while
   `start < to`, attach `parentLords`; validates the window; throws if more than
   10 000 periods would be returned (naming the level and window)

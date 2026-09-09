@@ -154,6 +154,41 @@ public final class DashaTimeline {
         return new RunningDasha(query, stack);
     }
 
+    /** Largest number of periods {@link #periods} will return before rejecting the window. */
+    static final int MAX_PERIODS = 10_000;
+
+    /**
+     * Every period at {@code level} overlapping the window {@code [from, to)}, in
+     * chronological order and contiguous ({@code periods[i].end() ==
+     * periods[i+1].start()}), each carrying its {@code parentLords} chain.
+     *
+     * @throws IllegalArgumentException if {@code from} is after {@code to}, {@code
+     *     from} is before the birth instant, or the window spans more than
+     *     {@value #MAX_PERIODS} periods at {@code level} (mis-scaled for the level)
+     */
+    public List<DashaPeriod> periods(DashaLevel level, Instant from, Instant to) {
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("window start after end: " + from + " .. " + to);
+        }
+        if (from.isBefore(birthInstant)) {
+            throw new IllegalArgumentException("window start is before the birth instant: " + from);
+        }
+        List<DashaPeriod> out = new ArrayList<>();
+        Instant cursor = from;
+        while (cursor.isBefore(to)) {
+            if (out.size() >= MAX_PERIODS) {
+                throw new IllegalArgumentException(
+                        "window " + from + " .. " + to + " spans more than " + MAX_PERIODS
+                                + " " + level + " periods");
+            }
+            DashaPeriod p = running(cursor, level.rank()).period(level);
+            out.add(p);
+            // guarantee forward progress even if p.end() rounds a fraction of a ns backwards
+            cursor = p.end().isAfter(cursor) ? p.end() : cursor.plusNanos(1);
+        }
+        return out;
+    }
+
     /** A period given its bounds as exact seconds from the birth-Mahadasha start. */
     private DashaPeriod period(
             DashaLevel level, Graha lord, BigFraction startFromMahaStart, BigFraction endFromMahaStart,
