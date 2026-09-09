@@ -27,12 +27,12 @@ golden-chart harness. No new module, no new dependency, no new ADR.
 - [ ] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with the balance +
   running-stack rules (research.md §1, §4): emit `expected.dasha.balance`
   (`maha_lord`, `elapsed_fraction`, `elapsed_days`, `balance_days`) and
-  `expected.dasha.running` (a fixed query date → the five period lords with
-  start/end). Reuse the existing Moon computation and the `lord_chain` / nakshatra
-  helpers; 1 year = 365.25 days.
+  `expected.dasha.running` (query instant = `birthInstant + 40 Julian years`,
+  research.md §4 → the five period lords with start/end). Reuse the existing Moon
+  computation and the `lord_chain` / nakshatra helpers; 1 year = 365.25 days.
 - [ ] T002 Regenerate the golden files (`--write`); verify determinism (re-run,
   diff `expected`). Update `core/src/test/resources/golden/README.md` with the new
-  fields, the fixed query date, and the year-length note.
+  fields, the `birth + 40 years` query convention, and the year-length note.
 - [ ] T003 [P] SC-006: transcribe **one** golden chart's birth Mahadasha lord and
   balance from a KP textbook worked example (or two agreeing mainstream KP tools
   on KP-New ayanamsa); record it in `verification.dasha_human_check` and note any
@@ -96,7 +96,9 @@ balance, start before birth, end).
   `birthInstant − elapsed`
 - [ ] T012 [P] [US1] `DashaGoldenTest` — for each golden chart,
   `balanceAtBirth().mahaLord()` == `expected.dasha.balance.maha_lord` and the
-  balance matches within **1 day**; `@EnabledIf` ephemeris data
+  balance matches within **1 day**; plus a year-1600 birth via
+  `DashaTimelineFactory.at(...)` → `accuracy() == Accuracy.REDUCED`,
+  `balanceAtBirth()` non-null, no exception (FR-016); `@EnabledIf` ephemeris data
 
 ### Implementation
 
@@ -129,8 +131,8 @@ balance, start before birth, end).
 **Goal**: birth + query instant → the Maha/Antar/Pratyantar/Sookshma/Prana lords
 active at that instant, to a requested depth, with boundaries.
 
-**Independent Test**: golden charts + a fixed query date — the five lords (exact)
-and the Maha/Antar boundaries (within 1 day).
+**Independent Test**: golden charts + the `birth + 40 years` query instant — the
+five lords (exact) and the Maha/Antar boundaries (within 1 day).
 
 ### Tests (write first)
 
@@ -145,9 +147,9 @@ and the Maha/Antar boundaries (within 1 day).
   exactly at `mahaEnd` returns the next Mahadasha and its first child at each
   deeper level
 - [ ] T019 [P] [US2] `RunningDashaGoldenTest` — for each golden chart plus the
-  fixed query date, the five running lords == `expected.dasha.running.lords`
-  **exactly**, and the Mahadasha and Antardasha boundaries match within **1 day**;
-  `@EnabledIf` ephemeris data
+  `birthInstant + 40 Julian years` query instant, the five running lords ==
+  `expected.dasha.running.lords` **exactly**, and the Mahadasha and Antardasha
+  boundaries match within **1 day**; `@EnabledIf` ephemeris data
 - [ ] T020 [US2] Mahadasha resolution in `DashaTimeline` — the Vimshottari
   sequence from the birth-Maha start is periodic with a 120-year period; find the
   Maha containing the query by fast-forwarding whole cycles then a ≤ 9-step walk;

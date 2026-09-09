@@ -29,11 +29,11 @@ nanosecond `Instant` only at each boundary.
 **Storage**: N/A — immutable value objects. (The `dasha_period` table is SPEC-008.)
 
 **Testing**: `./mvnw verify`. Reuses the golden-chart harness, extended with the
-birth balance (lord + elapsed + balance) and the running five-lord stack at a
-fixed query date, produced by `tools/ephe-crosscheck` (Python replica of the
-balance + partition rules). Because the tool and the engine share the formula,
-**one chart's birth Mahadasha lord + balance is additionally checked against a
-published KP source** (SC-006).
+birth balance (lord + elapsed + balance) and the running five-lord stack at
+`birthInstant + 40 Julian years` (research.md §4), produced by
+`tools/ephe-crosscheck` (Python replica of the balance + partition rules).
+Because the tool and the engine share the formula, **one chart's birth Mahadasha
+lord + balance is additionally checked against a published KP source** (SC-006).
 
 **Target Platform**: JVM library. Bit-reproducible across Linux/macOS, x86-64/arm64.
 

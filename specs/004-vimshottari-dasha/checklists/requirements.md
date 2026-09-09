@@ -53,3 +53,10 @@
   because the golden reference tool and the engine will share the same formula.
 - Ready for `/speckit-clarify` (optional) / `/speckit-plan` / `/speckit-tasks` /
   `/speckit-implement`.
+- `/speckit-analyze` (2026-09-09, post-tasks): A1 remediated — T012 gains the
+  FR-016 assertion (year-1600 birth → `Accuracy.REDUCED`, no exception). A2
+  remediated — the golden running-stack query instant is pinned to
+  `birthInstant + 40 Julian years` (research.md §4; T001/T002/T019/quickstart
+  updated). A4 remediated — research.md §3 shortest-Prana expression corrected.
+  A3 (SC-005 5 ms vs the 50 ms guard) and A5 (no automated engine-version check)
+  left as accepted LOW, consistent with SPEC-002/003.

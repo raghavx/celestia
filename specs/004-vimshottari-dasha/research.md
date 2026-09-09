@@ -59,9 +59,8 @@ rational.
 
 - Convert to `java.time.Duration` at the boundary: `secs = floor(rationalSeconds)`,
   `nanos = round((rationalSeconds − secs) × 1e9)`. Nanosecond resolution; the
-  shortest Prana (`7/120⁴ × 120 yr ≈ 26 minutes` for Ketu·Ketu·Ketu·Ketu·Ketu…
-  actually the *smallest* is Sun in the deepest Ketu chain, `6·7⁴/120⁵ × 120 yr`,
-  still minutes) dwarfs a nanosecond.
+  shortest possible Prana — Sun's Prana in a Sun / Sun / Sun / Sun chain — is
+  `6 × (6/120)⁴` years ≈ 20 minutes, which dwarfs a nanosecond.
 - **Cumulative offsets stay exact**: a boundary is
   `birthInstant + toDuration(Σ exact child seconds)`, rounded **once**. Never sum
   rounded `Duration`s — that would drift over hundreds of levels of a long
@@ -88,6 +87,11 @@ second modelling inside a span.
 **Half-open** `[start, end)` at every level: `q == start` → that period; `q ==
 end` → the next one. A `q` exactly on a Mahadasha boundary is the start of the new
 Maha and the start of *its* first child at every deeper level.
+
+**Golden running-stack query instant**: for the extended golden files the query
+instant is `birthInstant + 40 Julian years` (`40 × 31 557 600` s). Forty years
+puts every golden chart (1879, 1955, 1961) into a non-first Mahadasha and
+exercises all five levels; it is independent of the wall clock.
 
 ## 5. Windowed enumeration
 

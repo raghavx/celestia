@@ -14,8 +14,8 @@ Builds on SPEC-001 (merged to `master`). Branch `004-vimshottari-dasha`.
   ```
 
   (`--write` now also emits `expected.dasha.balance` — birth Maha lord, elapsed,
-  balance — and `expected.dasha.running` — the five period lords + boundaries at a
-  fixed query date.)
+  balance — and `expected.dasha.running` — the five period lords + boundaries at
+  `birthInstant + 40 Julian years`.)
 
 ## Build & test
 
@@ -31,7 +31,7 @@ New coverage:
   (all five levels, half-open boundary), `periods(level, from, to)` (contiguous,
   parent chains, safety cap).
 - extended golden suite — the birth balance (lord exact, days within tolerance)
-  and the running five-lord stack at a fixed query date.
+  and the running five-lord stack at `birth + 40 years`.
 
 ## Scenario → test map
 
