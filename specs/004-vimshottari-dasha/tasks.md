@@ -221,23 +221,23 @@ the window, contiguous, with parent-lord chains.
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T031 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the
+- [x] T031 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the
   Vimshottari Mahadasha lengths and order, the nested nine-way split (in
   Vimshottari order **from the parent's lord**, proportional to the weights), the
   **365.25-day year** (cite K. S. Krishnamurti, *KP Readers*), and the
   balance-of-dasha rule; note that a `core.dasha` rule change also bumps
   `EngineVersion.rules`
-- [ ] T032 [P] (optional) Refactor `core/src/main/java/com/celestia/core/dasha/VimshottariPartition.java`
+- [x] T032 [P] (optional) Refactor `core/src/main/java/com/celestia/core/dasha/VimshottariPartition.java`
   to consume `VimshottariSplit` — pure, no behaviour change (SPEC-001/002 golden
   suites guard it, no version bump); skip if it looks risky during implementation
-- [ ] T033 [P] `DashaPerformanceTest` `@Tag("perf")` in
+- [x] T033 [P] `DashaPerformanceTest` `@Tag("perf")` in
   `core/src/test/java/com/celestia/core/dasha/DashaPerformanceTest.java` — the
   depth-5 `running(...)` for a date under a 50 ms warm guard (SC-005 target 5 ms);
   excluded from the default run
-- [ ] T034 [P] Update `core/README.md` (+ `DashaTimeline`, `DashaTimelineFactory`,
+- [x] T034 [P] Update `core/README.md` (+ `DashaTimeline`, `DashaTimelineFactory`,
   `VimshottariSplit`, `DashaLevel`)
-- [ ] T035 Run `specs/004-vimshottari-dasha/quickstart.md` end to end; fix drift
-- [ ] T036 `./mvnw -q verify` — full reactor green incl.
+- [x] T035 Run `specs/004-vimshottari-dasha/quickstart.md` end to end; fix drift
+- [x] T036 `./mvnw -q verify` — full reactor green incl.
   `DeterminismArchitectureTest` / `LayeringArchitectureTest`
 
 ---

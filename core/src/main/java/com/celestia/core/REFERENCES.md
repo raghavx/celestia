@@ -26,6 +26,10 @@ references are acceptable where an ADR settled the choice.
 | **Per-graha significators** = the strict transpose of the twelve per-house lists (no independent rule) | `core.judgement.SignificatorTable.grahaSignificators` | KP practice (the significator table read either way) |
 | **Ruling planets** for a moment: lagna sign/star/(sub) lords, Moon sign/star/(sub) lords, the day lord; Rahu/Ketu added when the node's sign or star lord is already ruling, or the node shares the sign or nakshatra of the Moon or the Ascendant. Sub-lord inclusion is a switch (default on = modern KP) | `core.judgement.RulingPlanetsFactory`, `RpSource` | K. S. Krishnamurti, *KP Readers* VI &amp; horary method; sub-lord inclusion per modern KP |
 | **Day lord** = lord of the KP weekday, which runs from local **sunrise** to the next local sunrise (not civil midnight); Sun&rarr;Sunday &hellip; Saturn&rarr;Saturday. No sunrise that day &rarr; civil (LMT) weekday + fallback flag | `core.judgement.KpWeekday`, `ephemeris.SunriseProvider` | K. S. Krishnamurti, *KP Readers* (Hindu day = sunrise to sunrise) |
+| **Vimshottari Mahadasha lengths** (Ketu 7, Venus 20, Sun 6, Moon 10, Mars 7, Rahu 18, Jupiter 16, Saturn 19, Mercury 17; total 120 years) and the fixed cyclic order | `core.dasha.DashaTimeline`, `ephemeris.Graha` | Standard Vimshottari table (as SPEC-001); K. S. Krishnamurti, *KP Readers* II |
+| **Balance of dasha at birth**: the birth Mahadasha lord is the lord of the Moon's nakshatra; the fraction of the nakshatra the Moon has traversed is the fraction of that Mahadasha already elapsed | `core.dasha.DashaTimeline.balanceAtBirth` | K. S. Krishnamurti, *KP Readers* II (balance of dasa) |
+| **Nested subdivision**: each period splits into nine, in Vimshottari order **from that period's own lord**, each child = parent &times; childYears / 120; five levels Mahadasha &rarr; Antardasha (Bhukti) &rarr; Pratyantardasha (Antara) &rarr; Sookshma &rarr; Prana | `core.dasha.VimshottariSplit`, `DashaLevel` | K. S. Krishnamurti, *KP Readers* II; standard Vimshottari sub-period rule |
+| **1 Vimshottari year = 365.25 days** (Julian year) for converting dasha lengths to dates | `core.dasha.DashaTimeline` | K. S. Krishnamurti, *KP Readers* dasa tables; the mainstream KP-software convention (`specs/004-vimshottari-dasha/research.md` §7) |
 
 ## Engine version bump procedure
 
@@ -33,7 +37,8 @@ references are acceptable where an ADR settled the choice.
 whenever any rule above changes -- including rules that live in `core`
 (`Sign`, `Nakshatra`, `VimshottariPartition`, `KpLordage`, `Longitudes`,
 `judgement.SignificatorTable`, `judgement.RulingPlanetsFactory`,
-`judgement.KpWeekday`). `core`
+`judgement.KpWeekday`, `dasha.VimshottariSplit`, `dasha.DashaTimeline` — including
+the 365.25-day year). `core`
 cannot reference `EngineVersion` (no dependency back to nothing -- `ephemeris` is
 the lower layer), so the coupling is a documented manual step. A change without a
 bump is caught by the golden-chart snapshot suite drifting with no version change.
