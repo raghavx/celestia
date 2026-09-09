@@ -75,15 +75,15 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 ### Tests (write first)
 
-- [ ] T012 [P] [US1] `SignificatorTableTest` in `core/src/test/java/com/celestia/core/judgement/SignificatorTableTest.java` — a hand-built small chart (or a golden chart): a house with occupants populates all 4 steps; an empty house has empty 1–2, non-empty 3–4; a graha qualifying via 2 steps appears once tagged with both, ordered by the stronger; owner==occupant tagged `{OCCUPANT,OWNER}`
-- [ ] T013 [P] [US1] `SignificatorGoldenTest` — for each golden chart, `houseSignificators(h)` for all 12 houses == `expected.significators.by_house[h]` (graha membership **and** step-tag sets), ordering deterministic; `@EnabledIf` ephemeris data
+- [x] T012 [P] [US1] `SignificatorTableTest` in `core/src/test/java/com/celestia/core/judgement/SignificatorTableTest.java` — a hand-built small chart (or a golden chart): a house with occupants populates all 4 steps; an empty house has empty 1–2, non-empty 3–4; a graha qualifying via 2 steps appears once tagged with both, ordered by the stronger; owner==occupant tagged `{OCCUPANT,OWNER}`
+- [x] T013 [P] [US1] `SignificatorGoldenTest` — for each golden chart, `houseSignificators(h)` for all 12 houses == `expected.significators.by_house[h]` (graha membership **and** step-tag sets), ordering deterministic; `@EnabledIf` ephemeris data
 
 ### Implementation
 
-- [ ] T014 [US1] Per-graha lord-chain helper (star lord, sign it occupies) in `SignificatorTable` — `KpLordage.chainFor(chart.position(g).longitude())`
-- [ ] T015 [US1] Effective-occupants computation (research.md §1 step 2): occupants of a house ∪ (for each node occupant) its agents = conjunct non-node grahas in the same bhava ∪ occupied-sign lord ∪ occupied-star lord
-- [ ] T016 [US1] `SignificatorTable.of(NatalChart)` in `core/.../judgement/SignificatorTable.java` — steps 1–4 per house (star of effective occupants / effective occupants / star of owner / owner); merge, de-dupe, order by `strongestStep().rank()` then `Graha` ordinal; build `HouseSignificators` ×12; carry `chart.engineVersion()`
-- [ ] T017 [P] [US1] `SignificatorOrderingTest` — the per-house list has no duplicate graha; order is by strongest step then ordinal; deterministic across two `of(chart)` calls
+- [x] T014 [US1] Per-graha lord-chain helper (star lord, sign it occupies) in `SignificatorTable` — `KpLordage.chainFor(chart.position(g).longitude())`
+- [x] T015 [US1] Effective-occupants computation (research.md §1 step 2): occupants of a house ∪ (for each node occupant) its agents = conjunct non-node grahas in the same bhava ∪ occupied-sign lord ∪ occupied-star lord
+- [x] T016 [US1] `SignificatorTable.of(NatalChart)` in `core/.../judgement/SignificatorTable.java` — steps 1–4 per house (star of effective occupants / effective occupants / star of owner / owner); merge, de-dupe, order by `strongestStep().rank()` then `Graha` ordinal; build `HouseSignificators` ×12; carry `chart.engineVersion()`
+- [x] T017 [P] [US1] `SignificatorOrderingTest` — the per-house list has no duplicate graha; order is by strongest step then ordinal; deterministic across two `of(chart)` calls
 
 **Checkpoint**: four-step significators computable and golden-verified.
 
