@@ -144,20 +144,20 @@ reproduce.
 
 ### Tests (write first)
 
-- [ ] T015 [P] [US3] `HoraryHouseProviderContractTest` in
+- [x] T015 [P] [US3] `HoraryHouseProviderContractTest` in
   `ephemeris/src/test/java/com/celestia/ephemeris/HoraryHouseProviderContractTest.java`
   — `housesFor(judgment, asc)`: `cuspLongitudes().get(0)` bit-identical to `asc`;
   **round-trip** — take a normal `SwissEphemerisHouseProvider.houses(bd)` cast,
   feed its Ascendant back through `housesFor(bd, asc)`, the twelve cusps match to
   ≤ 1′; a polar latitude → `PlacidusUndefinedException`; a year-1600 instant →
   `Accuracy.REDUCED`, no exception; deterministic
-- [ ] T016 [P] [US3] `HoraryChartFactoryTest` — `cast(n, j).cusp(1)` ==
+- [x] T016 [P] [US3] `HoraryChartFactoryTest` — `cast(n, j).cusp(1)` ==
   `ascendant(n).longitude()`; same number + place, two instants **5 minutes
   apart** → identical cusps and Moon longitudes differing by **2′–3′** (SC-004);
   same instant + place, two numbers → identical planets, different cusps; polar
   judgment → `PlacidusUndefinedException`; `cast(0/250, ...)` throw;
   `SignificatorTable.of(cast(...))` and `RulingPlanetsFactory` accept the chart
-- [ ] T017 [P] [US3] `HoraryGoldenTest` — the golden horary case: `cast(...)
+- [x] T017 [P] [US3] `HoraryGoldenTest` — the golden horary case: `cast(...)
   .cusp(1)` == `expected.horary.ascendant`; the twelve cuspal sub lords and the
   nine placements (bhava, rasi) match; `SignificatorTable.of(chart)`
   `houseSignificators(h)` for all 12 houses == `expected.horary.significators
@@ -165,7 +165,7 @@ reproduce.
 
 ### Implementation
 
-- [ ] T018 [US3] RAMC-from-Ascendant in
+- [x] T018 [US3] RAMC-from-Ascendant in
   `ephemeris/src/main/java/com/celestia/ephemeris/swisseph/SwissEphemerisHoraryHouseProvider.java`
   — obliquity via `swe_calc_ut(jdUt, SE_ECL_NUT, iflag, xx, serr)` (`xx[0]`),
   ayanamsa via `swe_get_ayanamsa_ut(jdUt)`; closed form
@@ -173,13 +173,13 @@ reproduce.
   (Meeus, *Astronomical Algorithms* 2nd ed. ch. 13 / house formulae — **confirm
   the sign convention against the T015 round-trip before trusting it**);
   a 60-iteration bisection fallback behind the same method (research.md §3)
-- [ ] T019 [US3] `SwissEphemerisHoraryHouseProvider.housesFor(BirthData, double)`
+- [x] T019 [US3] `SwissEphemerisHoraryHouseProvider.housesFor(BirthData, double)`
   — polar check (`|lat| ≥ config.polarLimit()` → `PlacidusUndefinedException`);
   `tropicalAsc = normalise(asc + ayanamsa)`; RAMC (T018);
   `swe_houses_armc(armc, lat, eps, (int)'P', cusp, ascmc)`; sidereal cusp =
   `normalise(cusp − ayanamsa)`; **force `cusp[0]` = the sidereal Ascendant**;
   build `HouseResult` (synchronized handle, no SE type in the public API)
-- [ ] T020 [US3] `HoraryChartFactory(PositionProvider positions,
+- [x] T020 [US3] `HoraryChartFactory(PositionProvider positions,
   HoraryHouseProvider houses)` + `cast(int number, BirthData judgment)` +
   `static assemble(int number, BirthData judgment, EphemerisResult positions,
   HouseResult horaryHouses)` — validate `number` 1..249 and
