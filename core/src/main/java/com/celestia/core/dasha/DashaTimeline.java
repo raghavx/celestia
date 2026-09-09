@@ -105,26 +105,31 @@ public final class DashaTimeline {
             throw new IllegalArgumentException("depth out of 1..5: " + depth);
         }
 
-        // seconds from the start of the birth Mahadasha (>= 0)
+        // exact seconds of the query, measured from the start of the birth Mahadasha (>= 0)
         BigFraction q = elapsedSeconds.add(durationSeconds(Duration.between(birthInstant, query)));
 
         List<DashaPeriod> stack = new ArrayList<>(depth);
 
-        // level 1 — the sequence from the birth-Maha start is periodic with a 120-year period
+        // level 1 — the sequence from the birth-Maha start is periodic with a 120-year
+        // period. Walk from a whole cycle before the query (so the chosen segment has a
+        // real predecessor) and pick the first segment whose rounded end instant is
+        // after the query — that guarantees the rounded [start, end) brackets the query
+        // even when it lands sub-nanosecond from an exact boundary.
         BigInteger cycles = floor(q.divide(CYCLE_SECONDS));
-        BigFraction cycleStart = CYCLE_SECONDS.multiply(BigFraction.of(cycles));
-        BigFraction offset = q.subtract(cycleStart);
+        BigInteger walkFrom = cycles.signum() > 0 ? cycles.subtract(BigInteger.ONE) : BigInteger.ZERO;
 
+        // walk up to three cycles (27 segments) from one cycle before the query, so the
+        // selected segment always has a real predecessor even at a cycle boundary
         Graha lord = mahaLord;
-        BigFraction cursor = BigFraction.ZERO;
-        BigFraction start = null;
-        BigFraction end = null;
-        for (int i = 0; i < 9; i++) {
-            BigFraction span = CYCLE_SECONDS.multiply(BigFraction.of(lord.years(), Graha.CYCLE_YEARS));
-            BigFraction next = cursor.add(span);
-            if (offset.compareTo(cursor) >= 0 && offset.compareTo(next) < 0) {
-                start = cycleStart.add(cursor);
-                end = cycleStart.add(next);
+        BigFraction cursor = CYCLE_SECONDS.multiply(BigFraction.of(walkFrom));
+        BigFraction start = cursor;
+        BigFraction end = cursor.add(CYCLE_SECONDS.multiply(BigFraction.of(lord.years(), Graha.CYCLE_YEARS)));
+        for (int i = 0; i < 27; i++) {
+            BigFraction next = cursor.add(
+                    CYCLE_SECONDS.multiply(BigFraction.of(lord.years(), Graha.CYCLE_YEARS)));
+            start = cursor;
+            end = next;
+            if (query.isBefore(instantAt(next))) {
                 break;
             }
             cursor = next;
@@ -134,14 +139,16 @@ public final class DashaTimeline {
         List<Graha> parentLords = List.of();
         stack.add(period(DashaLevel.MAHADASHA, lord, start, end, parentLords));
 
-        // levels 2..depth — recursive nine-way split of the parent period
+        // levels 2..depth — nine-way split of the parent; same "first child ending
+        // after the query" selection. b[0] == parent.start, b[9] == parent.end.
         for (int rank = 2; rank <= depth; rank++) {
             parentLords = append(parentLords, lord);
+            List<VimshottariSplit.Portion> parts = VimshottariSplit.of(end.subtract(start), lord);
             BigFraction childCursor = start;
-            for (VimshottariSplit.Portion portion : VimshottariSplit.of(end.subtract(start), lord)) {
-                BigFraction childEnd = childCursor.add(portion.span());
-                if (q.compareTo(childCursor) >= 0 && q.compareTo(childEnd) < 0) {
-                    lord = portion.lord();
+            for (int i = 0; i < 9; i++) {
+                BigFraction childEnd = childCursor.add(parts.get(i).span());
+                if (query.isBefore(instantAt(childEnd)) || i == 8) {
+                    lord = parts.get(i).lord();
                     start = childCursor;
                     end = childEnd;
                     break;
@@ -152,6 +159,11 @@ public final class DashaTimeline {
         }
 
         return new RunningDasha(query, stack);
+    }
+
+    /** {@code birthInstant + (offset - elapsed)}, rounded to the nearest nanosecond. */
+    private Instant instantAt(BigFraction offsetFromMahaStart) {
+        return plusSeconds(birthInstant, offsetFromMahaStart.subtract(elapsedSeconds));
     }
 
     /** Largest number of periods {@link #periods} will return before rejecting the window. */
@@ -194,10 +206,7 @@ public final class DashaTimeline {
             DashaLevel level, Graha lord, BigFraction startFromMahaStart, BigFraction endFromMahaStart,
             List<Graha> parentLords) {
         return new DashaPeriod(
-                level, lord,
-                plusSeconds(birthInstant, startFromMahaStart.subtract(elapsedSeconds)),
-                plusSeconds(birthInstant, endFromMahaStart.subtract(elapsedSeconds)),
-                parentLords);
+                level, lord, instantAt(startFromMahaStart), instantAt(endFromMahaStart), parentLords);
     }
 
     private static List<Graha> append(List<Graha> lords, Graha lord) {

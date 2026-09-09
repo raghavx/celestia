@@ -197,21 +197,21 @@ the window, contiguous, with parent-lord chains.
 
 ## Phase 6: User Story 4 — Reproducible correctness (P2)
 
-- [ ] T027 [P] [US4] `VimshottariSplitTest` in
+- [x] T027 [P] [US4] `VimshottariSplitTest` in
   `core/src/test/java/com/celestia/core/dasha/VimshottariSplitTest.java` —
   `of(total, lord)` for several totals and lords: nine portions, Vimshottari order
   from `lord`, `Σ span == total` as an **exact** `BigFraction` equality; portion
   `i` span == `total × grahaᵢ.years() / 120`
-- [ ] T028 [P] [US4] `DashaPartitionPropertyTest` (jqwik) in
+- [x] T028 [P] [US4] `DashaPartitionPropertyTest` (jqwik) in
   `core/src/test/java/com/celestia/core/dasha/DashaPartitionPropertyTest.java` —
   for a generated birth instant + Moon longitude + level + depth: the nine
   children of any resolved period are contiguous (`child[i].end == child[i+1]
   .start`), `child[0].start == parent.start`, `child[8].end == parent.end`
-- [ ] T029 [P] [US4] `DashaDeterminismTest` — `DashaTimeline.from` twice on a
+- [x] T029 [P] [US4] `DashaDeterminismTest` — `DashaTimeline.from` twice on a
   golden chart; compare the **accessor outputs** (`balanceAtBirth()`,
   `running(q, 5)`, `periods(ANTARDASHA, from, to)` — records with value equality),
   since `DashaTimeline` is a class without `equals`
-- [ ] T030 [US4] `.github/workflows/ci.yml` — add `DashaGoldenTest`,
+- [x] T030 [US4] `.github/workflows/ci.yml` — add `DashaGoldenTest`,
   `RunningDashaGoldenTest`, `DashaWindowGoldenTest`, `DashaDeterminismTest` to the
   OS-matrix determinism step
 
