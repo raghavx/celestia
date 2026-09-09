@@ -43,7 +43,7 @@ New coverage:
 | US3 Rahu/Ketu agency | `core.judgement.NodeAgencyTest`, golden |
 | US4 ruling planets, sources, sub-lord flag | `core.judgement.RulingPlanetsTest`, golden `RulingPlanetsGoldenTest` |
 | US4 day lord sunrise boundary (SC-004) | `core.judgement.KpWeekdayTest` |
-| US5 determinism | `SignificatorTableTest`, `RulingPlanetsTest` (compute twice) |
+| US5 determinism | `SignificatorDeterminismTest`, `RulingPlanetsDeterminismTest` |
 | SC-005 performance (< 20 ms) | `core.judgement.SignificatorPerformanceTest` — `@Tag("perf")` |
 
 ## Determinism / architecture gates

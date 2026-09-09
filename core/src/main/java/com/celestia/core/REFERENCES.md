@@ -21,12 +21,19 @@ references are acceptable where an ADR settled the choice.
 | Cusp 1 = the Ascendant (bit-identical) | `SwissEphemerisHouseProvider` | SPEC-002 FR-003 |
 | **Bhava** (cusp-to-cusp): a graha is in bhava _n_ iff its longitude lies in the forward arc `[cusp n, cusp n+1)` — half-open, wrap-aware. Not the Sripati midpoint method. | `core.chart.Bhavas.bhavaOf` | K. S. Krishnamurti, *KP Readers* (the cuspal system) |
 | **Rasi house** (display): whole signs from the Ascendant's sign, which is house 1 | `core.chart.Bhavas.rasiHouseOf` | standard whole-sign Rasi layout |
+| **Four-step significators** of a house: (1) grahas in the star of an effective occupant, (2) effective occupants, (3) grahas in the star of the house owner, (4) the house owner; strength decreases 1&rarr;4; a graha keeps every step that qualified it | `core.judgement.SignificatorTable`, `Step` | K. S. Krishnamurti, *KP Readers* VI (four-fold significator hierarchy) |
+| **Effective occupants**: the occupants of a bhava plus, for a node in that bhava, its **agents** = non-node grahas conjoined in the same bhava &cup; the lord of the node's sign &cup; the lord of the node's star | `core.judgement.SignificatorTable`, `NodeAgency` | K. S. Krishnamurti, *KP Readers* (Rahu/Ketu act as agents of the planets they represent) |
+| **Per-graha significators** = the strict transpose of the twelve per-house lists (no independent rule) | `core.judgement.SignificatorTable.grahaSignificators` | KP practice (the significator table read either way) |
+| **Ruling planets** for a moment: lagna sign/star/(sub) lords, Moon sign/star/(sub) lords, the day lord; Rahu/Ketu added when the node's sign or star lord is already ruling, or the node shares the sign or nakshatra of the Moon or the Ascendant. Sub-lord inclusion is a switch (default on = modern KP) | `core.judgement.RulingPlanetsFactory`, `RpSource` | K. S. Krishnamurti, *KP Readers* VI &amp; horary method; sub-lord inclusion per modern KP |
+| **Day lord** = lord of the KP weekday, which runs from local **sunrise** to the next local sunrise (not civil midnight); Sun&rarr;Sunday &hellip; Saturn&rarr;Saturday. No sunrise that day &rarr; civil (LMT) weekday + fallback flag | `core.judgement.KpWeekday`, `ephemeris.SunriseProvider` | K. S. Krishnamurti, *KP Readers* (Hindu day = sunrise to sunrise) |
 
 ## Engine version bump procedure
 
 `EngineVersion.rules` (currently `"kp-1"`, in `ephemeris`) is bumped **by hand**
 whenever any rule above changes -- including rules that live in `core`
-(`Sign`, `Nakshatra`, `VimshottariPartition`, `KpLordage`, `Longitudes`). `core`
+(`Sign`, `Nakshatra`, `VimshottariPartition`, `KpLordage`, `Longitudes`,
+`judgement.SignificatorTable`, `judgement.RulingPlanetsFactory`,
+`judgement.KpWeekday`). `core`
 cannot reference `EngineVersion` (no dependency back to nothing -- `ephemeris` is
 the lower layer), so the coupling is a documented manual step. A change without a
 bump is caught by the golden-chart snapshot suite drifting with no version change.

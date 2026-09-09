@@ -162,17 +162,17 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T036 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the
+- [x] T036 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the
   four-step significator rule, the node-agency rule, the ruling-planet sources +
   node rule, and the day-lord-at-sunrise rule (cite KSK / *KP Readers*); note that
   a `core.judgement` rule change also bumps `EngineVersion.rules`
-- [ ] T037 [P] `SignificatorPerformanceTest` `@Tag("perf")` — all 12 houses +
+- [x] T037 [P] `SignificatorPerformanceTest` `@Tag("perf")` — all 12 houses +
   per-graha table for a chart < 200 ms warm guard (SC-005 target 20 ms); excluded
   from the default run
-- [ ] T038 [P] Update `ephemeris/README.md` (+ `SunriseProvider`) and
+- [x] T038 [P] Update `ephemeris/README.md` (+ `SunriseProvider`) and
   `core/README.md` (+ `SignificatorTable`, `RulingPlanetsFactory`)
-- [ ] T039 Run `specs/003-significators-ruling-planets/quickstart.md` end to end; fix drift
-- [ ] T040 `./mvnw -q verify` — full reactor green incl. `DeterminismArchitectureTest` / `LayeringArchitectureTest`
+- [x] T039 Run `specs/003-significators-ruling-planets/quickstart.md` end to end; fix drift
+- [x] T040 `./mvnw -q verify` — full reactor green incl. `DeterminismArchitectureTest` / `LayeringArchitectureTest`
 
 ---
 
