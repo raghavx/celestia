@@ -78,30 +78,30 @@ sample matches KSK's table.
 
 ### Tests (write first)
 
-- [ ] T008 [P] [US1] `Horary249TilingPropertyTest` in
+- [x] T008 [P] [US1] `Horary249TilingPropertyTest` in
   `core/src/test/java/com/celestia/core/horary/Horary249TilingPropertyTest.java` —
   `Horary249.arcs().size() == 249`; `arcs().get(0).start()` == `0` and
   `arcs().get(248).end()` == `360` as exact `BigFraction`;
   `arc[n].end() == arc[n+1].start()` for all n; every arc lies in one `Sign`;
   every arc's `subLord()` == the sub lord of the `VimshottariPartition
   .subDivisions()` span covering its midpoint
-- [ ] T009 [P] [US1] `Horary249SnapshotTest` — the full 249-row list (number,
+- [x] T009 [P] [US1] `Horary249SnapshotTest` — the full 249-row list (number,
   start°, end°, sign, sub lord) matches
   `core/src/test/resources/horary/horary-249.json`. The test **writes the file
   when it is missing** (as the golden harness does); it is then committed and any
   later diff is a table change to review. Include the KSK-sample rows from T003 as
   an inline assertion once transcribed.
-- [ ] T010 [P] [US1] `Horary249Test` — `arc(0)` and `arc(250)` throw
+- [x] T010 [P] [US1] `Horary249Test` — `arc(0)` and `arc(250)` throw
   `IllegalArgumentException`; `arc(1).startDeg()` == 0; `arc(249).endDeg()` == 360;
   a hand-checked number's sub lord and sign
 
 ### Implementation
 
-- [ ] T011 [US1] Sign-crossing split in
+- [x] T011 [US1] Sign-crossing split in
   `core/src/main/java/com/celestia/core/horary/Horary249.java` — for each
   `VimshottariPartition.subDivisions()` span, split it at every `30k°`
   (`k = 1..11`) it **strictly** crosses (`s < c < e`); collect the pieces
-- [ ] T012 [US1] `Horary249.arcs()` (built once, cached), `arc(int number)`
+- [x] T012 [US1] `Horary249.arcs()` (built once, cached), `arc(int number)`
   (1..249), `count()` — sort the pieces by `start`, number from 1, build each
   `HoraryArc` with `Sign.at(midpoint)` and `KpLordage.chainFor(midpoint)`
 
