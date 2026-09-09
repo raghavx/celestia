@@ -197,18 +197,18 @@ Ascendant.
 
 ### Tests (write first)
 
-- [ ] T021 [P] [US4] `HoraryRulingPlanetsTest` in
+- [x] T021 [P] [US4] `HoraryRulingPlanetsTest` in
   `core/src/test/java/com/celestia/core/horary/HoraryRulingPlanetsTest.java` —
   the lagna sign / star / sub lords equal those of `HoraryChartFactory.ascendant(n)`;
   the Moon lords and day lord match the judgment moment; equals
   `RulingPlanetsFactory.compute(...)` with the number's Ascendant; deterministic
-- [ ] T022 [P] [US4] `HoraryRulingPlanetsGoldenTest` — the golden horary case's
+- [x] T022 [P] [US4] `HoraryRulingPlanetsGoldenTest` — the golden horary case's
   ruling planets == `expected.horary.ruling_planets` (planet set + sources + day
   lord + weekday); `@EnabledIf` ephemeris data
 
 ### Implementation
 
-- [ ] T023 [US4] `HoraryRulingPlanets.at(int number, BirthData judgment,
+- [x] T023 [US4] `HoraryRulingPlanets.at(int number, BirthData judgment,
   PositionProvider positions, SunriseProvider sunrise)` (+ an `Options` overload)
   in `core/src/main/java/com/celestia/core/horary/HoraryRulingPlanets.java` —
   `KpWeekday.resolve(...)` for the day lord; `RulingPlanetsFactory.compute(
