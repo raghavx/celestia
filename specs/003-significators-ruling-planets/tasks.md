@@ -95,12 +95,12 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 ### Tests (write first)
 
-- [ ] T018 [P] [US2] `SignificatorTransposePropertyTest` (jqwik over the golden charts, or a generated chart) — for every `Graha g` and house `h`, `grahaSignificators(g).signifies(h)` ⇔ `houseSignificators(h).signifies(g)`, with identical step sets (SC-002)
-- [ ] T019 [P] [US2] `GrahaSignificatorGoldenTest` — for each golden chart, `grahaSignificators(g)` == `expected.significators.by_graha[g]`
+- [x] T018 [P] [US2] `SignificatorTransposePropertyTest` (jqwik over the golden charts, or a generated chart) — for every `Graha g` and house `h`, `grahaSignificators(g).signifies(h)` ⇔ `houseSignificators(h).signifies(g)`, with identical step sets (SC-002)
+- [x] T019 [P] [US2] `GrahaSignificatorGoldenTest` — for each golden chart, `grahaSignificators(g)` == `expected.significators.by_graha[g]`
 
 ### Implementation
 
-- [ ] T020 [US2] `SignificatorTable.grahaSignificators(Graha)` — transpose the twelve `HouseSignificators` (no independent rule); immutable `Map<Integer,Set<Step>>`
+- [x] T020 [US2] `SignificatorTable.grahaSignificators(Graha)` — transpose the twelve `HouseSignificators` (no independent rule); immutable `Map<Integer,Set<Step>>`
 
 **Checkpoint**: per-graha table is the verified transpose.
 
@@ -112,12 +112,12 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 ### Tests (write first)
 
-- [ ] T021 [P] [US3] `NodeAgencyTest` — a node conjoined with a graha → agents include that graha; a node alone → agents = `{signLord, starLord}`; `nodeAgency(SUN)` throws `IllegalArgumentException`
-- [ ] T022 [P] [US3] `NodeAgencyGoldenTest` — for each golden chart, `nodeAgency(RAHU)` / `nodeAgency(KETU)` == `expected.node_agency`; and a node's `grahaSignificators` covers every house signified by its agents
+- [x] T021 [P] [US3] `NodeAgencyTest` — a node conjoined with a graha → agents include that graha; a node alone → agents = `{signLord, starLord}`; `nodeAgency(SUN)` throws `IllegalArgumentException`
+- [x] T022 [P] [US3] `NodeAgencyGoldenTest` — for each golden chart, `nodeAgency(RAHU)` / `nodeAgency(KETU)` == `expected.node_agency`; and a node's `grahaSignificators` covers every house signified by its agents
 
 ### Implementation
 
-- [ ] T023 [US3] `SignificatorTable.nodeAgency(Graha node)` — surface the `NodeAgency` computed for the effective-occupants fold (T015); reject non-nodes
+- [x] T023 [US3] `SignificatorTable.nodeAgency(Graha node)` — surface the `NodeAgency` computed for the effective-occupants fold (T015); reject non-nodes
 
 **Checkpoint**: node agency exposed and golden-verified.
 
