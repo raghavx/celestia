@@ -39,7 +39,7 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
   **one** golden chart from a KP textbook worked example (or two agreeing
   mainstream KP tools on KP-New ayanamsa + mean node + Placidus); record it in
   `verification.significators_human_check` and note any single-source values.
-- [ ] T005 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java`
+- [x] T005 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java`
   to parse `expected.significators.*`, `expected.node_agency`, and
   `expected.ruling_planets`.
 
@@ -47,20 +47,20 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 ## Phase 2: Foundational (blocking — no user story starts until this is done)
 
-- [ ] T006 [P] `Step` enum (`STAR_OF_OCCUPANT` 1, `OCCUPANT` 2, `STAR_OF_OWNER` 3,
+- [x] T006 [P] `Step` enum (`STAR_OF_OCCUPANT` 1, `OCCUPANT` 2, `STAR_OF_OWNER` 3,
   `OWNER` 4; `int rank()`) in `core/src/main/java/com/celestia/core/judgement/Step.java`
-- [ ] T007 [P] `Significator` (`Graha, int house, Set<Step> steps`; `strongestStep()`;
+- [x] T007 [P] `Significator` (`Graha, int house, Set<Step> steps`; `strongestStep()`;
   non-empty immutable steps), `HouseSignificators` (`int house, List<Significator>`;
   `stepsFor`, `signifies`), `GrahaSignificators` (`Graha, Map<Integer,Set<Step>>`;
   `signifies`) records in `core/.../judgement/`
-- [ ] T008 [P] `NodeAgency` record (`Graha node, Set<Graha> conjunctGrahas, Graha
+- [x] T008 [P] `NodeAgency` record (`Graha node, Set<Graha> conjunctGrahas, Graha
   signLord, Graha starLord, Set<Graha> agents`) in `core/.../judgement/NodeAgency.java`
-- [ ] T009 [P] `RpSource` enum (`LAGNA_SIGN, LAGNA_STAR, LAGNA_SUB, MOON_SIGN,
+- [x] T009 [P] `RpSource` enum (`LAGNA_SIGN, LAGNA_STAR, LAGNA_SUB, MOON_SIGN,
   MOON_STAR, MOON_SUB, DAY_LORD, NODE`) and `RulingPlanet` record (`Graha, Set<RpSource>`)
   in `core/.../judgement/`
-- [ ] T010 [P] `KpWeekday` enum (`SUNDAY..SATURDAY`, each `Graha lord()`;
+- [x] T010 [P] `KpWeekday` enum (`SUNDAY..SATURDAY`, each `Graha lord()`;
   `static KpWeekday of(DayOfWeek)`) in `core/.../judgement/KpWeekday.java`
-- [ ] T011 [P] `FoundationalTypesTest` — `Step.rank()` 1..4; `Significator` rejects
+- [x] T011 [P] `FoundationalTypesTest` — `Step.rank()` 1..4; `Significator` rejects
   empty steps; `KpWeekday` maps Sun→Sunday … Saturn→Saturday and `of(DayOfWeek)` round-trips
 
 **Checkpoint**: `./mvnw -pl core -am test` green.
