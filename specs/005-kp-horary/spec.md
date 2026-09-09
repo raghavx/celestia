@@ -210,9 +210,9 @@ ruling planets. A determinism test and the 249-tiling property run in CI.
 - **FR-012**: The **horary ruling planets** MUST be the SPEC-003 ruling planets
   computed with the number's Ascendant longitude for the lagna lords and the
   judgment instant for the Moon lords and the day lord.
-- **FR-013**: The SPEC-003 `SignificatorTable` and the SPEC-004 dasha (if a birth
-  chart is also present) MUST consume a horary chart without modification — a
-  horary chart *is* a `NatalChart`.
+- **FR-013**: A horary chart MUST be a valid `NatalChart` — the SPEC-003
+  `SignificatorTable`, the SPEC-003 ruling planets, and any other `NatalChart`
+  consumer MUST accept it unchanged, with no horary-specific code path.
 - **FR-014**: For identical inputs the engine MUST produce identical output across
   runs and platforms.
 - **FR-015**: The engine version MUST be carried on the outputs and MUST change

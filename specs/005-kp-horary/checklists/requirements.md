@@ -58,3 +58,12 @@
   Ascendant, and the cast chart. US4 (horary RP) and US5 (golden suite) are P2.
 - Ready for `/speckit-clarify` (optional) / `/speckit-plan` / `/speckit-tasks` /
   `/speckit-implement`.
+- `/speckit-analyze` (2026-09-10, post-tasks): A1 remediated — T001 emits
+  `expected.horary.significators.by_house` and T017 asserts it (backs SC-003).
+  A2 — the RAMC inversion cites Meeus (*Astronomical Algorithms* 2nd ed. ch. 13)
+  in research.md §3 and T018/T026, with the sign convention to be confirmed
+  against the T015 round-trip. A3 — T009 writes the 249 snapshot when missing.
+  A4 — T016 asserts the SC-004 5-minute Moon motion (2′–3′). A5 — FR-013 reworded
+  to "a horary chart is a valid `NatalChart`". A6 (SC-005 75 ms vs the 200 ms
+  guard) left as accepted LOW. B1-style note: the 249 table is derived, so
+  SC-006 / T003 is the only independent check — still open.

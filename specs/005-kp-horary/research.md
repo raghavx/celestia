@@ -53,11 +53,18 @@ the geographic latitude and the obliquity — all **tropical**. So the task is:
 given the desired tropical Ascendant longitude `λ`, the latitude `φ` and the
 obliquity `ε`, find `armc`.
 
-**Closed form** (inversion of the standard Ascendant equation):
+**Closed form** — the inversion of the standard Ascendant equation
+(J. Meeus, *Astronomical Algorithms*, 2nd ed., ch. 13 & the house-position
+formulae; the forward form is
+`tan λ = −cos(armc) / (sin ε · tan φ + cos ε · sin(armc))`):
 
 ```
 armc = atan2( −cos λ ,  sin λ · cos ε + tan φ · sin ε )    (degrees, normalised [0, 360))
 ```
+
+The exact sign convention is **confirmed during implementation** (T018) against
+the `swe_houses` round-trip below before it is trusted; if it does not
+round-trip, the bisection fallback is used and the closed form corrected.
 
 **Verification**: for a grid of `(instant, latitude)` we call the ordinary
 `swe_houses(jd, SEFLG_SIDEREAL, φ, lon, 'P', cusp, ascmc)`; `ascmc[0]` is the

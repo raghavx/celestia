@@ -30,9 +30,11 @@ no new dependency, no new ADR.
 - [ ] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with a horary case
   (research.md §3–§6): a fixed number 1–249 + a fixed judgment instant + place →
   `expected.horary` — the Ascendant (longitude + lord chain), the twelve cusps
-  (longitude + lord chain), the nine planetary placements (bhava, rasi), and the
-  horary ruling planets. Reuse `lord_chain` / cusp helpers; add the RAMC inversion
-  + `swe_houses_armc` (tropical) + `swe_get_ayanamsa_ut` round-trip.
+  (longitude + lord chain), the nine planetary placements (bhava, rasi), the
+  **per-house significators** (`by_house`, from `compute_significators` fed the
+  horary houses — backs SC-003), and the horary ruling planets. Reuse `lord_chain`
+  / cusp / `compute_significators` helpers; add the RAMC inversion +
+  `swe_houses_armc` (tropical) + `swe_get_ayanamsa_ut` round-trip.
 - [ ] T002 Regenerate the golden files (`--write`); verify determinism (re-run,
   diff `expected`). Update `core/src/test/resources/golden/README.md` with the
   `expected.horary` shape, the fixed number / instant / place, and the
@@ -84,8 +86,11 @@ sample matches KSK's table.
   every arc's `subLord()` == the sub lord of the `VimshottariPartition
   .subDivisions()` span covering its midpoint
 - [ ] T009 [P] [US1] `Horary249SnapshotTest` — the full 249-row list (number,
-  start°, end°, sign, sub lord) matches a checked-in
-  `src/test/resources/horary/horary-249.json` snapshot; a diff is a table change
+  start°, end°, sign, sub lord) matches
+  `core/src/test/resources/horary/horary-249.json`. The test **writes the file
+  when it is missing** (as the golden harness does); it is then committed and any
+  later diff is a table change to review. Include the KSK-sample rows from T003 as
+  an inline assertion once transcribed.
 - [ ] T010 [P] [US1] `Horary249Test` — `arc(0)` and `arc(250)` throw
   `IllegalArgumentException`; `arc(1).startDeg()` == 0; `arc(249).endDeg()` == 360;
   a hand-checked number's sub lord and sign
@@ -147,14 +152,16 @@ reproduce.
   ≤ 1′; a polar latitude → `PlacidusUndefinedException`; a year-1600 instant →
   `Accuracy.REDUCED`, no exception; deterministic
 - [ ] T016 [P] [US3] `HoraryChartFactoryTest` — `cast(n, j).cusp(1)` ==
-  `ascendant(n).longitude()`; same number + place, two instants → identical cusps,
-  different Moon; same instant + place, two numbers → identical planets, different
-  cusps; polar judgment → `PlacidusUndefinedException`; `cast(0/250, ...)` throw;
+  `ascendant(n).longitude()`; same number + place, two instants **5 minutes
+  apart** → identical cusps and Moon longitudes differing by **2′–3′** (SC-004);
+  same instant + place, two numbers → identical planets, different cusps; polar
+  judgment → `PlacidusUndefinedException`; `cast(0/250, ...)` throw;
   `SignificatorTable.of(cast(...))` and `RulingPlanetsFactory` accept the chart
 - [ ] T017 [P] [US3] `HoraryGoldenTest` — the golden horary case: `cast(...)
   .cusp(1)` == `expected.horary.ascendant`; the twelve cuspal sub lords and the
-  nine placements (bhava, rasi) match; `SignificatorTable.of(chart)` ==
-  `expected.horary` significators (if emitted); `@EnabledIf` ephemeris data
+  nine placements (bhava, rasi) match; `SignificatorTable.of(chart)`
+  `houseSignificators(h)` for all 12 houses == `expected.horary.significators
+  .by_house[h]` (membership + step tags — SC-003); `@EnabledIf` ephemeris data
 
 ### Implementation
 
@@ -162,7 +169,9 @@ reproduce.
   `ephemeris/src/main/java/com/celestia/ephemeris/swisseph/SwissEphemerisHoraryHouseProvider.java`
   — obliquity via `swe_calc_ut(jdUt, SE_ECL_NUT, iflag, xx, serr)` (`xx[0]`),
   ayanamsa via `swe_get_ayanamsa_ut(jdUt)`; closed form
-  `armc = atan2(−cos λ, sin λ·cos ε + tan φ·sin ε)` normalised `[0, 360)`;
+  `armc = atan2(−cos λ, sin λ·cos ε + tan φ·sin ε)` normalised `[0, 360)`
+  (Meeus, *Astronomical Algorithms* 2nd ed. ch. 13 / house formulae — **confirm
+  the sign convention against the T015 round-trip before trusting it**);
   a 60-iteration bisection fallback behind the same method (research.md §3)
 - [ ] T019 [US3] `SwissEphemerisHoraryHouseProvider.housesFor(BirthData, double)`
   — polar check (`|lat| ≥ config.polarLimit()` → `PlacidusUndefinedException`);
@@ -226,8 +235,10 @@ Ascendant.
 ## Phase 8: Polish & Cross-Cutting
 
 - [ ] T026 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the 249
-  table derivation (243 sub-spans split at the twelve sign cusps), the
-  Ascendant-midpoint rule, and the RAMC-from-Ascendant inversion; add
+  table derivation (243 sub-spans split at the twelve sign cusps; cite KSK's
+  *Krishnamurti Padhdhati* horary volume), the Ascendant-midpoint rule, and the
+  RAMC-from-Ascendant inversion (cite Meeus, *Astronomical Algorithms* 2nd ed.
+  ch. 13 / house formulae); add
   `horary.Horary249` / `horary.HoraryChartFactory` and
   `swisseph.SwissEphemerisHoraryHouseProvider` to the `EngineVersion` bump list
 - [ ] T027 [P] `HoraryPerformanceTest` `@Tag("perf")` in

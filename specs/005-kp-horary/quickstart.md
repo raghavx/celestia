@@ -34,7 +34,7 @@ New coverage:
 - `ephemeris` — `HoraryHouseProvider`: houses from a given Ascendant; round-trips
   `swe_houses` to ≤ 1′; polar → `PlacidusUndefinedException`.
 - extended golden suite — one horary case: Ascendant, twelve cuspal sub lords,
-  placements, ruling planets.
+  placements, per-house significators, ruling planets.
 
 ## Scenario → test map
 
