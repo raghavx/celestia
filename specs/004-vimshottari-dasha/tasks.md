@@ -44,29 +44,29 @@ golden-chart harness. No new module, no new dependency, no new ADR.
 
 ## Phase 2: Foundational (blocking — no user story starts until this is done)
 
-- [ ] T005 [P] `DashaLevel` enum (`MAHADASHA` 1 … `PRANA` 5; `int rank()`;
+- [x] T005 [P] `DashaLevel` enum (`MAHADASHA` 1 … `PRANA` 5; `int rank()`;
   `static ofRank(int)`; `Optional<DashaLevel> child()` / `parent()`; Bhukti /
   Antara synonyms in javadoc) in `core/src/main/java/com/celestia/core/dasha/DashaLevel.java`
-- [ ] T006 [P] `Portion` record (`Graha lord, BigFraction span`) and
+- [x] T006 [P] `Portion` record (`Graha lord, BigFraction span`) and
   `VimshottariSplit.of(BigFraction total, Graha fromLord)` in
   `core/src/main/java/com/celestia/core/dasha/VimshottariSplit.java` — nine
   portions in Vimshottari order from `fromLord`, span `i` = `total × grahaᵢ.years()
   / 120`, spans summing to `total` exactly; `total > 0` else `IllegalArgumentException`
-- [ ] T007 [P] `DashaPeriod` record (`DashaLevel level, Graha lord, Instant start,
+- [x] T007 [P] `DashaPeriod` record (`DashaLevel level, Graha lord, Instant start,
   Instant end, List<Graha> parentLords`; `contains(Instant)` half-open;
   `Duration duration()`; compact ctor validates `start` before `end`,
   `parentLords` size == `level.rank() − 1`, `List.copyOf`) in
   `core/src/main/java/com/celestia/core/dasha/DashaPeriod.java`
-- [ ] T008 [P] `DashaBalance` record (`Graha mahaLord, double elapsedFraction,
+- [x] T008 [P] `DashaBalance` record (`Graha mahaLord, double elapsedFraction,
   Duration elapsed, Duration balance, Instant mahaStart, Instant mahaEnd`; compact
   ctor validates `0.0 ≤ elapsedFraction < 1.0`, `mahaStart` before `mahaEnd`) in
   `core/src/main/java/com/celestia/core/dasha/DashaBalance.java`
-- [ ] T009 [P] `RunningDasha` record (`Instant instant, List<DashaPeriod> stack`;
+- [x] T009 [P] `RunningDasha` record (`Instant instant, List<DashaPeriod> stack`;
   `period(DashaLevel)`, `lord(DashaLevel)`, `int depth()`; compact ctor validates
   non-empty stack ≤ 5, `stack.get(i).level().rank() == i + 1`, every period
   `contains(instant)`, each nested in the previous, `List.copyOf`) in
   `core/src/main/java/com/celestia/core/dasha/RunningDasha.java`
-- [ ] T010 [P] `FoundationalTypesTest` in
+- [x] T010 [P] `FoundationalTypesTest` in
   `core/src/test/java/com/celestia/core/dasha/FoundationalTypesTest.java` —
   `DashaLevel.rank()` 1..5 and `ofRank` round-trip / rejects out of range;
   `DashaPeriod` rejects wrong `parentLords` size and `start ≥ end`;
