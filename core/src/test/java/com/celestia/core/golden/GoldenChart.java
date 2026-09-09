@@ -32,7 +32,8 @@ public record GoldenChart(
         Map<Integer, List<SigRef>> significatorsByHouse,
         Map<Graha, Map<Integer, Set<Integer>>> significatorsByGraha,
         Map<Graha, NodeAgencyRef> nodeAgency,
-        RulingPlanetsRef rulingPlanets) {
+        RulingPlanetsRef rulingPlanets,
+        DashaRef dasha) {
 
     /** Reference values for one graha (SPEC-001 + SPEC-002 bhava / rasi house). */
     public record Expected(
@@ -57,6 +58,14 @@ public record GoldenChart(
             Instant sunriseUtc, String weekday, String dayLord,
             boolean dayLordFallback, boolean includeSubLords,
             Map<String, Set<String>> planetSources) {}
+
+    /** SPEC-004: the birth balance and the running five-lord stack at birth + 40 y. */
+    public record DashaRef(
+            String mahaLord, double elapsedFraction, double elapsedDays, double balanceDays,
+            Instant mahaStart, Instant mahaEnd,
+            Instant runningQueryUtc, List<String> runningLords, List<DashaPeriodRef> runningPeriods) {}
+
+    public record DashaPeriodRef(String level, String lord, Instant start, Instant end) {}
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -165,9 +174,30 @@ public record GoldenChart(
                         rpNode.get("include_sub_lords").asBoolean(), Map.copyOf(ps));
             }
 
+            DashaRef dasha = null;
+            JsonNode dNode = root.at("/expected/dasha");
+            if (dNode != null && !dNode.isMissingNode()) {
+                JsonNode bal = dNode.get("balance");
+                JsonNode run = dNode.get("running");
+                List<DashaPeriodRef> runPeriods = new ArrayList<>();
+                for (JsonNode pn : run.get("periods")) {
+                    runPeriods.add(new DashaPeriodRef(
+                            pn.get("level").asText(), pn.get("lord").asText(),
+                            Instant.parse(pn.get("start").asText()),
+                            Instant.parse(pn.get("end").asText())));
+                }
+                dasha = new DashaRef(
+                        bal.get("maha_lord").asText(), bal.get("elapsed_fraction").asDouble(),
+                        bal.get("elapsed_days").asDouble(), bal.get("balance_days").asDouble(),
+                        Instant.parse(bal.get("maha_start").asText()),
+                        Instant.parse(bal.get("maha_end").asText()),
+                        Instant.parse(run.get("query_utc").asText()),
+                        strings(run.get("lords")), List.copyOf(runPeriods));
+            }
+
             return new GoldenChart(id, instant, lat, lon, expected, List.copyOf(cusps),
                     Map.copyOf(angles), Map.copyOf(byHouse), Map.copyOf(byGraha),
-                    Map.copyOf(nodeAgency), rp);
+                    Map.copyOf(nodeAgency), rp, dasha);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

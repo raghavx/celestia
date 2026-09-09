@@ -48,7 +48,7 @@ jobs:
           # The real cross-platform check is these tests asserting computed ==
           # stored on each OS; the JSON fingerprint below is a coarse extra guard.
           ./mvnw -q -B -ntp -pl core -am test \
-            -Dtest=GoldenChartTest,DeterminismTest,NatalChartGoldenTest,NatalChartDeterminismTest,SignificatorGoldenTest,GrahaSignificatorGoldenTest,NodeAgencyGoldenTest,RulingPlanetsGoldenTest,SignificatorDeterminismTest,RulingPlanetsDeterminismTest \
+            -Dtest=GoldenChartTest,DeterminismTest,NatalChartGoldenTest,NatalChartDeterminismTest,SignificatorGoldenTest,GrahaSignificatorGoldenTest,NodeAgencyGoldenTest,RulingPlanetsGoldenTest,SignificatorDeterminismTest,RulingPlanetsDeterminismTest,DashaGoldenTest,RunningDashaGoldenTest,DashaWindowGoldenTest,DashaDeterminismTest \
             -Dsurefire.failIfNoSpecifiedTests=false
           find core/src/test/resources/golden -name '*.json' -exec shasum -a 256 {} + \
             | sort > golden-fingerprint-${{ matrix.os }}.txt

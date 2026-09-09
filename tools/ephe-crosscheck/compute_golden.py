@@ -297,6 +297,90 @@ def compute_ruling_planets(judgment: dict) -> dict:
     }
 
 
+YEAR_SECONDS = 365 * 86400 + 21600          # 365.25 days, exact (KSK / KP Readers)
+CYCLE_SECONDS = 120 * YEAR_SECONDS
+_DASHA_LEVELS = ["MAHADASHA", "ANTARDASHA", "PRATYANTARDASHA", "SOOKSHMA", "PRANA"]
+RUNNING_QUERY_OFFSET_YEARS = 40             # research.md §4
+
+
+def _split(start: Fraction, total: Fraction, from_lord: str):
+    """Nine (lord, sub_start, sub_end) portions of [start, start+total), in
+    Vimshottari order from `from_lord`, spans proportional to the dasha years."""
+    idx = VIMS_NAMES.index(from_lord)
+    out = []
+    cursor = start
+    for k in range(9):
+        lord = VIMS_NAMES[(idx + k) % 9]
+        end = cursor + total * Fraction(VIMS_YEARS[lord], 120)
+        out.append((lord, cursor, end))
+        cursor = end
+    return out
+
+
+def _iso_from_birth(birth: dt.datetime, seconds: Fraction) -> str:
+    us = int(round(seconds * 1_000_000))
+    t = birth + dt.timedelta(microseconds=us)
+    return t.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def compute_dasha(chart: dict, out: dict) -> dict:
+    """SPEC-004: balance of dasha at birth + the running five-lord stack at
+    birth + 40 Julian years. 1 year = 365.25 days."""
+    birth = dt.datetime.fromisoformat(chart["birth"]["utc_instant"].replace("Z", "+00:00"))
+    moon = out["MOON"]["longitude"] % 360.0
+
+    nak = int(moon // float(NAK_DEG)) % 27
+    maha_lord = VIMS_NAMES[nak % 9]
+    nak_start = nak * NAK_DEG
+    frac = (Fraction(moon).limit_denominator(10**12) - nak_start) / NAK_DEG
+    maha_years = VIMS_YEARS[maha_lord]
+    elapsed_s = frac * maha_years * YEAR_SECONDS
+    balance_s = (1 - frac) * maha_years * YEAR_SECONDS
+
+    balance = {
+        "maha_lord": maha_lord,
+        "elapsed_fraction": round(float(frac), 9),
+        "elapsed_days": round(float(frac * maha_years * Fraction(3652500, 10000)), 3),
+        "balance_days": round(float((1 - frac) * maha_years * Fraction(3652500, 10000)), 3),
+        "maha_start": _iso_from_birth(birth, -elapsed_s),
+        "maha_end": _iso_from_birth(birth, balance_s),
+    }
+
+    # running stack: q measured in seconds from the (pre-birth) start of the birth Maha
+    q = elapsed_s + RUNNING_QUERY_OFFSET_YEARS * YEAR_SECONDS
+    periods = []
+    # level 1 — periodic 120-year cycle from the birth-Maha start
+    cyc = q // CYCLE_SECONDS
+    off = q - cyc * CYCLE_SECONDS
+    canonical = _split(Fraction(0), Fraction(CYCLE_SECONDS), maha_lord)
+    lord, seg_start, seg_end = next(c for c in canonical if c[1] <= off < c[2])
+    periods.append(("MAHADASHA", lord,
+                    cyc * CYCLE_SECONDS + seg_start, cyc * CYCLE_SECONDS + seg_end))
+    # levels 2..5 — recursive nine-way split of the parent
+    for level in _DASHA_LEVELS[1:]:
+        parent_lord, ps, pe = periods[-1][1], periods[-1][2], periods[-1][3]
+        for child in _split(ps, pe - ps, parent_lord):
+            if child[1] <= q < child[2]:
+                periods.append((level, child[0], child[1], child[2]))
+                break
+
+    running = {
+        "query_utc": _iso_from_birth(birth, RUNNING_QUERY_OFFSET_YEARS * YEAR_SECONDS),
+        "query_offset_years": RUNNING_QUERY_OFFSET_YEARS,
+        "lords": [p[1] for p in periods],
+        "periods": [
+            {
+                "level": lvl, "lord": ld,
+                # start/end are seconds from the birth-Maha start; render vs birth
+                "start": _iso_from_birth(birth, st - elapsed_s),
+                "end": _iso_from_birth(birth, en - elapsed_s),
+            }
+            for (lvl, ld, st, en) in periods
+        ],
+    }
+    return {"year_days": 365.25, "balance": balance, "running": running}
+
+
 # The one worked ruling-planet example — independent of any birth data.
 RP_JUDGMENT = {
     "utc_instant": "2026-01-01T12:00:00Z",
@@ -325,7 +409,7 @@ def compute_houses(chart: dict) -> dict:
     }
 
 
-def compute(chart: dict) -> tuple[dict, dict, dict, dict, str]:
+def compute(chart: dict) -> tuple[dict, dict, dict, dict, dict, str]:
     swe.set_sid_mode(swe.SIDM_KRISHNAMURTI, 0, 0)   # ADR-0003: constant value 5
     jd = _jd_ut(chart["birth"]["utc_instant"])
 
@@ -360,9 +444,12 @@ def compute(chart: dict) -> tuple[dict, dict, dict, dict, str]:
     # SPEC-003: significators + node agency
     significators, node_agency = compute_significators(out, houses)
 
+    # SPEC-004: Vimshottari dasha
+    dasha = compute_dasha(chart, out)
+
     swe_ver = getattr(swe, "version", "unknown")
-    return (out, houses, significators, node_agency,
-            f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.3")
+    return (out, houses, significators, node_agency, dasha,
+            f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.4")
 
 
 def _entry(lon: float, speed: float) -> dict:
@@ -390,7 +477,7 @@ def main() -> int:
     exit_code = 0
     for p in args.paths:
         chart = json.loads(p.read_text())
-        computed, houses, significators, node_agency, generated_by = compute(chart)
+        computed, houses, significators, node_agency, dasha, generated_by = compute(chart)
         prior = chart.get("expected", {}).get("grahas", {})
         prior_cusps = chart.get("expected", {}).get("cusps", [])
         prior_sig = chart.get("expected", {}).get("significators", {}).get("by_house", [])
@@ -416,6 +503,15 @@ def main() -> int:
             old = prior_sig[i - 1] if i - 1 < len(prior_sig) else None
             if old is not None and old != sigs:
                 drift.append(f"house {i} significators {old} -> {sigs}")
+        prior_dasha = chart.get("expected", {}).get("dasha", {})
+        if prior_dasha.get("balance", {}).get("maha_lord") is not None:
+            ob, nb = prior_dasha["balance"], dasha["balance"]
+            if ob["maha_lord"] != nb["maha_lord"]:
+                drift.append(f"dasha maha_lord {ob['maha_lord']} -> {nb['maha_lord']}")
+            if abs(ob["balance_days"] - nb["balance_days"]) > 1.0:
+                drift.append(f"dasha balance_days {ob['balance_days']} -> {nb['balance_days']}")
+            if prior_dasha.get("running", {}).get("lords") not in (None, dasha["running"]["lords"]):
+                drift.append(f"dasha running lords {prior_dasha['running']['lords']} -> {dasha['running']['lords']}")
 
         if args.write:
             expected = {
@@ -426,6 +522,7 @@ def main() -> int:
                 "angles": houses["angles"],
                 "significators": significators,
                 "node_agency": node_agency,
+                "dasha": dasha,
             }
             if chart.get("expected", {}).get("ruling_planets") is not None or chart["id"] == "obama-1961":
                 expected["ruling_planets"] = compute_ruling_planets(RP_JUDGMENT)
@@ -434,7 +531,9 @@ def main() -> int:
             v["positions_reference"] = generated_by
             v["houses_reference"] = generated_by
             v["significators_reference"] = generated_by
+            v["dasha_reference"] = generated_by
             v.setdefault("significators_human_check", "pending - see golden/README.md (SC-006)")
+            v.setdefault("dasha_human_check", "pending - see golden/README.md (SC-006)")
             if v.get("status") == "birth_data_sourced":
                 v["status"] = "expected_generated"
             p.write_text(json.dumps(chart, indent=2) + "\n")

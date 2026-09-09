@@ -24,8 +24,6 @@ public final class VimshottariPartition {
     /** Width of one nakshatra, 13&deg;20'. */
     private static final BigFraction NAK_WIDTH = BigFraction.of(40, 3);
 
-    private static final BigFraction ONE_TWENTIETH = BigFraction.of(1, 120);
-
     private VimshottariPartition() {}
 
     /**
@@ -71,13 +69,10 @@ public final class VimshottariPartition {
     private static List<Span> partition(BigFraction start, BigFraction width, Graha firstLord) {
         List<Span> spans = new ArrayList<>(9);
         BigFraction cursor = start;
-        Graha lord = firstLord;
-        for (int i = 0; i < 9; i++) {
-            BigFraction w = width.multiply(ONE_TWENTIETH).multiply(lord.years());
-            BigFraction end = cursor.add(w);
-            spans.add(new Span(lord, cursor, end));
+        for (VimshottariSplit.Portion portion : VimshottariSplit.of(width, firstLord)) {
+            BigFraction end = cursor.add(portion.span());
+            spans.add(new Span(portion.lord(), cursor, end));
             cursor = end;
-            lord = lord.next();
         }
         return spans;
     }
