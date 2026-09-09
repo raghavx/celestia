@@ -87,14 +87,14 @@ balance, start before birth, end).
 
 ### Tests (write first)
 
-- [ ] T011 [P] [US1] `DashaBalanceTest` in
+- [x] T011 [P] [US1] `DashaBalanceTest` in
   `core/src/test/java/com/celestia/core/dasha/DashaBalanceTest.java` — hand-set
   Moon longitudes: a Moon 3/4 through a Venus nakshatra → `elapsedFraction` 0.75,
   `elapsed` 15 years, `balance` 5 years; a Moon exactly at a nakshatra start →
   fraction 0 and `balance` == the lord's full Mahadasha; `mahaEnd − mahaStart` ==
   `mahaLord.years()` (365.25-day years, ± the ns rounding); `mahaStart` ==
   `birthInstant − elapsed`
-- [ ] T012 [P] [US1] `DashaGoldenTest` — for each golden chart,
+- [x] T012 [P] [US1] `DashaGoldenTest` — for each golden chart,
   `balanceAtBirth().mahaLord()` == `expected.dasha.balance.maha_lord` and the
   balance matches within **1 day**; plus a year-1600 birth via
   `DashaTimelineFactory.at(...)` → `accuracy() == Accuracy.REDUCED`,
@@ -102,20 +102,20 @@ balance, start before birth, end).
 
 ### Implementation
 
-- [ ] T013 [US1] Years → `Duration` conversion in
+- [x] T013 [US1] Years → `Duration` conversion in
   `core/src/main/java/com/celestia/core/dasha/DashaTimeline.java` — 1 year =
   365.25 d = 31 557 600 s exact; `BigFraction` seconds → `Duration`
   (`floor` seconds + rounded nanos); helper stays private
-- [ ] T014 [US1] `DashaBalance` computation in
+- [x] T014 [US1] `DashaBalance` computation in
   `DashaTimeline.from(Instant birthInstant, double moonLongitude, Accuracy
   accuracy, EngineVersion engineVersion)` — `Nakshatra.at(moonLongitude)` → maha
   lord; exact traversed fraction `(λ − nakStart) / (40/3)`; `elapsed` / `balance`
   = fraction / (1 − fraction) × `mahaLord.years()`; `mahaStart` =
   `birthInstant − elapsed`, `mahaEnd` = `birthInstant + balance`
-- [ ] T015 [US1] `DashaTimeline.balanceAtBirth()`, `birthInstant()`, `accuracy()`,
+- [x] T015 [US1] `DashaTimeline.balanceAtBirth()`, `birthInstant()`, `accuracy()`,
   `engineVersion()` accessors; store the exact birth-Maha start (rational seconds)
   for the running query (Phase 4)
-- [ ] T016 [US1] `DashaTimelineFactory` in
+- [x] T016 [US1] `DashaTimelineFactory` in
   `core/src/main/java/com/celestia/core/dasha/DashaTimelineFactory.java` —
   `DashaTimelineFactory(PositionProvider positions)`; `at(BirthData birth)` reads
   the Moon from `positions.positions(birth.instant())`, takes its longitude and
