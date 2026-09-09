@@ -27,7 +27,7 @@ no new dependency, no new ADR.
 
 ## Phase 1: Setup
 
-- [ ] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with a horary case
+- [x] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with a horary case
   (research.md §3–§6): a fixed number 1–249 + a fixed judgment instant + place →
   `expected.horary` — the Ascendant (longitude + lord chain), the twelve cusps
   (longitude + lord chain), the nine planetary placements (bhava, rasi), the
@@ -35,7 +35,7 @@ no new dependency, no new ADR.
   horary houses — backs SC-003), and the horary ruling planets. Reuse `lord_chain`
   / cusp / `compute_significators` helpers; add the RAMC inversion +
   `swe_houses_armc` (tropical) + `swe_get_ayanamsa_ut` round-trip.
-- [ ] T002 Regenerate the golden files (`--write`); verify determinism (re-run,
+- [x] T002 Regenerate the golden files (`--write`); verify determinism (re-run,
   diff `expected`). Update `core/src/test/resources/golden/README.md` with the
   `expected.horary` shape, the fixed number / instant / place, and the
   `horary_human_check` protocol.
@@ -44,7 +44,7 @@ no new dependency, no new ADR.
   cast chart's cusp 1 + one other cuspal sub lord from a mainstream KP horary tool
   (KP-New ayanamsa + Placidus); record in `verification.horary_human_check` and
   note any single-source value.
-- [ ] T004 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java`
+- [x] T004 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java`
   to parse `expected.horary` (ascendant, cusps, placements, ruling planets).
 
 ---

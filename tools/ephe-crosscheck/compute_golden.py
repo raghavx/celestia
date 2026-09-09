@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import math
 import os
 import sys
 from fractions import Fraction
@@ -235,13 +236,13 @@ def _sunrise_before(jd_ut: float, lat: float, lon: float):
     return r if r <= jd_ut else None
 
 
-def compute_ruling_planets(judgment: dict) -> dict:
+def compute_ruling_planets(judgment: dict, asc_override: float | None = None) -> dict:
     jd = _jd_ut(judgment["utc_instant"])
     lat, lon = judgment["latitude"], judgment["longitude"]
     flags = swe.FLG_SIDEREAL | swe.FLG_SPEED | swe.FLG_SWIEPH
 
     _cusps, ascmc = swe.houses_ex(jd, lat, lon, b"P", swe.FLG_SIDEREAL)
-    asc = ascmc[0] % 360.0
+    asc = ascmc[0] % 360.0 if asc_override is None else asc_override % 360.0
     moon = swe.calc_ut(jd, swe.MOON, flags)[0][0] % 360.0
     rahu = swe.calc_ut(jd, swe.MEAN_NODE, flags)[0][0] % 360.0
     ketu = (rahu + 180.0) % 360.0
@@ -389,6 +390,114 @@ RP_JUDGMENT = {
     "place": "New Delhi, India",
 }
 
+# --- SPEC-005: KP horary 1-249 ---
+
+# The one worked horary example — a number + a fixed judgment moment.
+HORARY_QUERY = {
+    "number": 100,
+    "utc_instant": "2026-01-01T12:00:00Z",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "place": "New Delhi, India",
+}
+
+
+def _nakshatra_subs(nak_index: int):
+    """The 9 (sub_lord, start, end) sub-spans of nakshatra `nak_index`, absolute
+    degrees, exact Fraction (== VimshottariPartition.subs)."""
+    star_lord = VIMS_NAMES[nak_index % 9]
+    base = nak_index * NAK_DEG
+    idx = VIMS_NAMES.index(star_lord)
+    out, cursor = [], base
+    for k in range(9):
+        lord = VIMS_NAMES[(idx + k) % 9]
+        end = cursor + Fraction(VIMS_YEARS[lord], 120) * NAK_DEG
+        out.append((lord, cursor, end))
+        cursor = end
+    return out
+
+
+def horary_249_arcs():
+    """The 249 arcs: the 243 sub-spans split wherever they strictly cross a 30 deg
+    sign cusp, in longitude order. Each: (sub_lord, start, end) exact Fraction."""
+    spans = []
+    for n in range(27):
+        spans.extend(_nakshatra_subs(n))
+    sign_cusps = [Fraction(30 * k) for k in range(1, 12)]
+    arcs = []
+    for lord, s, e in spans:
+        pts = [s] + sorted(c for c in sign_cusps if s < c < e) + [e]
+        for i in range(len(pts) - 1):
+            arcs.append((lord, pts[i], pts[i + 1]))
+    arcs.sort(key=lambda a: a[1])
+    return arcs
+
+
+def _armc_from_ascendant(trop_asc_deg: float, lat_deg: float, eps_deg: float) -> float:
+    """The RAMC that yields tropical Ascendant `trop_asc_deg` at latitude `lat_deg`
+    for obliquity `eps_deg`. Closed-form inversion of the Ascendant equation
+    (Meeus, Astronomical Algorithms 2nd ed. ch. 13)."""
+    lam, phi, e = math.radians(trop_asc_deg), math.radians(lat_deg), math.radians(eps_deg)
+    k = math.sin(e) * math.tan(phi)
+    a = math.cos(lam) ** 2 + math.cos(e) ** 2 * math.sin(lam) ** 2
+    b = 2 * k * math.cos(lam)
+    c = k * k - math.cos(e) ** 2
+    rho = (-b + math.sqrt(b * b - 4 * a * c)) / (2 * a)   # positive root -> Ascendant
+    cos_t = rho * math.sin(lam)
+    sin_t = (-rho * math.cos(lam) - k) / math.cos(e)
+    return math.degrees(math.atan2(sin_t, cos_t)) % 360.0
+
+
+def compute_horary(query: dict) -> dict:
+    """SPEC-005: number -> Ascendant, Placidus cusps (RAMC-seeded), planets for the
+    judgment instant, per-house significators, ruling planets."""
+    arcs = horary_249_arcs()
+    assert len(arcs) == 249, f"expected 249 arcs, got {len(arcs)}"
+    sub_lord, s, e = arcs[query["number"] - 1]
+    asc = float((s + e) / 2) % 360.0
+
+    jd = _jd_ut(query["utc_instant"])
+    lat = query["latitude"]
+    flags = swe.FLG_SIDEREAL | swe.FLG_SPEED | swe.FLG_SWIEPH
+
+    ph: dict[str, dict] = {}
+    for name, pid in GRAHA_SWE.items():
+        xx, _ = swe.calc_ut(jd, pid, flags)
+        ph[name] = _entry(xx[0], xx[3])
+    ph["KETU"] = _entry((ph["RAHU"]["longitude"] + 180.0) % 360.0, ph["RAHU"]["_speed"])
+    for v in ph.values():
+        v.pop("_speed", None)
+
+    ayan = swe.get_ayanamsa_ut(jd)
+    eps = swe.calc_ut(jd, swe.ECL_NUT, swe.FLG_SWIEPH)[0][0]
+    armc = _armc_from_ascendant((asc + ayan) % 360.0, lat, eps)
+    ct, at = swe.houses_armc(armc, lat, eps, b"P")
+    cusp_lons = [(c - ayan) % 360.0 for c in ct[:12]]
+    cusp_lons[0] = asc
+    mc = (at[1] - ayan) % 360.0
+
+    for v in ph.values():
+        v["bhava"] = _bhava_of(v["longitude"], cusp_lons)
+        v["rasi_house"] = _rasi_house(v["longitude"], asc)
+
+    houses_h = {"cusps": [dict(house=i + 1, **_chain_point(cusp_lons[i])) for i in range(12)]}
+    significators, _node = compute_significators(ph, houses_h)
+
+    return {
+        "query": dict(query),
+        "ascendant": _chain_point(asc),
+        "sub_lord": sub_lord,
+        "midheaven": _chain_point(mc),
+        "cusps": houses_h["cusps"],
+        "placements": {
+            g: {"longitude": ph[g]["longitude"], "bhava": ph[g]["bhava"],
+                "rasi_house": ph[g]["rasi_house"]}
+            for g in GRAHA_NAMES
+        },
+        "significators": significators,
+        "ruling_planets": compute_ruling_planets(query, asc_override=asc),
+    }
+
 
 def compute_houses(chart: dict) -> dict:
     """SPEC-002: 12 Placidus cusps + Ascendant + Midheaven, sidereal KP."""
@@ -449,7 +558,7 @@ def compute(chart: dict) -> tuple[dict, dict, dict, dict, dict, str]:
 
     swe_ver = getattr(swe, "version", "unknown")
     return (out, houses, significators, node_agency, dasha,
-            f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.4")
+            f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.5")
 
 
 def _entry(lon: float, speed: float) -> dict:
@@ -526,6 +635,8 @@ def main() -> int:
             }
             if chart.get("expected", {}).get("ruling_planets") is not None or chart["id"] == "obama-1961":
                 expected["ruling_planets"] = compute_ruling_planets(RP_JUDGMENT)
+            if chart.get("expected", {}).get("horary") is not None or chart["id"] == "obama-1961":
+                expected["horary"] = compute_horary(HORARY_QUERY)
             chart["expected"] = expected
             v = chart.setdefault("verification", {})
             v["positions_reference"] = generated_by
@@ -534,6 +645,9 @@ def main() -> int:
             v["dasha_reference"] = generated_by
             v.setdefault("significators_human_check", "pending - see golden/README.md (SC-006)")
             v.setdefault("dasha_human_check", "pending - see golden/README.md (SC-006)")
+            if "horary" in expected:
+                v["horary_reference"] = generated_by
+                v.setdefault("horary_human_check", "pending - see golden/README.md (SC-006)")
             if v.get("status") == "birth_data_sourced":
                 v["status"] = "expected_generated"
             p.write_text(json.dumps(chart, indent=2) + "\n")
