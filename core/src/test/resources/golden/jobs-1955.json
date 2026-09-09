@@ -25,8 +25,8 @@
     "position_flags": "SEFLG_SIDEREAL | SEFLG_SPEED (SWIEPH, MOSEPH fallback)"
   },
   "expected": {
-    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.3",
-    "generated_at": "2026-09-09T09:04:34+00:00",
+    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.4",
+    "generated_at": "2026-09-09T17:49:56+00:00",
     "grahas": {
       "SUN": {
         "longitude": 312.609291,
@@ -744,14 +744,70 @@
           "MERCURY"
         ]
       }
+    },
+    "dasha": {
+      "year_days": 365.25,
+      "balance": {
+        "maha_lord": "SATURN",
+        "elapsed_fraction": 0.84563645,
+        "elapsed_days": 5868.506,
+        "balance_days": 1071.244,
+        "maha_start": "1939-01-31T15:07:00Z",
+        "maha_end": "1958-01-31T09:07:00Z"
+      },
+      "running": {
+        "query_utc": "1995-02-25T03:15:00Z",
+        "query_offset_years": 40,
+        "lords": [
+          "VENUS",
+          "SATURN",
+          "SATURN",
+          "VENUS",
+          "SATURN"
+        ],
+        "periods": [
+          {
+            "level": "MAHADASHA",
+            "lord": "VENUS",
+            "start": "1982-01-31T09:07:00Z",
+            "end": "2002-01-31T09:07:00Z"
+          },
+          {
+            "level": "ANTARDASHA",
+            "lord": "SATURN",
+            "start": "1994-12-01T18:07:00Z",
+            "end": "1998-01-31T09:07:00Z"
+          },
+          {
+            "level": "PRATYANTARDASHA",
+            "lord": "SATURN",
+            "start": "1994-12-01T18:07:00Z",
+            "end": "1995-06-02T21:17:30Z"
+          },
+          {
+            "level": "SOOKSHMA",
+            "lord": "VENUS",
+            "start": "1995-02-05T09:03:15Z",
+            "end": "1995-03-07T21:35:00Z"
+          },
+          {
+            "level": "PRANA",
+            "lord": "SATURN",
+            "start": "1995-02-24T23:05:38Z",
+            "end": "1995-03-01T19:04:39Z"
+          }
+        ]
+      }
     }
   },
   "verification": {
-    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.3",
+    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.4",
     "lordchain_human_check": "pending",
     "status": "expected_generated",
-    "houses_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.3",
-    "significators_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.3",
-    "significators_human_check": "pending - see golden/README.md (SC-006)"
+    "houses_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.4",
+    "significators_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.4",
+    "significators_human_check": "pending - see golden/README.md (SC-006)",
+    "dasha_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.4",
+    "dasha_human_check": "pending - see golden/README.md (SC-006)"
   }
 }

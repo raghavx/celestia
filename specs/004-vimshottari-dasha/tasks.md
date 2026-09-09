@@ -24,20 +24,20 @@ golden-chart harness. No new module, no new dependency, no new ADR.
 
 ## Phase 1: Setup
 
-- [ ] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with the balance +
+- [x] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with the balance +
   running-stack rules (research.md §1, §4): emit `expected.dasha.balance`
   (`maha_lord`, `elapsed_fraction`, `elapsed_days`, `balance_days`) and
   `expected.dasha.running` (query instant = `birthInstant + 40 Julian years`,
   research.md §4 → the five period lords with start/end). Reuse the existing Moon
   computation and the `lord_chain` / nakshatra helpers; 1 year = 365.25 days.
-- [ ] T002 Regenerate the golden files (`--write`); verify determinism (re-run,
+- [x] T002 Regenerate the golden files (`--write`); verify determinism (re-run,
   diff `expected`). Update `core/src/test/resources/golden/README.md` with the new
   fields, the `birth + 40 years` query convention, and the year-length note.
 - [ ] T003 [P] SC-006: transcribe **one** golden chart's birth Mahadasha lord and
   balance from a KP textbook worked example (or two agreeing mainstream KP tools
   on KP-New ayanamsa); record it in `verification.dasha_human_check` and note any
   single-source value.
-- [ ] T004 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java`
+- [x] T004 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java`
   to parse `expected.dasha.balance` and `expected.dasha.running`.
 
 ---
