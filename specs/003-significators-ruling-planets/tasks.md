@@ -23,16 +23,16 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 
 ## Phase 1: Setup
 
-- [ ] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with the four-step
+- [x] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with the four-step
   significator algorithm (research.md §1) and the ruling-planet rules (§3): emit
   `expected.significators.by_house` (12 lists of `{graha, steps}`),
   `expected.significators.by_graha` (9 entries), `expected.node_agency` (Rahu /
   Ketu agents + significations). Reuse the existing `lord_chain`, `bhava`, cusp
   helpers.
-- [ ] T002 Add **one** `expected.ruling_planets` block to one golden file: a fixed
+- [x] T002 Add **one** `expected.ruling_planets` block to one golden file: a fixed
   judgment instant + place (independent of the birth data) → RP set with sources,
   the resolved KP weekday, day lord, and sunrise instant.
-- [ ] T003 Regenerate the golden files (`--write`); verify determinism (re-run,
+- [x] T003 Regenerate the golden files (`--write`); verify determinism (re-run,
   diff `expected`). Update `core/src/test/resources/golden/README.md` with the new
   fields and settings.
 - [ ] T004 [P] SC-006: transcribe the twelve per-house significator lists for

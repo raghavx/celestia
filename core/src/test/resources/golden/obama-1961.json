@@ -25,8 +25,8 @@
     "position_flags": "SEFLG_SIDEREAL | SEFLG_SPEED (SWIEPH, MOSEPH fallback)"
   },
   "expected": {
-    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.2",
-    "generated_at": "2026-09-08T09:31:35+00:00",
+    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.3",
+    "generated_at": "2026-09-09T09:05:13+00:00",
     "grahas": {
       "SUN": {
         "longitude": 109.326425,
@@ -301,12 +301,498 @@
         "sub_lord": "MERCURY",
         "sub_sub_lord": "MERCURY"
       }
+    },
+    "significators": {
+      "by_house": [
+        [
+          {
+            "graha": "KETU",
+            "steps": [
+              1,
+              2
+            ]
+          },
+          {
+            "graha": "RAHU",
+            "steps": [
+              1
+            ]
+          },
+          {
+            "graha": "MERCURY",
+            "steps": [
+              1,
+              3
+            ]
+          },
+          {
+            "graha": "MARS",
+            "steps": [
+              2
+            ]
+          },
+          {
+            "graha": "SATURN",
+            "steps": [
+              2,
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "JUPITER",
+            "steps": [
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "KETU",
+            "steps": [
+              3
+            ]
+          },
+          {
+            "graha": "MARS",
+            "steps": [
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "MOON",
+            "steps": [
+              1,
+              2
+            ]
+          },
+          {
+            "graha": "VENUS",
+            "steps": [
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "VENUS",
+            "steps": [
+              2
+            ]
+          },
+          {
+            "graha": "SUN",
+            "steps": [
+              3
+            ]
+          },
+          {
+            "graha": "MERCURY",
+            "steps": [
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "SUN",
+            "steps": [
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "graha": "MARS",
+            "steps": [
+              1
+            ]
+          },
+          {
+            "graha": "JUPITER",
+            "steps": [
+              1
+            ]
+          },
+          {
+            "graha": "SATURN",
+            "steps": [
+              1
+            ]
+          },
+          {
+            "graha": "MERCURY",
+            "steps": [
+              2,
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "KETU",
+            "steps": [
+              1,
+              2
+            ]
+          },
+          {
+            "graha": "VENUS",
+            "steps": [
+              1
+            ]
+          },
+          {
+            "graha": "MARS",
+            "steps": [
+              1,
+              2
+            ]
+          },
+          {
+            "graha": "RAHU",
+            "steps": [
+              1,
+              2
+            ]
+          },
+          {
+            "graha": "JUPITER",
+            "steps": [
+              1
+            ]
+          },
+          {
+            "graha": "SATURN",
+            "steps": [
+              1
+            ]
+          },
+          {
+            "graha": "SUN",
+            "steps": [
+              2
+            ]
+          },
+          {
+            "graha": "MOON",
+            "steps": [
+              3,
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "SUN",
+            "steps": [
+              3
+            ]
+          },
+          {
+            "graha": "MERCURY",
+            "steps": [
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "VENUS",
+            "steps": [
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "KETU",
+            "steps": [
+              3
+            ]
+          },
+          {
+            "graha": "MARS",
+            "steps": [
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "JUPITER",
+            "steps": [
+              4
+            ]
+          }
+        ],
+        [
+          {
+            "graha": "MERCURY",
+            "steps": [
+              1
+            ]
+          },
+          {
+            "graha": "JUPITER",
+            "steps": [
+              2,
+              4
+            ]
+          },
+          {
+            "graha": "SATURN",
+            "steps": [
+              2
+            ]
+          }
+        ]
+      ],
+      "by_graha": {
+        "KETU": {
+          "1": [
+            1,
+            2
+          ],
+          "3": [
+            3
+          ],
+          "7": [
+            1,
+            2
+          ],
+          "10": [
+            3
+          ]
+        },
+        "VENUS": {
+          "4": [
+            4
+          ],
+          "5": [
+            2
+          ],
+          "7": [
+            1
+          ],
+          "9": [
+            4
+          ]
+        },
+        "SUN": {
+          "5": [
+            3
+          ],
+          "6": [
+            1,
+            2,
+            3
+          ],
+          "7": [
+            2
+          ],
+          "8": [
+            3
+          ]
+        },
+        "MOON": {
+          "4": [
+            1,
+            2
+          ],
+          "7": [
+            3,
+            4
+          ]
+        },
+        "MARS": {
+          "1": [
+            2
+          ],
+          "3": [
+            4
+          ],
+          "6": [
+            1
+          ],
+          "7": [
+            1,
+            2
+          ],
+          "10": [
+            4
+          ]
+        },
+        "RAHU": {
+          "1": [
+            1
+          ],
+          "7": [
+            1,
+            2
+          ]
+        },
+        "JUPITER": {
+          "2": [
+            4
+          ],
+          "6": [
+            1
+          ],
+          "7": [
+            1
+          ],
+          "11": [
+            4
+          ],
+          "12": [
+            2,
+            4
+          ]
+        },
+        "SATURN": {
+          "1": [
+            2,
+            4
+          ],
+          "6": [
+            1
+          ],
+          "7": [
+            1
+          ],
+          "12": [
+            2
+          ]
+        },
+        "MERCURY": {
+          "1": [
+            1,
+            3
+          ],
+          "5": [
+            4
+          ],
+          "6": [
+            2,
+            4
+          ],
+          "8": [
+            4
+          ],
+          "12": [
+            1
+          ]
+        }
+      }
+    },
+    "node_agency": {
+      "RAHU": {
+        "conjunct_grahas": [
+          "MARS"
+        ],
+        "sign_lord": "SUN",
+        "star_lord": "KETU",
+        "agents": [
+          "KETU",
+          "SUN",
+          "MARS"
+        ]
+      },
+      "KETU": {
+        "conjunct_grahas": [],
+        "sign_lord": "SATURN",
+        "star_lord": "MARS",
+        "agents": [
+          "MARS",
+          "SATURN"
+        ]
+      }
+    },
+    "ruling_planets": {
+      "judgment": {
+        "utc_instant": "2026-01-01T12:00:00Z",
+        "latitude": 28.6139,
+        "longitude": 77.209,
+        "place": "New Delhi, India"
+      },
+      "ascendant": {
+        "longitude": 76.682394,
+        "sign": "GEMINI",
+        "sign_lord": "MERCURY",
+        "nakshatra": "ARDRA",
+        "pada": 4,
+        "star_lord": "RAHU",
+        "sub_lord": "VENUS",
+        "sub_sub_lord": "SATURN"
+      },
+      "moon": {
+        "longitude": 50.100296,
+        "sign": "TAURUS",
+        "sign_lord": "VENUS",
+        "nakshatra": "ROHINI",
+        "pada": 4,
+        "star_lord": "MOON",
+        "sub_lord": "KETU",
+        "sub_sub_lord": "RAHU"
+      },
+      "sunrise_utc": "2026-01-01T01:43:38Z",
+      "weekday": "THURSDAY",
+      "day_lord": "JUPITER",
+      "day_lord_fallback": false,
+      "include_sub_lords": true,
+      "planets": [
+        {
+          "graha": "KETU",
+          "sources": [
+            "MOON_SUB",
+            "NODE"
+          ]
+        },
+        {
+          "graha": "VENUS",
+          "sources": [
+            "LAGNA_SUB",
+            "MOON_SIGN"
+          ]
+        },
+        {
+          "graha": "MOON",
+          "sources": [
+            "MOON_STAR"
+          ]
+        },
+        {
+          "graha": "RAHU",
+          "sources": [
+            "LAGNA_STAR",
+            "NODE"
+          ]
+        },
+        {
+          "graha": "JUPITER",
+          "sources": [
+            "DAY_LORD"
+          ]
+        },
+        {
+          "graha": "MERCURY",
+          "sources": [
+            "LAGNA_SIGN"
+          ]
+        }
+      ]
     }
   },
   "verification": {
-    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.2",
+    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.3",
     "lordchain_human_check": "pending",
     "status": "expected_generated",
-    "houses_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.2"
+    "houses_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.3",
+    "significators_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.3",
+    "significators_human_check": "pending - see golden/README.md (SC-006)"
   }
 }
