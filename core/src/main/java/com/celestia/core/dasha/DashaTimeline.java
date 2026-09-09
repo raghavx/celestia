@@ -8,6 +8,8 @@ import com.celestia.ephemeris.Graha;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.numbers.fraction.BigFraction;
 
 /**
@@ -86,6 +88,96 @@ public final class DashaTimeline {
         return new DashaBalance(
                 mahaLord, elapsedFraction.doubleValue(),
                 toDuration(elapsedSeconds), toDuration(balanceSeconds), mahaStart, mahaEnd);
+    }
+
+    /**
+     * The stack of active periods at {@code query}, from Mahadasha down to
+     * {@code depth} (1..5). Half-open {@code [start, end)} at every level.
+     *
+     * @throws IllegalArgumentException if {@code query} is before the birth instant,
+     *     or {@code depth} is outside 1..5
+     */
+    public RunningDasha running(Instant query, int depth) {
+        if (query.isBefore(birthInstant)) {
+            throw new IllegalArgumentException("query is before the birth instant: " + query);
+        }
+        if (depth < 1 || depth > 5) {
+            throw new IllegalArgumentException("depth out of 1..5: " + depth);
+        }
+
+        // seconds from the start of the birth Mahadasha (>= 0)
+        BigFraction q = elapsedSeconds.add(durationSeconds(Duration.between(birthInstant, query)));
+
+        List<DashaPeriod> stack = new ArrayList<>(depth);
+
+        // level 1 — the sequence from the birth-Maha start is periodic with a 120-year period
+        BigInteger cycles = floor(q.divide(CYCLE_SECONDS));
+        BigFraction cycleStart = CYCLE_SECONDS.multiply(BigFraction.of(cycles));
+        BigFraction offset = q.subtract(cycleStart);
+
+        Graha lord = mahaLord;
+        BigFraction cursor = BigFraction.ZERO;
+        BigFraction start = null;
+        BigFraction end = null;
+        for (int i = 0; i < 9; i++) {
+            BigFraction span = CYCLE_SECONDS.multiply(BigFraction.of(lord.years(), Graha.CYCLE_YEARS));
+            BigFraction next = cursor.add(span);
+            if (offset.compareTo(cursor) >= 0 && offset.compareTo(next) < 0) {
+                start = cycleStart.add(cursor);
+                end = cycleStart.add(next);
+                break;
+            }
+            cursor = next;
+            lord = lord.next();
+        }
+
+        List<Graha> parentLords = List.of();
+        stack.add(period(DashaLevel.MAHADASHA, lord, start, end, parentLords));
+
+        // levels 2..depth — recursive nine-way split of the parent period
+        for (int rank = 2; rank <= depth; rank++) {
+            parentLords = append(parentLords, lord);
+            BigFraction childCursor = start;
+            for (VimshottariSplit.Portion portion : VimshottariSplit.of(end.subtract(start), lord)) {
+                BigFraction childEnd = childCursor.add(portion.span());
+                if (q.compareTo(childCursor) >= 0 && q.compareTo(childEnd) < 0) {
+                    lord = portion.lord();
+                    start = childCursor;
+                    end = childEnd;
+                    break;
+                }
+                childCursor = childEnd;
+            }
+            stack.add(period(DashaLevel.ofRank(rank), lord, start, end, parentLords));
+        }
+
+        return new RunningDasha(query, stack);
+    }
+
+    /** A period given its bounds as exact seconds from the birth-Mahadasha start. */
+    private DashaPeriod period(
+            DashaLevel level, Graha lord, BigFraction startFromMahaStart, BigFraction endFromMahaStart,
+            List<Graha> parentLords) {
+        return new DashaPeriod(
+                level, lord,
+                plusSeconds(birthInstant, startFromMahaStart.subtract(elapsedSeconds)),
+                plusSeconds(birthInstant, endFromMahaStart.subtract(elapsedSeconds)),
+                parentLords);
+    }
+
+    private static List<Graha> append(List<Graha> lords, Graha lord) {
+        List<Graha> out = new ArrayList<>(lords);
+        out.add(lord);
+        return out;
+    }
+
+    private static BigInteger floor(BigFraction f) {
+        BigInteger[] qr = f.getNumerator().divideAndRemainder(f.getDenominator());
+        return qr[1].signum() < 0 ? qr[0].subtract(BigInteger.ONE) : qr[0];
+    }
+
+    static BigFraction durationSeconds(Duration d) {
+        return BigFraction.of(d.getSeconds()).add(BigFraction.of(d.getNano(), 1_000_000_000L));
     }
 
     // --- exact-seconds <-> Instant / Duration -------------------------------------------------

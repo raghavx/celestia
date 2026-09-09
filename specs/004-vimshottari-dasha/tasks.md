@@ -136,28 +136,28 @@ five lords (exact) and the Maha/Antar boundaries (within 1 day).
 
 ### Tests (write first)
 
-- [ ] T017 [P] [US2] `RunningDashaTest` in
+- [x] T017 [P] [US2] `RunningDashaTest` in
   `core/src/test/java/com/celestia/core/dasha/RunningDashaTest.java` — depth 5:
   every level populated, each period `contains` the query, each nested in the
   previous; depth 3 returns exactly Maha / Antar / Pratyantar; a query 130 years
   after birth resolves in the second Vimshottari cycle; query `< birthInstant` →
   `IllegalArgumentException`; depth 0 or 6 → `IllegalArgumentException`
-- [ ] T018 [P] [US2] `DashaBoundaryTest` (SC-004) — a query exactly at a period's
+- [x] T018 [P] [US2] `DashaBoundaryTest` (SC-004) — a query exactly at a period's
   `start` returns that period (not its predecessor) at **every** level; a query
   exactly at `mahaEnd` returns the next Mahadasha and its first child at each
   deeper level
-- [ ] T019 [P] [US2] `RunningDashaGoldenTest` — for each golden chart plus the
+- [x] T019 [P] [US2] `RunningDashaGoldenTest` — for each golden chart plus the
   `birthInstant + 40 Julian years` query instant, the five running lords ==
   `expected.dasha.running.lords` **exactly**, and the Mahadasha and Antardasha
   boundaries match within **1 day**; `@EnabledIf` ephemeris data
-- [ ] T020 [US2] Mahadasha resolution in `DashaTimeline` — the Vimshottari
+- [x] T020 [US2] Mahadasha resolution in `DashaTimeline` — the Vimshottari
   sequence from the birth-Maha start is periodic with a 120-year period; find the
   Maha containing the query by fast-forwarding whole cycles then a ≤ 9-step walk;
   absolute `start` / `end` as exact cumulative seconds from the birth instant
-- [ ] T021 [US2] Recursive level split in `DashaTimeline` — `VimshottariSplit` the
+- [x] T021 [US2] Recursive level split in `DashaTimeline` — `VimshottariSplit` the
   parent `[start, end)` (exact seconds) by its lord, find the child containing the
   query, recurse to depth; build each `DashaPeriod` with its `parentLords` chain
-- [ ] T022 [US2] `DashaTimeline.running(Instant query, int depth)` → `RunningDasha`
+- [x] T022 [US2] `DashaTimeline.running(Instant query, int depth)` → `RunningDasha`
   — validates `query ≥ birthInstant` and `1 ≤ depth ≤ 5`; half-open `[start, end)`
   at every level
 
