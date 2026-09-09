@@ -71,29 +71,37 @@ per-graha table iff `G` is in the four-step significators of `H`.
 
 ### User Story 3 - Rahu / Ketu agency (Priority: P2)
 
-Rahu and Ketu have no sign rulership, so they signify by **agency**: a node
-signifies the houses signified by (a) any graha it is **conjoined** with in the
-same bhava, (b) the lord of the **sign** it occupies, and (c) the lord of the
-**star** it occupies. Graha aspects to the nodes are **not** used by default (KP
-practice varies); this is a configuration flag, default off.
+Rahu and Ketu have no sign rulership, so they signify by **agency**: a node acts
+for its **agents** — the non-node grahas conjoined with it in the same bhava, the
+lord of the **sign** it occupies, and the lord of the **star** it occupies. Those
+agents are folded into the **effective occupants** of the node's bhava, so they
+(and the grahas in their stars) become significators of that house through the
+four-step machinery of User Story 1. The node itself is a step-2 occupant of its
+bhava; its own signification set is then just its row of the per-house lists
+(`grahaSignificators(node)`), with no separate step. Graha aspects to the nodes
+are **not** used by default (KP practice varies); this is a configuration flag,
+default off.
 
 **Why this priority**: The nodes are frequently the cuspal sub lord and are
 treated by KP as very strong; getting their significations right is essential, but
 the four-step machinery for the other seven must exist first.
 
-**Independent Test**: For each golden chart, each node's agency-derived
-significations match the reference.
+**Independent Test**: For each golden chart, each node's `NodeAgency` (conjunct
+grahas, sign lord, star lord, agents) matches the reference, and every agent
+appears as a step-2 occupant of the node's bhava.
 
 **Acceptance Scenarios**:
 
-1. **Given** a node conjoined with a graha in the same bhava, **When** its
-   significations are computed, **Then** they include every house that graha signifies.
-2. **Given** a node alone in its bhava, **When** its significations are computed,
-   **Then** they are the union of the houses signified by its sign lord and its
-   star lord.
-3. **Given** a node whose sign lord signifies houses {2, 11} and whose star lord
-   signifies {6, 10}, **When** its significations are computed, **Then** they are
-   {2, 6, 10, 11} (graha aspects to the node are not used in v1).
+1. **Given** a node conjoined with a graha in the same bhava, **When** the node's
+   agency is computed, **Then** that graha is one of the node's agents and is a
+   step-2 (effective-occupant) significator of the node's bhava.
+2. **Given** a node alone in its bhava, **When** its agency is computed, **Then**
+   its agents are exactly the lord of the sign it occupies and the lord of the
+   star it occupies.
+3. **Given** a node in bhava H, **When** house H's significators are computed,
+   **Then** each of the node's agents carries `OCCUPANT`, and the grahas in an
+   agent's star carry `STAR_OF_OCCUPANT`, for house H (graha aspects to the node
+   are not used in v1).
 
 ---
 
@@ -151,8 +159,8 @@ every run and platform.
 ### Edge Cases
 
 - A house with an occupant that is a node → the node is a step-2 occupant, and its
-  own agency (US3) also contributes; the node's *agency* significations are added
-  to the house's significators as step 2.
+  *agents* (US3) are folded into that house's effective occupants — each agent as
+  a step-2 significator, grahas in an agent's star as step-1.
 - Two grahas in exact conjunction (same bhava, near-identical longitude) → both
   are step-1 sources for each other's star only if in each other's star; conjunction
   matters for node agency, not for steps 1–4.
@@ -188,14 +196,17 @@ every run and platform.
 - **FR-006**: The engine MUST produce the inverse **per-graha significator table**:
   for each graha, the houses it signifies with the qualifying steps, consistent
   with the per-house lists.
-- **FR-007**: For **Rahu** and **Ketu**, significations MUST be derived by agency —
-  the union of the houses signified by: any graha conjoined with the node in the
-  same bhava, the lord of the node's occupied sign, and the lord of the node's
-  occupied star. Graha aspects to the nodes are **not** used in v1; the extension
-  point is a later `SignificatorTable.of(chart, options)` overload (there is no
-  aspect scheme yet).
-- **FR-008**: A node MUST also appear as a step-2 occupant of its own bhava, and
-  its agency significations MUST be merged into that bhava's significator list.
+- **FR-007**: For **Rahu** and **Ketu**, agency MUST be resolved as a set of
+  **agents** — the non-node grahas conjoined with the node in the same bhava, the
+  lord of the node's occupied sign, and the lord of the node's occupied star —
+  exposed as a `NodeAgency` value. Graha aspects to the nodes are **not** used in
+  v1; the extension point is a later `SignificatorTable.of(chart, options)`
+  overload (there is no aspect scheme yet).
+- **FR-008**: A node MUST appear as a step-2 occupant of its own bhava, and its
+  **agents** MUST be folded into that bhava's **effective occupants** — so each
+  agent is a step-2 significator of the bhava and the grahas in an agent's star
+  are step-1 significators of it. The node's own signification set is then its
+  row of the per-graha table (`grahaSignificators(node)`), with no extra step.
 - **FR-009**: Given a judgment instant (UTC) and a place, the engine MUST return
   the ruling planets: sign lord, star lord and sub lord of the Ascendant; sign
   lord, star lord and sub lord of the Moon; and the day lord.
@@ -233,8 +244,9 @@ every run and platform.
 - **House significators**: for one house — the ordered, de-duplicated list of
   significators.
 - **Graha significators**: for one graha — the houses it signifies, with steps.
-- **Node agency**: for Rahu or Ketu — the sources (conjunct graha, sign lord, star
-  lord) and the resulting significations.
+- **Node agency**: for Rahu or Ketu — the conjunct grahas, the occupied-sign lord,
+  the occupied-star lord, and their union (`agents`). It carries no separate
+  signification set; the node's significations are read from the per-graha table.
 - **Ruling planet**: a graha and its source(s) at a judgment moment.
 - **Ruling planets**: the set for one judgment instant + place, with an
   accuracy flag and a day-lord-fallback flag.

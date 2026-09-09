@@ -51,3 +51,10 @@
   T033 compares accessor outputs (A1, D1); FR-017 out-of-range RP test added to
   T026 (C2).
 - Ready for `/speckit-plan` / `/speckit-tasks` / `/speckit-implement`.
+- `/speckit-analyze` (2026-09-09, post-merge): F1 remediated — FR-007/FR-008,
+  US3 (narrative + Independent Test + all 3 acceptance scenarios), the node Edge
+  Case, and the "Node agency" Key Entity reworded to the delivered
+  effective-occupant fold (`research.md §2`): a node's agents are folded into its
+  bhava's effective occupants; `NodeAgency` carries no separate signification set.
+  F3 remediated — T022 wording corrected to the FR-008 invariant. F2 (SC-006 /
+  T004 independent textbook cross-check) still open.

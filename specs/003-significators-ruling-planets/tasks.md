@@ -113,7 +113,7 @@ Builds on SPEC-002 (merged to `master`): `NatalChart`, `Cusp`, `HousePlacement`,
 ### Tests (write first)
 
 - [x] T021 [P] [US3] `NodeAgencyTest` — a node conjoined with a graha → agents include that graha; a node alone → agents = `{signLord, starLord}`; `nodeAgency(SUN)` throws `IllegalArgumentException`
-- [x] T022 [P] [US3] `NodeAgencyGoldenTest` — for each golden chart, `nodeAgency(RAHU)` / `nodeAgency(KETU)` == `expected.node_agency`; and a node's `grahaSignificators` covers every house signified by its agents
+- [x] T022 [P] [US3] `NodeAgencyGoldenTest` — for each golden chart, `nodeAgency(RAHU)` / `nodeAgency(KETU)` == `expected.node_agency`; and every agent is a step-2 (`OCCUPANT`) significator of the node's bhava, with the node itself present there too (FR-008)
 
 ### Implementation
 
