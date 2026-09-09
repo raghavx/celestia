@@ -221,10 +221,10 @@ Ascendant.
 
 ## Phase 7: User Story 5 — Reproducible correctness (P2)
 
-- [ ] T024 [P] [US5] `HoraryDeterminismTest` — `Horary249.arcs()` stable across
+- [x] T024 [P] [US5] `HoraryDeterminismTest` — `Horary249.arcs()` stable across
   two calls; `HoraryChartFactory.cast` twice on the golden case → equal
   `NatalChart` (value equality); `HoraryRulingPlanets.at` twice → equal
-- [ ] T025 [US5] `.github/workflows/ci.yml` — add `Horary249SnapshotTest`,
+- [x] T025 [US5] `.github/workflows/ci.yml` — add `Horary249SnapshotTest`,
   `HoraryGoldenTest`, `HoraryRulingPlanetsGoldenTest`, `HoraryDeterminismTest` to
   the OS-matrix determinism step
 
