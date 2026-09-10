@@ -38,7 +38,11 @@ jobs:
         run: bash scripts/fetch-ephe.sh
 
       - name: Build, test, verify
-        run: ./mvnw -B -ntp verify
+        # SPEC-008: the persistence integration tests (*IT) use Testcontainers
+        # (mysql:8.4). ubuntu-latest has Docker; the macOS runner does not, so
+        # failsafe is skipped there — the persistence layer is not OS-sensitive
+        # and the golden-chart cross-OS check below still runs on both.
+        run: ./mvnw -B -ntp verify -DskipITs=${{ runner.os == 'macOS' }}
 
       # SPEC-001 SC-005 / FR-014: the golden-chart output must be identical
       # across OS + arch. Fingerprint the deterministic golden test's inputs
