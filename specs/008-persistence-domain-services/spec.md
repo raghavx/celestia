@@ -228,11 +228,13 @@ validated in CI.
   stored as a UTC timestamp and reloads to the identical `Instant`.
 - **FR-004**: A `BirthDataStore` MUST expose save (upsert by `user_id`) and load;
   the loaded value MUST yield a `BirthData` identical to resolution time.
-- **FR-005**: A chart-cache service MUST, for a `(user, chart kind)` request,
-  return the stored `chart` row when its `engine_version` equals the current
-  engine version, and otherwise recompute via the KP engine, overwrite the row
-  (including dependent `dasha_period` / `horary_query` rows), and return the
-  fresh result.
+- **FR-005**: A chart-cache service MUST, for a natal-chart request, return the
+  stored `chart` row when its `engine_version` equals the current engine
+  version, and otherwise recompute via the KP engine, overwrite the `chart` row
+  transactionally, and return the fresh result. (Populating the dependent
+  `dasha_period` rows is SPEC-013's; horary charts — which need a judgment
+  moment / place — are SPEC-015's. The `chart.HORARY` kind and `horary_query`
+  table are created here, unused.)
 - **FR-006**: The **current engine version** MUST be a single well-defined string
   assembled from `EngineVersion` (rules + SE port + ΔT model + ephemeris data
   identity) and available as an injectable value.

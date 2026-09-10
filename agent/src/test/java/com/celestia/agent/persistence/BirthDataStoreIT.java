@@ -7,6 +7,7 @@ import com.celestia.agent.persistence.store.BirthDataStore;
 import com.celestia.agent.persistence.store.StoredBirth;
 import com.celestia.agent.persistence.store.UserAccountService;
 import com.celestia.geo.ResolvedBirth;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,19 @@ class BirthDataStoreIT extends PersistenceIT {
         assertThat(r.birthTimeKnown()).isTrue();
         assertThat(r.flags()).isEmpty();
         assertThat(r.versions()).isEqualTo(original.versions());
+    }
+
+    @Test
+    void aPre1970BirthRoundTripsToTheExactInstant() {
+        long userId = newUser("+911111100005");
+        ResolvedBirth original = BirthFixtures.kolkata1943(); // 1943 — below the TIMESTAMP floor
+
+        store.save(userId, "Kamala", "Calcutta", original);
+        ResolvedBirth r = store.load(userId).orElseThrow().resolved();
+
+        assertThat(r.instant()).isEqualTo(Instant.parse("1943-06-01T03:30:00Z"));
+        assertThat(r.offsetApplied()).hasToString("+06:30");
+        assertThat(store.load(userId).orElseThrow().birthData()).isEqualTo(original.birthData());
     }
 
     @Test

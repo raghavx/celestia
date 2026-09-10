@@ -42,6 +42,20 @@ final class BirthFixtures {
                 new DatasetVersions("2026a", "2025b.26"));
     }
 
+    /** Kolkata, 1943 — a pre-1970 birth under India's war-time +06:30 (SPEC-007 corpus). */
+    static ResolvedBirth kolkata1943() {
+        return new ResolvedBirth(
+                LocalDateTime.of(1943, 6, 1, 10, 0),
+                ZoneId.of("Asia/Kolkata"),
+                Instant.parse("1943-06-01T03:30:00Z"),
+                ZoneOffset.ofHoursMinutes(6, 30),
+                22.5726, 88.3639,
+                "Kolkata, West Bengal, India", "India", "fixture",
+                null, true,
+                EnumSet.noneOf(BirthMomentFlag.class),
+                new DatasetVersions("2026a", "2025b.26"));
+    }
+
     /** Stated zone differs from geocoded → ZONE_CONFLICT + a recorded stated zone. */
     static ResolvedBirth karachiZoneConflict() {
         return new ResolvedBirth(

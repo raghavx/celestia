@@ -1,8 +1,11 @@
 # Phase 1 Data Model: Persistence & Domain Services (SPEC-008)
 
 MySQL 8.4, `utf8mb4_0900_ai_ci`. All DDL via Flyway `V1..V6`. Entities are
-`com.celestia.agent.persistence.entity`, internal. Timestamps are
-`TIMESTAMP` with `DEFAULT CURRENT_TIMESTAMP` (and `ON UPDATE` for `updated_at`).
+`com.celestia.agent.persistence.entity`, internal. Bookkeeping columns
+(`created_at` / `updated_at` / `consent_at` / …) are `TIMESTAMP` with
+`DEFAULT CURRENT_TIMESTAMP`. Columns that hold a **historical** instant
+(`birth_utc`, `dasha_period.*_utc`, `judged_utc`) are **`DATETIME(0)`** —
+`TIMESTAMP` only spans 1970–2038 and births predate 1970.
 
 ## Tables
 
@@ -11,7 +14,8 @@ MySQL 8.4, `utf8mb4_0900_ai_ci`. All DDL via Flyway `V1..V6`. Entities are
 | Column | Type | Notes |
 |--------|------|-------|
 | `id` | `BIGINT` PK auto | |
-| `phone_e164` | `VARCHAR(20)` | **UNIQUE**; E.164; after "forget me" becomes `deleted:<sha256>` |
+| `phone_e164` | `VARCHAR(20)` null | **UNIQUE**; E.164; `NULL` after "forget me" (MySQL allows many NULLs under a UNIQUE key, so re-contact makes a fresh user) |
+| `phone_hash` | `CHAR(64)` null | SHA-256 hex of the E.164, retained after "forget me" (ADR-0016; a pepper is SPEC-016) |
 | `wa_id` | `VARCHAR(32)` null | WhatsApp id |
 | `display_name` | `VARCHAR(120)` null | PII |
 | `locale` | `VARCHAR(16)` null | |
@@ -36,7 +40,7 @@ MySQL 8.4, `utf8mb4_0900_ai_ci`. All DDL via Flyway `V1..V6`. Entities are
 | `country` | `VARCHAR(120)` | |
 | `lat` / `lon` | `DECIMAL(9,6)` / `DECIMAL(9,6)` | exact as resolved |
 | `zone_id` | `VARCHAR(64)` | IANA id |
-| `birth_utc` | `TIMESTAMP(0)` | the `Instant`, second precision |
+| `birth_utc` | `DATETIME(0)` | the `Instant`, second precision |
 | `offset_applied` | `VARCHAR(16)` | `ZoneOffset.getId()` |
 | `geocode_source` | `VARCHAR(32)` | |
 | `stated_zone_id` | `VARCHAR(64)` null | set ⇔ `ZONE_CONFLICT` |
@@ -61,7 +65,7 @@ MySQL 8.4, `utf8mb4_0900_ai_ci`. All DDL via Flyway `V1..V6`. Entities are
 
 `id`, `chart_id` (FK → `chart` `ON DELETE CASCADE`), `level` (`VARCHAR(16)` —
 `MAHADASHA`…`PRANA`), `lord` (`VARCHAR(12)`), `start_utc` / `end_utc`
-(`TIMESTAMP(0)`), `parent_id` (`BIGINT` null, self-FK). Index `(chart_id, level)`.
+(`DATETIME(0)`), `parent_id` (`BIGINT` null, self-FK). Index `(chart_id, level)`.
 
 **SPEC-008 creates the table but does NOT populate it.** `ChartCacheService`
 returns the computed `DashaTimeline` object from `computed_json`; a flattened
@@ -74,7 +78,7 @@ now would be the "dead schema" the billing tables were deferred to avoid.
 ### `horary_query` (V3)
 
 `id`, `chart_id` (FK → `chart` `ON DELETE CASCADE`), `number_1_249` (`SMALLINT`,
-1..249), `question` (`VARCHAR(1000)` null), `judged_utc` (`TIMESTAMP(0)`).
+1..249), `question` (`VARCHAR(1000)` null), `judged_utc` (`DATETIME(0)`).
 
 ### `prediction` (V4)
 
@@ -114,7 +118,7 @@ now would be the "dead schema" the billing tables were deferred to avoid.
 |-----------------------|--------------|-------|
 | `geo.ResolvedBirth` + `name` + `placeQuery` | `birth_data` columns | field-by-field in `BirthDataStore` |
 | `ephemeris.BirthData` | derived from `birth_data` (`birth_utc`, `lat`, `lon`) | `BirthDataStore.load(...).birthData()` |
-| `core.chart.NatalChart` (+ `SignificatorTable`, `DashaTimeline`, `RulingPlanets`) | `chart.computed_json` | `ChartCodec` |
+| `core.chart.NatalChart` (+ `SignificatorTable`, `DashaTimeline` re-derived on read) | `chart.computed_json` = raw `EphemerisResult` + `HouseResult` | `ChartCodec` (rebuilds via pure `NatalChartFactory.assemble`) |
 | `core.prediction.DailyPrediction` | `prediction.payload_json` | `PredictionCodec` |
 | `geo.place.GeocodeResult` | `geocode_cache.results_json` | `GeocodeResultCodec` |
 | `ephemeris.EngineVersion` | `chart.engine_version` / `prediction.engine_version` (`id()` string) | `CurrentEngineVersion` |
@@ -124,8 +128,8 @@ now would be the "dead schema" the billing tables were deferred to avoid.
 ```java
 @Service class UserAccountService {
     AppUserRef findOrCreate(String phoneE164);      // idempotent under concurrency
-    void recordConsent(long userId);                // write-once
-    void forget(long userId);                       // @Transactional; deletes PII rows, anonymises app_user
+    void recordConsent(long userId);                // write-once — conditional UPDATE ... WHERE consent_at IS NULL
+    void forget(long userId);                       // @Transactional; deletes PII rows, phone_e164 -> NULL + phone_hash
 }
 
 @Service class BirthDataStore {
@@ -135,7 +139,7 @@ now would be the "dead schema" the billing tables were deferred to avoid.
 
 @Service class ChartCacheService {
     NatalChartBundle natalChart(long userId);       // versioned: serve-or-recompute
-    HoraryChartBundle horaryChart(long userId, int number);
+    // horaryChart(...) is SPEC-015's — a horary chart needs a judgment moment / place.
 }
 
 @Service class PredictionCacheService {
@@ -166,9 +170,10 @@ now would be the "dead schema" the billing tables were deferred to avoid.
 }
 ```
 
-`NatalChartBundle` / `HoraryChartBundle` are small carriers of the computed
-aggregate (`NatalChart` + `SignificatorTable` + `DashaTimeline` + `RulingPlanets`)
-plus the `engine_version` string it was served with.
+`NatalChartBundle` = `{ NatalChart chart, SignificatorTable significators,
+DashaTimeline dasha, String engineVersion }`. (`RulingPlanets` is a
+"now" / horary timing concept, not a natal-chart property, so it is not in the
+bundle.)
 
 ## Invariants (tested)
 

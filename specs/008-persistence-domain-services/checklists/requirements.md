@@ -77,3 +77,19 @@
   in a `GeocodeCache`), P5 (`birth_data.flags` = comma-joined name list, pinned).
   P6 (transactional-rollback test) and P7 (US3 test seeds via US1/US2) accepted
   LOW.
+- `/speckit-analyze` (2026-09-11, post-implementation): `./mvnw verify` green,
+  18 unit + 25 IT. One HIGH + 3 MEDIUM, all fixed:
+  - **H1** `birth_utc` / `dasha_period.*_utc` / `judged_utc` were `TIMESTAMP`
+    (1970–2038) — a pre-1970 birth (the SPEC-007 corpus) could not be stored.
+    Changed to `DATETIME(0)`; added `BirthFixtures.kolkata1943()` +
+    `BirthDataStoreIT.aPre1970BirthRoundTripsToTheExactInstant` (now green).
+  - **M1** FR-005 reworded — `ChartCacheService` overwrites the `chart` row only;
+    `dasha_period` population is SPEC-013's, horary is SPEC-015's.
+  - **M2** `data-model.md` synced to the shipped shapes (`computed_json` = raw
+    `EphemerisResult`+`HouseResult`; no `horaryChart`; bundle without
+    `RulingPlanets`; `phone_e164` nullable + `phone_hash`).
+  - **M3** `recordConsent` is now a single conditional `UPDATE … WHERE consent_at
+    IS NULL` (`AppUserRepository.recordConsentIfAbsent`) — cannot overwrite
+    under concurrency (FR-009).
+  - L1 (golden IT compares vs direct cast not JSON), L2 (SE handle singleton),
+    L3 (startup ephemeris probe) accepted LOW.

@@ -103,10 +103,12 @@ the domain aggregate, produced by a dedicated codec.
   - SC-003: 20 concurrent calls → one row, no caller sees the exception.
 - `recordConsent(userId)` — sets `consent_at = now()` **only if null**
   (`UPDATE ... SET consent_at = ? WHERE id = ? AND consent_at IS NULL`).
-- `forget(userId)` — `@Transactional`: delete `prediction`, `horary_query` (via
-  `chart`), `dasha_period` (via `chart`), `chart`, `birth_data` for the user;
+- `forget(userId)` — `@Transactional`: delete `prediction`, `chart` (its
+  `horary_query` / `dasha_period` children cascade), `birth_data` for the user;
   then `UPDATE app_user SET display_name = NULL, wa_id = NULL,
-  phone_e164 = CONCAT('deleted:', SHA2(phone_e164, 256)), deleted_at = now()`.
+  phone_hash = SHA2(phone_e164, 256), phone_e164 = NULL, deleted_at = now()`
+  (a `CHAR(64)` hash does not fit the E.164 column, and NULL-on-forget keeps the
+  UNIQUE key clean while a re-contact still creates a fresh user).
   Payment/tax rows are out of scope here and exempt (ADR-0016). A **pepper** on
   the hash is a SPEC-016 hardening — v1 uses a plain SHA-256 so a "forget me"
   cannot be reversed but a re-contact from the same number still creates a fresh

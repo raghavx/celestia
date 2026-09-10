@@ -14,7 +14,9 @@ CREATE TABLE birth_data (
     lat              DECIMAL(9,6) NOT NULL,
     lon              DECIMAL(9,6) NOT NULL,
     zone_id          VARCHAR(64)  NOT NULL,
-    birth_utc        TIMESTAMP(0) NOT NULL,
+    -- DATETIME, not TIMESTAMP: TIMESTAMP is 1970-2038; births predate 1970.
+    -- Hibernate maps Instant to this via jdbc.time_zone=UTC.
+    birth_utc        DATETIME(0)  NOT NULL,
     offset_applied   VARCHAR(16)  NOT NULL,
     geocode_source   VARCHAR(32)  NOT NULL,
     stated_zone_id   VARCHAR(64)      NULL,

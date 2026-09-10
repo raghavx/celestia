@@ -58,14 +58,14 @@ public class UserAccountService {
         }
     }
 
-    /** Sets {@code consent_at} to now only if it is null; a later call is a no-op. */
+    /**
+     * Sets {@code consent_at} to now — <b>once</b>. A concurrent or later call is
+     * a no-op: the write is a single conditional {@code UPDATE … WHERE consent_at
+     * IS NULL}, so it can never overwrite an existing value (FR-009).
+     */
     @Transactional
     public void recordConsent(long userId) {
-        AppUserEntity u = users.findById(userId).orElseThrow();
-        if (u.getConsentAt() == null) {
-            u.setConsentAt(Instant.now());
-            users.save(u);
-        }
+        users.recordConsentIfAbsent(userId, Instant.now());
     }
 
     /**
