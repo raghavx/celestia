@@ -68,3 +68,13 @@
   (the corpus / CI gate) are P2.
 - Ready for `/speckit-clarify` (optional) / `/speckit-plan` / `/speckit-tasks` /
   `/speckit-implement`.
+- `/speckit-analyze` (2026-09-10, post-tasks): no CRITICAL/HIGH. Applied A1
+  (FR-012 scoped to place-and-time-derived fields; `place_query` / `name` are the
+  caller's), A2 (SC-001 "hand-verified" → "independent reference: `zoneinfo` +
+  `timezonefinder`"), C1 (cache policy — no-TTL, permanent — documented in
+  research.md §1 and T039), F1 (FR-014 + US4 sc.2: polar = **flag only**, the
+  chart pipeline rejects at cast time), F2 (T003 / research.md §8 add a one-off
+  war-time corpus row), I1 (SC-003 "byte-identical" → "equal, value equality;
+  `results_json` byte-stability is SPEC-008). D1 (perf guard 60 ms vs 20 ms
+  target), E1 (US4 = tests + docs over US3 code), E2 (timeshape-offline
+  assertion) accepted LOW. SC-006 / T005 open.

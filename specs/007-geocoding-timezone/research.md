@@ -34,6 +34,13 @@ This is **consistent with the spec as written** — its Assumptions already stat
 "`geo` ships only the port, the value objects, and a fixture/cache-backed
 `Geocoder`; the HTTP adapter and the API key live outside `geo`."
 
+**Cache policy** (FR-010): `InMemoryGeocodeCache` is **permanent for the process
+lifetime — no TTL**. A geocode result does not go stale in a way that matters
+(coordinates of a place do not move), so a fixed cache is the right default; the
+`geocode_source` recorded on each candidate lets a later operator force a
+re-fetch if a provider correction is needed. A persistent TTL policy, if ever
+wanted, is a SPEC-008 (`geocode_cache` table) decision, not this module's.
+
 **ADR-0013** is moved `proposed → accepted` by the plan (dated 2026-09-10): the
 decision — OpenCage behind a `geo` port, every result cached — is locked; the
 consequence note records that the adapter implementation lands with SPEC-009/010
@@ -179,9 +186,10 @@ expected: { zone_id, offset_applied, birth_utc, flags[], tzdb_version,
 timezone_boundary_version } }`.
 
 Coverage: pre-1970 births in ≥ 3 zones; the India 1955 standard-offset change; a
-US spring-forward gap; a EU fall-back fold; a southern-hemisphere DST birth
-(Australia / Chile); an unknown-time birth; a no-polygon (ocean) coordinate; a
-polar-latitude birth; a stated-vs-geocoded zone conflict.
+one-off war-time change (1944 `Europe/London` Double Summer Time, or 1943 US War
+Time); a US spring-forward gap; a EU fall-back fold; a southern-hemisphere DST
+birth (Australia / Chile); an unknown-time birth; a no-polygon (ocean)
+coordinate; a polar-latitude birth; a stated-vs-geocoded zone conflict.
 
 **Tooling** — extend `tools/ephe-crosscheck/compute_golden.py`:
 

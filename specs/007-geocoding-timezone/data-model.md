@@ -161,6 +161,9 @@ String tzdbVersion)` — compact ctor copies the `EnumSet`.
 | `versions` | `DatasetVersions` | `tzdb` + `timeshape` dataset versions |
 
 - `BirthData birthData()` → `new BirthData(instant, latitude, longitude)`.
+- **Not carried**: `place_query` (the raw user text) and `name` — these
+  `birth_data` columns are not place-and-time-derived; the caller (SPEC-010)
+  threads them to persistence directly (FR-012).
 - Compact ctor: non-null instant / zone / label / versions; `|latitude| <= 90`,
   `|longitude| <= 180`; `birthTimeKnown == !flags.contains(TIME_NOT_KNOWN)`;
   `statedZoneId != null` ⇔ `flags.contains(ZONE_CONFLICT)`; `flags` copied.

@@ -40,8 +40,10 @@ plan. No new module.
   `timezonefinder` to `tools/ephe-crosscheck/requirements.txt`.
 - [ ] T003 Author `geo/src/test/resources/birthmoments/corpus.json` — ≥ 12
   entries covering: pre-1970 births in ≥ 3 zones; the India 1955 standard-offset
-  change (`Asia/Kolkata`, a 1940s birth); a US spring-forward **gap**; an EU
-  fall-back **fold**; a southern-hemisphere DST birth (Australia or Chile); an
+  change (`Asia/Kolkata`, a 1940s birth); a **one-off war-time change** (e.g. a
+  1944 `Europe/London` birth under Double Summer Time, or a 1943 US birth under
+  War Time); a US spring-forward **gap**; an EU fall-back **fold**; a
+  southern-hemisphere DST birth (Australia or Chile); an
   **unknown-time** birth (`birth_time` omitted); a **no-polygon** ocean
   coordinate; a **polar-latitude** birth (|lat| ≥ 66); a **stated-vs-geocoded
   zone conflict**. Run `python compute_golden.py --birthmoments … --write`, then
@@ -290,8 +292,11 @@ a chart cast there; a stated-vs-geocoded zone conflict surfaced, not overridden.
 - [ ] T039 [P] `geo/src/main/java/com/celestia/geo/REFERENCES.md` (new) — the
   alias map + rationale, the candidate-ranking rule, the DST gap (forward shift)
   and fold (earlier offset) conventions, the no-polygon `Etc/GMT` fallback, the
-  unknown-time = noon convention, the polar threshold (cite ADR-0004), and the
-  `tzdb` + `timeshape` dataset-versioning policy (FR-018)
+  unknown-time = noon convention, the polar threshold (cite ADR-0004), the
+  **cache policy** (`InMemoryGeocodeCache` is permanent for the process
+  lifetime, no TTL; a forced re-fetch is a SPEC-008 concern, keyed on the stored
+  `geocode_source`), and the `tzdb` + `timeshape` dataset-versioning policy
+  (FR-010, FR-018)
 - [ ] T040 [P] `geo/src/main/java/com/celestia/geo/package-info.java` (update) +
   `place/package-info.java` + `time/package-info.java` — point to SPEC-007, note
   purity and the deferred HTTP adapter

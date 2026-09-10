@@ -130,7 +130,9 @@ plausible-looking but wrong chart. Better to stop and ask.
 1. **Given** latitude 95° or longitude 200°, **When** a birth is resolved,
    **Then** the request is rejected.
 2. **Given** coordinates at 70°N, **When** a birth is resolved, **Then** the
-   result is rejected (or flagged) the same way a natal chart cast there would be.
+   result carries a "polar latitude" flag; the birth moment still resolves (only
+   the *chart* is undefined at that latitude — the chart pipeline rejects it at
+   cast time, SPEC-002).
 3. **Given** the user says "Asia/Kolkata" but the geocoded zone is "Asia/Karachi",
    **When** the birth is resolved, **Then** the result reports the conflict and
    does not silently pick one.
@@ -214,13 +216,19 @@ versions.
   API (Constitution II, IX). `geo` MUST ship a deterministic fixture `Geocoder`
   for tests and local development.
 - **FR-012**: Given a chosen candidate and a local date/time, the engine MUST
-  produce a **resolved birth** carrying every field `birth_data` persists: the
-  local date-time, `zone_id`, `birth_utc`, `latitude`, `longitude`, place label,
-  country, `geocode_source`, the offset applied, and the DST / unknown-time flags.
+  produce a **resolved birth** carrying every **place-and-time-derived** field
+  `birth_data` persists: the local date-time, `zone_id`, `birth_utc`,
+  `latitude`, `longitude`, place label, country, `geocode_source`, the offset
+  applied, and the DST / unknown-time flags. The non-derived columns —
+  `place_query` (the raw text the user typed) and `name` — are threaded to
+  persistence by the caller (SPEC-010), not echoed back by `geo`.
 - **FR-013**: Invalid coordinates (`|lat| > 90` or `|lon| > 180`) MUST be
   rejected.
 - **FR-014**: Coordinates at or beyond the Placidus polar limit (ADR-0004) MUST
-  be rejected or flagged consistently with a natal chart cast there.
+  raise a "polar latitude" flag on the resolved birth. `geo` does **not** reject
+  them — a birth moment is well-defined at any latitude; the Placidus *chart* is
+  not, and the chart pipeline rejects a polar birth at cast time (SPEC-002,
+  `PlacidusUndefinedException`). The flag lets SPEC-010 warn before persisting.
 - **FR-015**: A user-stated zone that differs from the geocoded zone MUST be
   **reported as a conflict**, not silently overridden.
 - **FR-016**: For identical inputs the engine MUST produce identical output
@@ -249,12 +257,17 @@ versions.
 ### Measurable Outcomes
 
 - **SC-001**: For a corpus of ≥ 12 births spanning pre-1970 offsets, at least one
-  historical standard-offset change, DST gap and fold cases, and both hemispheres,
-  every computed UTC instant matches a hand-verified reference **to the second**.
+  historical standard-offset change, at least one one-off war-time change, DST gap
+  and fold cases, and both hemispheres, every computed UTC instant matches an
+  **independent reference** — Python `zoneinfo` + `timezonefinder`, a separate
+  implementation *and* a separate copy of the IANA data from the JRE's bundled
+  `tzdb` — **to the second**. (≥ 3 of these are additionally checked by hand,
+  SC-006.)
 - **SC-002**: For a sample of ≥ 15 cities worldwide, `lat/lon → zone` matches the
   reference tz database's assignment.
-- **SC-003**: A cached query returns a **byte-identical** candidate list across
-  runs and platforms; no provider call is made on a hit.
+- **SC-003**: A cached query returns an **equal** candidate list (value equality
+  on `GeocodeResult`) across runs and platforms; no provider call is made on a
+  hit. (Byte-level stability of the serialised `results_json` is SPEC-008.)
 - **SC-004**: Every DST gap / fold / unknown-time birth in the corpus is
   **flagged**; none is silently resolved.
 - **SC-005**: Resolving a birth moment from a cached candidate is deterministic
