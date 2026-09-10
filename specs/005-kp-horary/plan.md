@@ -19,9 +19,9 @@ Three parts, mostly reuse:
   number's Ascendant** and whose other eleven cusps are Placidus, seeded from the
   right ascension of the MC that *produces* that Ascendant at the judgment
   latitude. That RAMC comes from a **direct closed-form inversion** of the
-  Ascendant formula (verified by round-tripping `swe_houses`); the one new
-  `ephemeris` capability is "houses from a given Ascendant longitude", not from an
-  instant.
+  Ascendant formula — the positive root of a quadratic, then `atan2` — verified by
+  round-tripping `swe_houses`; the one new `ephemeris` capability is "houses from
+  a given Ascendant longitude", not from an instant.
 
 A horary chart is a `NatalChart`, so the SPEC-003 `SignificatorTable` /
 `RulingPlanetsFactory` and the LLM's judgement need no changes.
@@ -133,8 +133,9 @@ See [research.md](./research.md). Items:
 2. The horary Ascendant — why the arc midpoint; what the sub lord / sub-sub lord
    are; the sign of a split arc.
 3. The RAMC from a given Ascendant — the closed-form inversion of the Ascendant
-   formula; verification by round-trip against `swe_houses`; the bisection
-   fallback.
+   formula (positive quadratic root); verification by round-trip against
+   `swe_houses`; no iterative fallback (the discriminant is positive within the
+   Placidus polar limit).
 4. Sidereal ↔ tropical — `swe_houses_armc` is tropical; convert the horary
    Ascendant to tropical with the instant's ayanamsa, compute, convert the cusps
    back; obliquity of date from `swe_calc_ut(SE_ECL_NUT)`.

@@ -169,10 +169,13 @@ reproduce.
   `ephemeris/src/main/java/com/celestia/ephemeris/swisseph/SwissEphemerisHoraryHouseProvider.java`
   — obliquity via `swe_calc_ut(jdUt, SE_ECL_NUT, iflag, xx, serr)` (`xx[0]`),
   ayanamsa via `swe_get_ayanamsa_ut(jdUt)`; closed form
-  `armc = atan2(−cos λ, sin λ·cos ε + tan φ·sin ε)` normalised `[0, 360)`
-  (Meeus, *Astronomical Algorithms* 2nd ed. ch. 13 / house formulae — **confirm
-  the sign convention against the T015 round-trip before trusting it**);
-  a 60-iteration bisection fallback behind the same method (research.md §3)
+  the positive root of the quadratic `a ρ² + b ρ + c = 0`
+  (`a = cos²λ + cos²ε·sin²λ`, `b = 2 sin ε·tan φ·cos λ`, `c = sin²ε·tan²φ − cos²ε`),
+  then `armc = atan2(sin armc, cos armc)` with `cos armc = ρ·sin λ`,
+  `sin armc = (−ρ·cos λ − sin ε·tan φ)/cos ε` (Meeus ch. 13; research.md §3).
+  No iterative fallback — the discriminant is positive within the polar limit;
+  `discriminant < 0` throws `PlacidusUndefinedException`. Confirm against the
+  T015 round-trip.
 - [x] T019 [US3] `SwissEphemerisHoraryHouseProvider.housesFor(BirthData, double)`
   — polar check (`|lat| ≥ config.polarLimit()` → `PlacidusUndefinedException`);
   `tropicalAsc = normalise(asc + ayanamsa)`; RAMC (T018);
@@ -243,8 +246,9 @@ Ascendant.
   `swisseph.SwissEphemerisHoraryHouseProvider` to the `EngineVersion` bump list
 - [x] T027 [P] `HoraryPerformanceTest` `@Tag("perf")` in
   `core/src/test/java/com/celestia/core/horary/HoraryPerformanceTest.java` — a
-  cast chart under a 200 ms warm guard (SC-005 target 75 ms) and
-  `Horary249.arcs()` first build under 20 ms; excluded from the default run
+  cast chart under a 200 ms warm guard (SC-005 target 75 ms); the cached
+  `Horary249.arc(n)` accessor O(1) (the build cost is exercised fresh by the
+  tiling / snapshot tests); excluded from the default run
 - [x] T028 [P] Update `ephemeris/README.md` (+ `HoraryHouseProvider`) and
   `core/README.md` (+ `Horary249`, `HoraryChartFactory`, `HoraryRulingPlanets`)
 - [x] T029 Run `specs/005-kp-horary/quickstart.md` end to end; fix drift

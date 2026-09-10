@@ -67,3 +67,10 @@
   to "a horary chart is a valid `NatalChart`". A6 (SC-005 75 ms vs the 200 ms
   guard) left as accepted LOW. B1-style note: the 249 table is derived, so
   SC-006 / T003 is the only independent check — still open.
+- `/speckit-analyze` (2026-09-10, post-implementation): C1 remediated — SC-004
+  reworded (cusps "unchanged to KP resolution, ~1e-8° drift"; Moon "~2.7′–3.4′").
+  C2 — the RAMC section (research §3, plan, T018, contract) rewritten to the
+  actual quadratic-root closed form; the never-built bisection fallback removed
+  (the discriminant is positive within the polar limit). C3 — the perf test's
+  weak 249-build timing dropped for an O(1) accessor check. C4/C5 accepted LOW;
+  SC-006 / T003 still open.

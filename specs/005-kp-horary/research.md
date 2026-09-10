@@ -54,29 +54,33 @@ given the desired tropical Ascendant longitude `λ`, the latitude `φ` and the
 obliquity `ε`, find `armc`.
 
 **Closed form** — the inversion of the standard Ascendant equation
-(J. Meeus, *Astronomical Algorithms*, 2nd ed., ch. 13 & the house-position
-formulae; the forward form is
-`tan λ = −cos(armc) / (sin ε · tan φ + cos ε · sin(armc))`):
+(J. Meeus, *Astronomical Algorithms*, 2nd ed., ch. 13; forward form
+`λ = atan2( cos(armc), −(cos ε · sin(armc) + sin ε · tan φ) )`). Writing the
+forward equation as `A·cos(armc) + B·sin(armc) = C` with `A = sin λ`,
+`B = cos λ · cos ε`, `C = −cos λ · sin ε · tan φ`, and letting `k = sin ε · tan φ`,
+`armc` is:
 
 ```
-armc = atan2( −cos λ ,  sin λ · cos ε + tan φ · sin ε )    (degrees, normalised [0, 360))
+a = cos²λ + cos²ε · sin²λ
+b = 2 k cos λ
+c = k² − cos²ε
+ρ = ( −b + √(b² − 4ac) ) / (2a)          (the positive root — the Ascendant, not the Descendant)
+cos(armc) = ρ · sin λ
+sin(armc) = ( −ρ · cos λ − k ) / cos ε
+armc = atan2( sin(armc), cos(armc) )     (degrees, normalised [0, 360))
 ```
-
-The exact sign convention is **confirmed during implementation** (T018) against
-the `swe_houses` round-trip below before it is trusted; if it does not
-round-trip, the bisection fallback is used and the closed form corrected.
 
 **Verification**: for a grid of `(instant, latitude)` we call the ordinary
 `swe_houses(jd, SEFLG_SIDEREAL, φ, lon, 'P', cusp, ascmc)`; `ascmc[0]` is the
-Ascendant and `ascmc[2]` is the ARMC. Feeding `ascmc[0] + ayanamsa` (tropical
-Ascendant) into the formula above must reproduce `ascmc[2]` to ~1e-6°. A property
-test does this round-trip over random latitudes and instants.
+Ascendant. Feeding `ascmc[0] + ayanamsa` into the formula, then
+`swe_houses_armc`, reproduces the twelve cusps to ≤ 1′. A contract test does this
+round-trip over several latitudes and instants (implementation confirms ~1.5″–8″
+residual, from the port's two internal paths, not the formula).
 
-**Bisection fallback**: the Ascendant is a continuous, strictly monotone function
-of `armc` on the correct branch, so if the closed form proves numerically fragile
-near `φ → 0` or `λ` near a solstice point, a 60-iteration bisection on
-`armc ∈ [asc-branch]` reaches 1e-9°. The closed form is tried first; the fallback
-is documented and kept behind the same interface.
+**No iterative fallback is needed**: within the Placidus polar limit,
+`|k| = |sin ε · tan φ| < cos ε` (⇔ `|φ| ≲ 66.6°`), so `c < 0` and the
+discriminant `b² − 4ac > 0` always. `discriminant < 0` (impossible there) throws
+`PlacidusUndefinedException`.
 
 **Polar limit**: `|φ| ≥ config.polarLimit()` (66°, as SPEC-002) →
 `PlacidusUndefinedException`, before any computation.
@@ -151,7 +155,7 @@ No change to SPEC-003.
 |---|-------|----------|
 | 1 | 249 table | derived: `subDivisions()` split at the 12 sign cusps (strict crossing); count == 249; longitude-order numbering |
 | 2 | Horary Ascendant | arc midpoint; sub lord constant over the arc so the choice is judgement-neutral |
-| 3 | RAMC | closed-form inversion `armc = atan2(−cos λ, sin λ·cos ε + tan φ·sin ε)`; verified vs `swe_houses`; bisection fallback |
+| 3 | RAMC | closed-form inversion (positive root of a quadratic in ρ, then `atan2`); verified vs `swe_houses` round-trip; no iterative fallback (discriminant > 0 within the polar limit) |
 | 4 | Frame | convert Asc to tropical via `swe_get_ayanamsa_ut`, compute tropical cusps, convert back; cusp 1 forced to the sidereal Asc |
 | 5 | Chart | reuse `NatalChart` + `NatalChartFactory.assemble`; only the `HouseResult` is new |
 | 6 | Horary RP | `RulingPlanetsFactory.compute` with the number's Ascendant; no SPEC-003 change |

@@ -25,8 +25,9 @@ public interface HoraryHouseProvider {
 - The other eleven cusps are **Placidus**, sidereal, consistent with that
   Ascendant at `judgment.latitude()` for the judgment instant's obliquity and
   ayanamsa: convert the Ascendant to tropical (`+ ayanamsa`), find the RAMC by a
-  closed-form inversion of the Ascendant formula (bisection fallback), call
-  `swe_houses_armc`, convert the cusps back (`− ayanamsa`).
+  closed-form inversion of the Ascendant formula (the positive root of a
+  quadratic — no iterative fallback; the discriminant is positive within the
+  polar limit), call `swe_houses_armc`, convert the cusps back (`− ayanamsa`).
 - `angles.get(MIDHEAVEN)` is the sidereal MC from the same computation.
 - `houseSystem == PLACIDUS`.
 - `birthData()` is `judgment` (the cusps are Ascendant-seeded, not

@@ -24,12 +24,16 @@ class HoraryPerformanceTest {
     }
 
     @Test
-    void the249TableBuildsQuickly() {
+    void the249TableAccessorIsTrivialAndComplete() {
+        // the table is built once at class load; here we only assert the cached
+        // accessor is O(1) and the table is the full 249 (the build cost itself
+        // is bounded by the tiling / snapshot tests, which run it fresh each time)
         long start = System.nanoTime();
-        Horary249.arcs(); // first access triggers the build (static init already ran, so re-measure a copy)
-        // build cost is paid once at class load; assert the accessor is trivial
-        double ms = (System.nanoTime() - start) / 1_000_000.0;
-        assertThat(ms).isLessThan(20.0);
+        for (int i = 0; i < 100_000; i++) {
+            Horary249.arc(1 + (i % 249));
+        }
+        double perCallMicros = (System.nanoTime() - start) / 1_000.0 / 100_000.0;
+        assertThat(perCallMicros).isLessThan(5.0);
         assertThat(Horary249.count()).isEqualTo(249);
     }
 

@@ -246,8 +246,9 @@ ruling planets. A determinism test and the 249-tiling property run in CI.
   reproduces the reference significators exactly (the horary chart is a valid
   `NatalChart`).
 - **SC-004**: Two horary charts for the same number and place at instants five
-  minutes apart have identical cusps and a Moon longitude that differs by the
-  Moon's five-minute motion (~2.5′).
+  minutes apart have cusps unchanged to KP resolution (they shift only with the
+  slowly-varying obliquity / ayanamsa, ~1e-8°) and a Moon longitude that differs
+  by the Moon's five-minute arc (~2.7′–3.4′, depending on its distance).
 - **SC-005**: Casting a horary chart is deterministic and completes in under
   **75 ms** on a developer machine; the horary golden snapshot suite passes
   unchanged in CI on every supported platform.
