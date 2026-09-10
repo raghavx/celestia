@@ -692,7 +692,7 @@ def compute(chart: dict) -> tuple[dict, dict, dict, dict, dict, dict, str]:
 
     swe_ver = getattr(swe, "version", "unknown")
     return (out, houses, significators, node_agency, dasha, daily,
-            f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.6")
+            f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.7")
 
 
 def _entry(lon: float, speed: float) -> dict:
@@ -711,11 +711,172 @@ def _entry(lon: float, speed: float) -> dict:
 TOL_DEG = 2.0 / 3600.0  # 2 arc-seconds
 
 
+# --------------------------------------------------------------------------- #
+# SPEC-007: birth-moment corpus (place + local time -> UTC), an INDEPENDENT    #
+# check of com.celestia.geo.  Uses Python `zoneinfo` (the system IANA tzdata,  #
+# a separate copy from the JRE's bundled tzdb) and `timezonefinder` (a         #
+# different polygon dataset from `timeshape`).  research.md sec 2, 3, 8.       #
+# --------------------------------------------------------------------------- #
+
+def _bm_zone_for(lat: float, lon: float):
+    """(zone_id, approximated) replicating TimeshapeTimeZoneResolver.
+
+    Both `timeshape` and timezonefinder.timezone_at() carry fixed-offset ocean
+    tiles ("Etc/GMT+-h"); those are not civil zones, so flag them approximated."""
+    from timezonefinder import TimezoneFinder
+    tf = TimezoneFinder()
+    z = tf.timezone_at(lat=lat, lng=lon)
+    if z:
+        return z, z.startswith("Etc/")
+    h = int(round(lon / 15.0))
+    if h == 0:
+        return "Etc/GMT", True
+    return ("Etc/GMT-%d" % h) if h > 0 else ("Etc/GMT+%d" % -h), True
+
+
+def _bm_offset_str(td) -> str:
+    """Match java.time.ZoneOffset.getId(): 'Z', '+HH:MM', or '+HH:MM:SS'."""
+    total = int(td.total_seconds())
+    if total == 0:
+        return "Z"
+    sign = "+" if total > 0 else "-"
+    total = abs(total)
+    h, m, s = total // 3600, (total % 3600) // 60, total % 60
+    return "%s%02d:%02d:%02d" % (sign, h, m, s) if s else "%s%02d:%02d" % (sign, h, m)
+
+
+def _zoneinfo_module():
+    """Prefer the bundled `tzdata` package over the host's /usr/share/zoneinfo,
+    so the corpus is reproducible regardless of the dev box's tz vintage."""
+    try:
+        from backports import zoneinfo as zi
+    except ImportError:
+        import zoneinfo as zi
+    try:
+        import tzdata  # noqa: F401  (presence => use it)
+        zi.reset_tzpath(to=[])
+    except ImportError:
+        pass
+    return zi
+
+
+def resolve_birthmoment(entry: dict) -> dict:
+    """Replicate BirthMomentResolver.resolve for one corpus entry."""
+    ZoneInfo = _zoneinfo_module().ZoneInfo
+
+    lat, lon = float(entry["latitude"]), float(entry["longitude"])
+    flags = []
+
+    zone_id, approximated = _bm_zone_for(lat, lon)
+    if approximated:
+        flags.append("ZONE_APPROXIMATED")
+
+    stated = entry.get("stated_zone")
+    if stated and stated != zone_id:
+        flags.append("ZONE_CONFLICT")
+
+    if abs(lat) >= 66.0:
+        flags.append("POLAR_LATITUDE")
+
+    d = dt.date.fromisoformat(entry["birth_date"])
+    t_raw = entry.get("birth_time")
+    if t_raw is None:
+        t = dt.time(12, 0)
+        flags.append("TIME_NOT_KNOWN")
+    else:
+        hh, mm = (t_raw.split(":") + ["0"])[:2]
+        t = dt.time(int(hh), int(mm))
+
+    zone = ZoneInfo(zone_id)
+    naive = dt.datetime.combine(d, t)
+    dt0 = naive.replace(tzinfo=zone, fold=0)
+    dt1 = naive.replace(tzinfo=zone, fold=1)
+    off0, off1 = dt0.utcoffset(), dt1.utcoffset()
+
+    # Resolution: fold=0 is the pre-transition (earlier) offset. Java's fold
+    # branch (withEarlierOffsetAtOverlap) and its gap branch (forward-shift)
+    # both land on the same *instant* as fold=0. The gap's reported *offset*,
+    # however, is Java's "later" offset, so report off1 there.
+    instant = dt0.astimezone(dt.timezone.utc)
+    applied_offset = dt0.utcoffset()
+    if off0 != off1:
+        if off1 > off0:                       # spring-forward gap
+            flags.append("DST_GAP")
+            applied_offset = off1
+        else:                                 # fall-back fold
+            flags.append("DST_FOLD")
+
+    return {
+        "zone_id": zone_id,
+        "offset_applied": _bm_offset_str(applied_offset),
+        "birth_utc": instant.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "flags": sorted(set(flags)),
+    }
+
+
+def run_birthmoments(path: Path, write: bool) -> int:
+    corpus = json.loads(path.read_text())
+    entries = corpus["births"] if isinstance(corpus, dict) else corpus
+    tzf_ver = "unknown"
+    try:
+        import timezonefinder as _tf
+        tzf_ver = getattr(_tf, "__version__", None) \
+            or getattr(getattr(_tf, "timezonefinder", None), "__version__", "unknown")
+    except Exception:
+        pass
+    tz_ver = "system"
+    try:
+        import tzdata
+        tz_ver = "tzdata " + tzdata.IANA_VERSION
+    except Exception:
+        pass
+    generated_by = f"python {tz_ver} + timezonefinder {tzf_ver} / kp-crosscheck 0.7"
+
+    exit_code = 0
+    for e in entries:
+        got = resolve_birthmoment(e)
+        if write:
+            e["expected"] = got
+            e.setdefault("verification", {})["reference"] = generated_by
+        else:
+            old = e.get("expected")
+            if not old:
+                print(f"{e['id']}: expected block empty - run with --birthmoments ... --write")
+                continue
+            entry_drift = []
+            for k in ("zone_id", "offset_applied", "birth_utc"):
+                if old.get(k) != got[k]:
+                    entry_drift.append(f"{k} {old.get(k)} -> {got[k]}")
+            if sorted(old.get("flags", [])) != got["flags"]:
+                entry_drift.append(f"flags {old.get('flags')} -> {got['flags']}")
+            if entry_drift:
+                exit_code = 1
+                print(f"{e['id']}: DRIFT " + "; ".join(entry_drift))
+            else:
+                print(f"{e['id']}: ok ({got['birth_utc']})")
+
+    if write:
+        if isinstance(corpus, dict):
+            corpus["generated_by"] = generated_by
+        path.write_text(json.dumps(corpus, indent=2) + "\n")
+        print(f"{path.name}: written ({generated_by}) - {len(entries)} births")
+    return exit_code
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("paths", nargs="+", type=Path)
+    ap.add_argument("paths", nargs="*", type=Path)
     ap.add_argument("--write", action="store_true", help="fill the expected block")
+    ap.add_argument("--birthmoments", type=Path, metavar="CORPUS",
+                    help="SPEC-007: recompute the birth-moment corpus "
+                         "(place + local time -> UTC) via zoneinfo + timezonefinder")
     args = ap.parse_args()
+
+    if args.birthmoments is not None:
+        return run_birthmoments(args.birthmoments, args.write)
+
+    if not args.paths:
+        ap.error("give one or more golden-chart JSON paths, or --birthmoments CORPUS")
 
     exit_code = 0
     for p in args.paths:

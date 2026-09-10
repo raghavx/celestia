@@ -12,10 +12,22 @@
 
     <artifactId>geo</artifactId>
     <name>Celestia Geo</name>
-    <description>Place name to lat/lon (geocoder client + cache); lat/lon to IANA zone; local birth time to UTC with historical rules.</description>
+    <description>Place name to lat/lon (Geocoder port + cache); lat/lon to IANA zone (offline); local birth time to UTC with historical rules. Pure — no Spring, no DB, no network, no clock.</description>
 
-    <!-- TODO(D13/D14): add geocoder client + timeshape (lat/lon -> IANA zone). -->
     <dependencies>
+        <!-- SPEC-001 BirthData — the (instant, lat, lon) a resolved birth feeds. -->
+        <dependency>
+            <groupId>com.celestia</groupId>
+            <artifactId>ephemeris</artifactId>
+        </dependency>
+        <!-- SPEC-007: lat/lon -> IANA ZoneId, offline (ADR-0014). Stays behind
+             TimeZoneResolver — no net.iakovlev type in the geo public API
+             (DeterminismArchitectureTest). -->
+        <dependency>
+            <groupId>net.iakovlev</groupId>
+            <artifactId>timeshape</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -26,5 +38,38 @@
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>net.jqwik</groupId>
+            <artifactId>jqwik</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Test-only: parse the geocode fixtures and the birth-moment corpus. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <resources>
+            <!-- Single-source the timeshape (timezone-boundary) version: the
+                 pinned artifact version is filtered into geo-build.properties so
+                 TimeshapeTimeZoneResolver reports the exact dataset it queried. -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>geo-build.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>geo-build.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
 </project>

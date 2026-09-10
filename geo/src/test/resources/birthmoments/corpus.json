@@ -1,0 +1,294 @@
+{
+  "_comment": "SPEC-007 birth-moment corpus. `expected` blocks are filled by tools/ephe-crosscheck/compute_golden.py --birthmoments (Python zoneinfo + timezonefinder), an independent implementation and an independent copy of the IANA data. Regenerate: python compute_golden.py --birthmoments geo/src/test/resources/birthmoments/corpus.json --write",
+  "generated_by": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7",
+  "verification": {
+    "sc006_protocol": "For >= 3 births, check the computed local->UTC instant against an independent source (an online tz converter, or a published birth-time record). The Python tool and the Java engine both lean on IANA data; an outside reference is the only fully independent verification.",
+    "sc006_checks": [
+      {
+        "id": "pune-1985",
+        "status": "pending",
+        "source": "",
+        "note": "ordinary modern case"
+      },
+      {
+        "id": "kolkata-1943",
+        "status": "pending",
+        "source": "",
+        "note": "pre-1970 war-time offset +06:30"
+      },
+      {
+        "id": "nyc-gap-2021",
+        "status": "pending",
+        "source": "",
+        "note": "DST spring-forward gap"
+      }
+    ]
+  },
+  "births": [
+    {
+      "id": "pune-1985",
+      "note": "ordinary modern India birth",
+      "place_query": "Pune, India",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "birth_date": "1985-06-15",
+      "birth_time": "14:30",
+      "expected": {
+        "zone_id": "Asia/Kolkata",
+        "offset_applied": "+05:30",
+        "birth_utc": "1985-06-15T09:00:00Z",
+        "flags": []
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "kolkata-1935",
+      "note": "pre-1970 India (+05:30 back past 1941 in modern IANA data; the pre-1941 +05:53:20 LMT is backzone-only)",
+      "place_query": "Calcutta",
+      "latitude": 22.5726,
+      "longitude": 88.3639,
+      "birth_date": "1935-01-01",
+      "birth_time": "12:00",
+      "expected": {
+        "zone_id": "Asia/Kolkata",
+        "offset_applied": "+05:30",
+        "birth_utc": "1935-01-01T06:30:00Z",
+        "flags": []
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "kolkata-1943",
+      "note": "one-off war-time change: India +06:30, 1942-1945",
+      "place_query": "Calcutta",
+      "latitude": 22.5726,
+      "longitude": 88.3639,
+      "birth_date": "1943-06-01",
+      "birth_time": "10:00",
+      "expected": {
+        "zone_id": "Asia/Kolkata",
+        "offset_applied": "+06:30",
+        "birth_utc": "1943-06-01T03:30:00Z",
+        "flags": []
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "london-1944",
+      "note": "one-off war-time change: British Double Summer Time (+02:00)",
+      "place_query": "London, England",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "birth_date": "1944-06-01",
+      "birth_time": "12:00",
+      "expected": {
+        "zone_id": "Europe/London",
+        "offset_applied": "+02:00",
+        "birth_utc": "1944-06-01T10:00:00Z",
+        "flags": []
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "chicago-1955",
+      "note": "pre-1970 northern-hemisphere birth, CDT",
+      "place_query": "Chicago, Illinois",
+      "latitude": 41.8781,
+      "longitude": -87.6298,
+      "birth_date": "1955-07-04",
+      "birth_time": "06:15",
+      "expected": {
+        "zone_id": "America/Chicago",
+        "offset_applied": "-05:00",
+        "birth_utc": "1955-07-04T11:15:00Z",
+        "flags": []
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "tokyo-1948",
+      "note": "pre-1970; Japan observed DST 1948-1951 (+10:00)",
+      "place_query": "Tokyo, Japan",
+      "latitude": 35.6762,
+      "longitude": 139.6503,
+      "birth_date": "1948-06-01",
+      "birth_time": "15:00",
+      "expected": {
+        "zone_id": "Asia/Tokyo",
+        "offset_applied": "+10:00",
+        "birth_utc": "1948-06-01T05:00:00Z",
+        "flags": []
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "nyc-gap-2021",
+      "note": "DST spring-forward gap: 02:30 on 2021-03-14 never occurred in New York",
+      "place_query": "New York City",
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "birth_date": "2021-03-14",
+      "birth_time": "02:30",
+      "expected": {
+        "zone_id": "America/New_York",
+        "offset_applied": "-04:00",
+        "birth_utc": "2021-03-14T07:30:00Z",
+        "flags": [
+          "DST_GAP"
+        ]
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "berlin-fold-2021",
+      "note": "DST fall-back fold: 02:30 on 2021-10-31 occurred twice in Berlin; earlier offset used",
+      "place_query": "Berlin, Germany",
+      "latitude": 52.52,
+      "longitude": 13.405,
+      "birth_date": "2021-10-31",
+      "birth_time": "02:30",
+      "expected": {
+        "zone_id": "Europe/Berlin",
+        "offset_applied": "+02:00",
+        "birth_utc": "2021-10-31T00:30:00Z",
+        "flags": [
+          "DST_FOLD"
+        ]
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "sydney-1990",
+      "note": "southern-hemisphere DST: January is summer in Sydney (+11:00)",
+      "place_query": "Sydney, Australia",
+      "latitude": -33.8688,
+      "longitude": 151.2093,
+      "birth_date": "1990-01-15",
+      "birth_time": "10:00",
+      "expected": {
+        "zone_id": "Australia/Sydney",
+        "offset_applied": "+11:00",
+        "birth_utc": "1990-01-14T23:00:00Z",
+        "flags": []
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "santiago-2019",
+      "note": "southern-hemisphere DST: January is summer in Chile (-03:00)",
+      "place_query": "Santiago, Chile",
+      "latitude": -33.4489,
+      "longitude": -70.6693,
+      "birth_date": "2019-01-10",
+      "birth_time": "12:00",
+      "expected": {
+        "zone_id": "America/Santiago",
+        "offset_applied": "-03:00",
+        "birth_utc": "2019-01-10T15:00:00Z",
+        "flags": []
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "pune-unknown-time",
+      "note": "birth time not known -> 12:00 local + TIME_NOT_KNOWN",
+      "place_query": "Pune",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "birth_date": "1970-02-20",
+      "birth_time": null,
+      "expected": {
+        "zone_id": "Asia/Kolkata",
+        "offset_applied": "+05:30",
+        "birth_utc": "1970-02-20T06:30:00Z",
+        "flags": [
+          "TIME_NOT_KNOWN"
+        ]
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "ocean-pacific",
+      "note": "no timezone polygon -> Etc/GMT longitude fallback + ZONE_APPROXIMATED",
+      "place_query": "0, -150",
+      "latitude": 0.0,
+      "longitude": -150.0,
+      "birth_date": "2000-01-01",
+      "birth_time": "12:00",
+      "expected": {
+        "zone_id": "Etc/GMT+10",
+        "offset_applied": "-10:00",
+        "birth_utc": "2000-01-01T22:00:00Z",
+        "flags": [
+          "ZONE_APPROXIMATED"
+        ]
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "tromso-1980",
+      "note": "polar latitude (69.6N >= 66) but a real civil zone; POLAR_LATITUDE flag only",
+      "place_query": "Tromso, Norway",
+      "latitude": 69.6492,
+      "longitude": 18.9553,
+      "birth_date": "1980-06-01",
+      "birth_time": "12:00",
+      "expected": {
+        "zone_id": "Europe/Oslo",
+        "offset_applied": "+02:00",
+        "birth_utc": "1980-06-01T10:00:00Z",
+        "flags": [
+          "POLAR_LATITUDE"
+        ]
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    },
+    {
+      "id": "karachi-zone-conflict",
+      "note": "caller states Asia/Kolkata; geocoded zone is Asia/Karachi -> ZONE_CONFLICT, geocoded wins",
+      "place_query": "Karachi, Pakistan",
+      "latitude": 24.8607,
+      "longitude": 67.0011,
+      "stated_zone": "Asia/Kolkata",
+      "birth_date": "1990-03-15",
+      "birth_time": "08:00",
+      "expected": {
+        "zone_id": "Asia/Karachi",
+        "offset_applied": "+05:00",
+        "birth_utc": "1990-03-15T03:00:00Z",
+        "flags": [
+          "ZONE_CONFLICT"
+        ]
+      },
+      "verification": {
+        "reference": "python tzdata 2026c + timezonefinder unknown / kp-crosscheck 0.7"
+      }
+    }
+  ]
+}
