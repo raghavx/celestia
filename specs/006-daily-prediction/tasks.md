@@ -52,18 +52,18 @@ module, no new dependency, no new ADR.
 
 ## Phase 2: Foundational (blocking — no user story starts until this is done)
 
-- [ ] T005 [P] `Matter` enum (research.md §1: `MARRIAGE`, `CAREER`, `WEALTH`,
+- [x] T005 [P] `Matter` enum (research.md §1: `MARRIAGE`, `CAREER`, `WEALTH`,
   `EDUCATION`, `CHILDREN`, `PROPERTY`, `TRAVEL`, `LITIGATION`, `HEALTH_RECOVERY`;
   each `Set<Integer> favourable()`, `Set<Integer> obstructive()`, `String
   source()`, `String key()`; static init validates favourable non-empty,
   favourable ∩ obstructive = ∅, houses 1..12) in
   `core/src/main/java/com/celestia/core/prediction/Matter.java`
-- [ ] T006 [P] `Verdict` enum (`FAVOURABLE, MIXED, UNFAVOURABLE, QUIET`) and
+- [x] T006 [P] `Verdict` enum (`FAVOURABLE, MIXED, UNFAVOURABLE, QUIET`) and
   `TransitBody` enum (`MOON, SUN`) in `core/src/main/java/com/celestia/core/prediction/`
-- [ ] T007 [P] `ActivatedHouse` record (`int house, int strength, Set<Graha>
+- [x] T007 [P] `ActivatedHouse` record (`int house, int strength, Set<Graha>
   lords`; compact ctor: `house` 1..12, `strength == lords.size()` in 1..5,
   `Set.copyOf`) in `core/src/main/java/com/celestia/core/prediction/ActivatedHouse.java`
-- [ ] T008 [P] `FoundationalTypesTest` in
+- [x] T008 [P] `FoundationalTypesTest` in
   `core/src/test/java/com/celestia/core/prediction/FoundationalTypesTest.java` —
   every `Matter`: favourable non-empty, favourable ∩ obstructive = ∅, all houses
   1..12, `source()` non-blank; `ActivatedHouse` rejects `strength != lords.size()`
