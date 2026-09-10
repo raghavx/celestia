@@ -33,7 +33,8 @@ public record GoldenChart(
         Map<Graha, Map<Integer, Set<Integer>>> significatorsByGraha,
         Map<Graha, NodeAgencyRef> nodeAgency,
         RulingPlanetsRef rulingPlanets,
-        DashaRef dasha) {
+        DashaRef dasha,
+        HoraryRef horary) {
 
     /** Reference values for one graha (SPEC-001 + SPEC-002 bhava / rasi house). */
     public record Expected(
@@ -66,6 +67,16 @@ public record GoldenChart(
             Instant runningQueryUtc, List<String> runningLords, List<DashaPeriodRef> runningPeriods) {}
 
     public record DashaPeriodRef(String level, String lord, Instant start, Instant end) {}
+
+    /** SPEC-005: one worked horary case (number + fixed judgment moment). */
+    public record HoraryRef(
+            int number, String subLord, Instant judgmentInstant, double latitude, double longitude,
+            LordChainRef ascendant, LordChainRef midheaven, List<CuspRef> cusps,
+            Map<Graha, HoraryPlacementRef> placements,
+            Map<Integer, List<SigRef>> significatorsByHouse,
+            Map<String, Set<String>> rulingPlanetSources) {}
+
+    public record HoraryPlacementRef(double longitude, int bhava, int rasiHouse) {}
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -195,9 +206,49 @@ public record GoldenChart(
                         strings(run.get("lords")), List.copyOf(runPeriods));
             }
 
+            HoraryRef horary = null;
+            JsonNode hNode = root.at("/expected/horary");
+            if (hNode != null && !hNode.isMissingNode()) {
+                JsonNode q = hNode.get("query");
+                List<CuspRef> hCusps = new ArrayList<>();
+                for (JsonNode c : hNode.get("cusps")) {
+                    hCusps.add(new CuspRef(c.get("house").asInt(), chainRef(c)));
+                }
+                Map<Graha, HoraryPlacementRef> hPlace = new EnumMap<>(Graha.class);
+                JsonNode plNode = hNode.get("placements");
+                for (Graha g : Graha.values()) {
+                    JsonNode pl = plNode.get(g.name());
+                    hPlace.put(g, new HoraryPlacementRef(
+                            pl.get("longitude").asDouble(), pl.get("bhava").asInt(),
+                            pl.get("rasi_house").asInt()));
+                }
+                Map<Integer, List<SigRef>> hByHouse = new TreeMap<>();
+                JsonNode hbh = hNode.at("/significators/by_house");
+                for (int h = 1; h <= hbh.size(); h++) {
+                    List<SigRef> list = new ArrayList<>();
+                    for (JsonNode s : hbh.get(h - 1)) {
+                        Set<Integer> steps = new LinkedHashSet<>();
+                        s.get("steps").forEach(st -> steps.add(st.asInt()));
+                        list.add(new SigRef(s.get("graha").asText(), Set.copyOf(steps)));
+                    }
+                    hByHouse.put(h, List.copyOf(list));
+                }
+                Map<String, Set<String>> hRp = new LinkedHashMap<>();
+                for (JsonNode pl : hNode.at("/ruling_planets/planets")) {
+                    hRp.put(pl.get("graha").asText(), Set.copyOf(strings(pl.get("sources"))));
+                }
+                horary = new HoraryRef(
+                        q.get("number").asInt(), hNode.get("sub_lord").asText(),
+                        Instant.parse(q.get("utc_instant").asText()),
+                        q.get("latitude").asDouble(), q.get("longitude").asDouble(),
+                        chainRef(hNode.get("ascendant")), chainRef(hNode.get("midheaven")),
+                        List.copyOf(hCusps), Map.copyOf(hPlace), Map.copyOf(hByHouse),
+                        Map.copyOf(hRp));
+            }
+
             return new GoldenChart(id, instant, lat, lon, expected, List.copyOf(cusps),
                     Map.copyOf(angles), Map.copyOf(byHouse), Map.copyOf(byGraha),
-                    Map.copyOf(nodeAgency), rp, dasha);
+                    Map.copyOf(nodeAgency), rp, dasha, horary);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

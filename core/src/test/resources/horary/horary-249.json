@@ -1,0 +1,1495 @@
+[ {
+  "number" : 1,
+  "start" : 0.0,
+  "end" : 0.777778,
+  "sign" : "ARIES",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 2,
+  "start" : 0.777778,
+  "end" : 3.0,
+  "sign" : "ARIES",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 3,
+  "start" : 3.0,
+  "end" : 3.666667,
+  "sign" : "ARIES",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 4,
+  "start" : 3.666667,
+  "end" : 4.777778,
+  "sign" : "ARIES",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 5,
+  "start" : 4.777778,
+  "end" : 5.555556,
+  "sign" : "ARIES",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 6,
+  "start" : 5.555556,
+  "end" : 7.555556,
+  "sign" : "ARIES",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 7,
+  "start" : 7.555556,
+  "end" : 9.333333,
+  "sign" : "ARIES",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 8,
+  "start" : 9.333333,
+  "end" : 11.444444,
+  "sign" : "ARIES",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 9,
+  "start" : 11.444444,
+  "end" : 13.333333,
+  "sign" : "ARIES",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 10,
+  "start" : 13.333333,
+  "end" : 15.555556,
+  "sign" : "ARIES",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 11,
+  "start" : 15.555556,
+  "end" : 16.222222,
+  "sign" : "ARIES",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 12,
+  "start" : 16.222222,
+  "end" : 17.333333,
+  "sign" : "ARIES",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 13,
+  "start" : 17.333333,
+  "end" : 18.111111,
+  "sign" : "ARIES",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 14,
+  "start" : 18.111111,
+  "end" : 20.111111,
+  "sign" : "ARIES",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 15,
+  "start" : 20.111111,
+  "end" : 21.888889,
+  "sign" : "ARIES",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 16,
+  "start" : 21.888889,
+  "end" : 24.0,
+  "sign" : "ARIES",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 17,
+  "start" : 24.0,
+  "end" : 25.888889,
+  "sign" : "ARIES",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 18,
+  "start" : 25.888889,
+  "end" : 26.666667,
+  "sign" : "ARIES",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 19,
+  "start" : 26.666667,
+  "end" : 27.333333,
+  "sign" : "ARIES",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 20,
+  "start" : 27.333333,
+  "end" : 28.444444,
+  "sign" : "ARIES",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 21,
+  "start" : 28.444444,
+  "end" : 29.222222,
+  "sign" : "ARIES",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 22,
+  "start" : 29.222222,
+  "end" : 30.0,
+  "sign" : "ARIES",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 23,
+  "start" : 30.0,
+  "end" : 31.222222,
+  "sign" : "TAURUS",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 24,
+  "start" : 31.222222,
+  "end" : 33.0,
+  "sign" : "TAURUS",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 25,
+  "start" : 33.0,
+  "end" : 35.111111,
+  "sign" : "TAURUS",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 26,
+  "start" : 35.111111,
+  "end" : 37.0,
+  "sign" : "TAURUS",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 27,
+  "start" : 37.0,
+  "end" : 37.777778,
+  "sign" : "TAURUS",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 28,
+  "start" : 37.777778,
+  "end" : 40.0,
+  "sign" : "TAURUS",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 29,
+  "start" : 40.0,
+  "end" : 41.111111,
+  "sign" : "TAURUS",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 30,
+  "start" : 41.111111,
+  "end" : 41.888889,
+  "sign" : "TAURUS",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 31,
+  "start" : 41.888889,
+  "end" : 43.888889,
+  "sign" : "TAURUS",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 32,
+  "start" : 43.888889,
+  "end" : 45.666667,
+  "sign" : "TAURUS",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 33,
+  "start" : 45.666667,
+  "end" : 47.777778,
+  "sign" : "TAURUS",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 34,
+  "start" : 47.777778,
+  "end" : 49.666667,
+  "sign" : "TAURUS",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 35,
+  "start" : 49.666667,
+  "end" : 50.444444,
+  "sign" : "TAURUS",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 36,
+  "start" : 50.444444,
+  "end" : 52.666667,
+  "sign" : "TAURUS",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 37,
+  "start" : 52.666667,
+  "end" : 53.333333,
+  "sign" : "TAURUS",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 38,
+  "start" : 53.333333,
+  "end" : 54.111111,
+  "sign" : "TAURUS",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 39,
+  "start" : 54.111111,
+  "end" : 56.111111,
+  "sign" : "TAURUS",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 40,
+  "start" : 56.111111,
+  "end" : 57.888889,
+  "sign" : "TAURUS",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 41,
+  "start" : 57.888889,
+  "end" : 60.0,
+  "sign" : "TAURUS",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 42,
+  "start" : 60.0,
+  "end" : 61.888889,
+  "sign" : "GEMINI",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 43,
+  "start" : 61.888889,
+  "end" : 62.666667,
+  "sign" : "GEMINI",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 44,
+  "start" : 62.666667,
+  "end" : 64.888889,
+  "sign" : "GEMINI",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 45,
+  "start" : 64.888889,
+  "end" : 65.555556,
+  "sign" : "GEMINI",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 46,
+  "start" : 65.555556,
+  "end" : 66.666667,
+  "sign" : "GEMINI",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 47,
+  "start" : 66.666667,
+  "end" : 68.666667,
+  "sign" : "GEMINI",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 48,
+  "start" : 68.666667,
+  "end" : 70.444444,
+  "sign" : "GEMINI",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 49,
+  "start" : 70.444444,
+  "end" : 72.555556,
+  "sign" : "GEMINI",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 50,
+  "start" : 72.555556,
+  "end" : 74.444444,
+  "sign" : "GEMINI",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 51,
+  "start" : 74.444444,
+  "end" : 75.222222,
+  "sign" : "GEMINI",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 52,
+  "start" : 75.222222,
+  "end" : 77.444444,
+  "sign" : "GEMINI",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 53,
+  "start" : 77.444444,
+  "end" : 78.111111,
+  "sign" : "GEMINI",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 54,
+  "start" : 78.111111,
+  "end" : 79.222222,
+  "sign" : "GEMINI",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 55,
+  "start" : 79.222222,
+  "end" : 80.0,
+  "sign" : "GEMINI",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 56,
+  "start" : 80.0,
+  "end" : 81.777778,
+  "sign" : "GEMINI",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 57,
+  "start" : 81.777778,
+  "end" : 83.888889,
+  "sign" : "GEMINI",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 58,
+  "start" : 83.888889,
+  "end" : 85.777778,
+  "sign" : "GEMINI",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 59,
+  "start" : 85.777778,
+  "end" : 86.555556,
+  "sign" : "GEMINI",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 60,
+  "start" : 86.555556,
+  "end" : 88.777778,
+  "sign" : "GEMINI",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 61,
+  "start" : 88.777778,
+  "end" : 89.444444,
+  "sign" : "GEMINI",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 62,
+  "start" : 89.444444,
+  "end" : 90.0,
+  "sign" : "GEMINI",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 63,
+  "start" : 90.0,
+  "end" : 90.555556,
+  "sign" : "CANCER",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 64,
+  "start" : 90.555556,
+  "end" : 91.333333,
+  "sign" : "CANCER",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 65,
+  "start" : 91.333333,
+  "end" : 93.333333,
+  "sign" : "CANCER",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 66,
+  "start" : 93.333333,
+  "end" : 95.444444,
+  "sign" : "CANCER",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 67,
+  "start" : 95.444444,
+  "end" : 97.333333,
+  "sign" : "CANCER",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 68,
+  "start" : 97.333333,
+  "end" : 98.111111,
+  "sign" : "CANCER",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 69,
+  "start" : 98.111111,
+  "end" : 100.333333,
+  "sign" : "CANCER",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 70,
+  "start" : 100.333333,
+  "end" : 101.0,
+  "sign" : "CANCER",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 71,
+  "start" : 101.0,
+  "end" : 102.111111,
+  "sign" : "CANCER",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 72,
+  "start" : 102.111111,
+  "end" : 102.888889,
+  "sign" : "CANCER",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 73,
+  "start" : 102.888889,
+  "end" : 104.888889,
+  "sign" : "CANCER",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 74,
+  "start" : 104.888889,
+  "end" : 106.666667,
+  "sign" : "CANCER",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 75,
+  "start" : 106.666667,
+  "end" : 108.555556,
+  "sign" : "CANCER",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 76,
+  "start" : 108.555556,
+  "end" : 109.333333,
+  "sign" : "CANCER",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 77,
+  "start" : 109.333333,
+  "end" : 111.555556,
+  "sign" : "CANCER",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 78,
+  "start" : 111.555556,
+  "end" : 112.222222,
+  "sign" : "CANCER",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 79,
+  "start" : 112.222222,
+  "end" : 113.333333,
+  "sign" : "CANCER",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 80,
+  "start" : 113.333333,
+  "end" : 114.111111,
+  "sign" : "CANCER",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 81,
+  "start" : 114.111111,
+  "end" : 116.111111,
+  "sign" : "CANCER",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 82,
+  "start" : 116.111111,
+  "end" : 117.888889,
+  "sign" : "CANCER",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 83,
+  "start" : 117.888889,
+  "end" : 120.0,
+  "sign" : "CANCER",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 84,
+  "start" : 120.0,
+  "end" : 120.777778,
+  "sign" : "LEO",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 85,
+  "start" : 120.777778,
+  "end" : 123.0,
+  "sign" : "LEO",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 86,
+  "start" : 123.0,
+  "end" : 123.666667,
+  "sign" : "LEO",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 87,
+  "start" : 123.666667,
+  "end" : 124.777778,
+  "sign" : "LEO",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 88,
+  "start" : 124.777778,
+  "end" : 125.555556,
+  "sign" : "LEO",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 89,
+  "start" : 125.555556,
+  "end" : 127.555556,
+  "sign" : "LEO",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 90,
+  "start" : 127.555556,
+  "end" : 129.333333,
+  "sign" : "LEO",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 91,
+  "start" : 129.333333,
+  "end" : 131.444444,
+  "sign" : "LEO",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 92,
+  "start" : 131.444444,
+  "end" : 133.333333,
+  "sign" : "LEO",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 93,
+  "start" : 133.333333,
+  "end" : 135.555556,
+  "sign" : "LEO",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 94,
+  "start" : 135.555556,
+  "end" : 136.222222,
+  "sign" : "LEO",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 95,
+  "start" : 136.222222,
+  "end" : 137.333333,
+  "sign" : "LEO",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 96,
+  "start" : 137.333333,
+  "end" : 138.111111,
+  "sign" : "LEO",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 97,
+  "start" : 138.111111,
+  "end" : 140.111111,
+  "sign" : "LEO",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 98,
+  "start" : 140.111111,
+  "end" : 141.888889,
+  "sign" : "LEO",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 99,
+  "start" : 141.888889,
+  "end" : 144.0,
+  "sign" : "LEO",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 100,
+  "start" : 144.0,
+  "end" : 145.888889,
+  "sign" : "LEO",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 101,
+  "start" : 145.888889,
+  "end" : 146.666667,
+  "sign" : "LEO",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 102,
+  "start" : 146.666667,
+  "end" : 147.333333,
+  "sign" : "LEO",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 103,
+  "start" : 147.333333,
+  "end" : 148.444444,
+  "sign" : "LEO",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 104,
+  "start" : 148.444444,
+  "end" : 149.222222,
+  "sign" : "LEO",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 105,
+  "start" : 149.222222,
+  "end" : 150.0,
+  "sign" : "LEO",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 106,
+  "start" : 150.0,
+  "end" : 151.222222,
+  "sign" : "VIRGO",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 107,
+  "start" : 151.222222,
+  "end" : 153.0,
+  "sign" : "VIRGO",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 108,
+  "start" : 153.0,
+  "end" : 155.111111,
+  "sign" : "VIRGO",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 109,
+  "start" : 155.111111,
+  "end" : 157.0,
+  "sign" : "VIRGO",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 110,
+  "start" : 157.0,
+  "end" : 157.777778,
+  "sign" : "VIRGO",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 111,
+  "start" : 157.777778,
+  "end" : 160.0,
+  "sign" : "VIRGO",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 112,
+  "start" : 160.0,
+  "end" : 161.111111,
+  "sign" : "VIRGO",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 113,
+  "start" : 161.111111,
+  "end" : 161.888889,
+  "sign" : "VIRGO",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 114,
+  "start" : 161.888889,
+  "end" : 163.888889,
+  "sign" : "VIRGO",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 115,
+  "start" : 163.888889,
+  "end" : 165.666667,
+  "sign" : "VIRGO",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 116,
+  "start" : 165.666667,
+  "end" : 167.777778,
+  "sign" : "VIRGO",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 117,
+  "start" : 167.777778,
+  "end" : 169.666667,
+  "sign" : "VIRGO",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 118,
+  "start" : 169.666667,
+  "end" : 170.444444,
+  "sign" : "VIRGO",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 119,
+  "start" : 170.444444,
+  "end" : 172.666667,
+  "sign" : "VIRGO",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 120,
+  "start" : 172.666667,
+  "end" : 173.333333,
+  "sign" : "VIRGO",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 121,
+  "start" : 173.333333,
+  "end" : 174.111111,
+  "sign" : "VIRGO",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 122,
+  "start" : 174.111111,
+  "end" : 176.111111,
+  "sign" : "VIRGO",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 123,
+  "start" : 176.111111,
+  "end" : 177.888889,
+  "sign" : "VIRGO",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 124,
+  "start" : 177.888889,
+  "end" : 180.0,
+  "sign" : "VIRGO",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 125,
+  "start" : 180.0,
+  "end" : 181.888889,
+  "sign" : "LIBRA",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 126,
+  "start" : 181.888889,
+  "end" : 182.666667,
+  "sign" : "LIBRA",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 127,
+  "start" : 182.666667,
+  "end" : 184.888889,
+  "sign" : "LIBRA",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 128,
+  "start" : 184.888889,
+  "end" : 185.555556,
+  "sign" : "LIBRA",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 129,
+  "start" : 185.555556,
+  "end" : 186.666667,
+  "sign" : "LIBRA",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 130,
+  "start" : 186.666667,
+  "end" : 188.666667,
+  "sign" : "LIBRA",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 131,
+  "start" : 188.666667,
+  "end" : 190.444444,
+  "sign" : "LIBRA",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 132,
+  "start" : 190.444444,
+  "end" : 192.555556,
+  "sign" : "LIBRA",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 133,
+  "start" : 192.555556,
+  "end" : 194.444444,
+  "sign" : "LIBRA",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 134,
+  "start" : 194.444444,
+  "end" : 195.222222,
+  "sign" : "LIBRA",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 135,
+  "start" : 195.222222,
+  "end" : 197.444444,
+  "sign" : "LIBRA",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 136,
+  "start" : 197.444444,
+  "end" : 198.111111,
+  "sign" : "LIBRA",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 137,
+  "start" : 198.111111,
+  "end" : 199.222222,
+  "sign" : "LIBRA",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 138,
+  "start" : 199.222222,
+  "end" : 200.0,
+  "sign" : "LIBRA",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 139,
+  "start" : 200.0,
+  "end" : 201.777778,
+  "sign" : "LIBRA",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 140,
+  "start" : 201.777778,
+  "end" : 203.888889,
+  "sign" : "LIBRA",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 141,
+  "start" : 203.888889,
+  "end" : 205.777778,
+  "sign" : "LIBRA",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 142,
+  "start" : 205.777778,
+  "end" : 206.555556,
+  "sign" : "LIBRA",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 143,
+  "start" : 206.555556,
+  "end" : 208.777778,
+  "sign" : "LIBRA",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 144,
+  "start" : 208.777778,
+  "end" : 209.444444,
+  "sign" : "LIBRA",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 145,
+  "start" : 209.444444,
+  "end" : 210.0,
+  "sign" : "LIBRA",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 146,
+  "start" : 210.0,
+  "end" : 210.555556,
+  "sign" : "SCORPIO",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 147,
+  "start" : 210.555556,
+  "end" : 211.333333,
+  "sign" : "SCORPIO",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 148,
+  "start" : 211.333333,
+  "end" : 213.333333,
+  "sign" : "SCORPIO",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 149,
+  "start" : 213.333333,
+  "end" : 215.444444,
+  "sign" : "SCORPIO",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 150,
+  "start" : 215.444444,
+  "end" : 217.333333,
+  "sign" : "SCORPIO",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 151,
+  "start" : 217.333333,
+  "end" : 218.111111,
+  "sign" : "SCORPIO",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 152,
+  "start" : 218.111111,
+  "end" : 220.333333,
+  "sign" : "SCORPIO",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 153,
+  "start" : 220.333333,
+  "end" : 221.0,
+  "sign" : "SCORPIO",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 154,
+  "start" : 221.0,
+  "end" : 222.111111,
+  "sign" : "SCORPIO",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 155,
+  "start" : 222.111111,
+  "end" : 222.888889,
+  "sign" : "SCORPIO",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 156,
+  "start" : 222.888889,
+  "end" : 224.888889,
+  "sign" : "SCORPIO",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 157,
+  "start" : 224.888889,
+  "end" : 226.666667,
+  "sign" : "SCORPIO",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 158,
+  "start" : 226.666667,
+  "end" : 228.555556,
+  "sign" : "SCORPIO",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 159,
+  "start" : 228.555556,
+  "end" : 229.333333,
+  "sign" : "SCORPIO",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 160,
+  "start" : 229.333333,
+  "end" : 231.555556,
+  "sign" : "SCORPIO",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 161,
+  "start" : 231.555556,
+  "end" : 232.222222,
+  "sign" : "SCORPIO",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 162,
+  "start" : 232.222222,
+  "end" : 233.333333,
+  "sign" : "SCORPIO",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 163,
+  "start" : 233.333333,
+  "end" : 234.111111,
+  "sign" : "SCORPIO",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 164,
+  "start" : 234.111111,
+  "end" : 236.111111,
+  "sign" : "SCORPIO",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 165,
+  "start" : 236.111111,
+  "end" : 237.888889,
+  "sign" : "SCORPIO",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 166,
+  "start" : 237.888889,
+  "end" : 240.0,
+  "sign" : "SCORPIO",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 167,
+  "start" : 240.0,
+  "end" : 240.777778,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 168,
+  "start" : 240.777778,
+  "end" : 243.0,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 169,
+  "start" : 243.0,
+  "end" : 243.666667,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 170,
+  "start" : 243.666667,
+  "end" : 244.777778,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 171,
+  "start" : 244.777778,
+  "end" : 245.555556,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 172,
+  "start" : 245.555556,
+  "end" : 247.555556,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 173,
+  "start" : 247.555556,
+  "end" : 249.333333,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 174,
+  "start" : 249.333333,
+  "end" : 251.444444,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 175,
+  "start" : 251.444444,
+  "end" : 253.333333,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 176,
+  "start" : 253.333333,
+  "end" : 255.555556,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 177,
+  "start" : 255.555556,
+  "end" : 256.222222,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 178,
+  "start" : 256.222222,
+  "end" : 257.333333,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 179,
+  "start" : 257.333333,
+  "end" : 258.111111,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 180,
+  "start" : 258.111111,
+  "end" : 260.111111,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 181,
+  "start" : 260.111111,
+  "end" : 261.888889,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 182,
+  "start" : 261.888889,
+  "end" : 264.0,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 183,
+  "start" : 264.0,
+  "end" : 265.888889,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 184,
+  "start" : 265.888889,
+  "end" : 266.666667,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 185,
+  "start" : 266.666667,
+  "end" : 267.333333,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 186,
+  "start" : 267.333333,
+  "end" : 268.444444,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 187,
+  "start" : 268.444444,
+  "end" : 269.222222,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 188,
+  "start" : 269.222222,
+  "end" : 270.0,
+  "sign" : "SAGITTARIUS",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 189,
+  "start" : 270.0,
+  "end" : 271.222222,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 190,
+  "start" : 271.222222,
+  "end" : 273.0,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 191,
+  "start" : 273.0,
+  "end" : 275.111111,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 192,
+  "start" : 275.111111,
+  "end" : 277.0,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 193,
+  "start" : 277.0,
+  "end" : 277.777778,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 194,
+  "start" : 277.777778,
+  "end" : 280.0,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 195,
+  "start" : 280.0,
+  "end" : 281.111111,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 196,
+  "start" : 281.111111,
+  "end" : 281.888889,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 197,
+  "start" : 281.888889,
+  "end" : 283.888889,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 198,
+  "start" : 283.888889,
+  "end" : 285.666667,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 199,
+  "start" : 285.666667,
+  "end" : 287.777778,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 200,
+  "start" : 287.777778,
+  "end" : 289.666667,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 201,
+  "start" : 289.666667,
+  "end" : 290.444444,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 202,
+  "start" : 290.444444,
+  "end" : 292.666667,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 203,
+  "start" : 292.666667,
+  "end" : 293.333333,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 204,
+  "start" : 293.333333,
+  "end" : 294.111111,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 205,
+  "start" : 294.111111,
+  "end" : 296.111111,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 206,
+  "start" : 296.111111,
+  "end" : 297.888889,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 207,
+  "start" : 297.888889,
+  "end" : 300.0,
+  "sign" : "CAPRICORN",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 208,
+  "start" : 300.0,
+  "end" : 301.888889,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 209,
+  "start" : 301.888889,
+  "end" : 302.666667,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 210,
+  "start" : 302.666667,
+  "end" : 304.888889,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 211,
+  "start" : 304.888889,
+  "end" : 305.555556,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 212,
+  "start" : 305.555556,
+  "end" : 306.666667,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 213,
+  "start" : 306.666667,
+  "end" : 308.666667,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 214,
+  "start" : 308.666667,
+  "end" : 310.444444,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 215,
+  "start" : 310.444444,
+  "end" : 312.555556,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 216,
+  "start" : 312.555556,
+  "end" : 314.444444,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 217,
+  "start" : 314.444444,
+  "end" : 315.222222,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 218,
+  "start" : 315.222222,
+  "end" : 317.444444,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 219,
+  "start" : 317.444444,
+  "end" : 318.111111,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 220,
+  "start" : 318.111111,
+  "end" : 319.222222,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 221,
+  "start" : 319.222222,
+  "end" : 320.0,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 222,
+  "start" : 320.0,
+  "end" : 321.777778,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 223,
+  "start" : 321.777778,
+  "end" : 323.888889,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 224,
+  "start" : 323.888889,
+  "end" : 325.777778,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 225,
+  "start" : 325.777778,
+  "end" : 326.555556,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 226,
+  "start" : 326.555556,
+  "end" : 328.777778,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 227,
+  "start" : 328.777778,
+  "end" : 329.444444,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 228,
+  "start" : 329.444444,
+  "end" : 330.0,
+  "sign" : "AQUARIUS",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 229,
+  "start" : 330.0,
+  "end" : 330.555556,
+  "sign" : "PISCES",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 230,
+  "start" : 330.555556,
+  "end" : 331.333333,
+  "sign" : "PISCES",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 231,
+  "start" : 331.333333,
+  "end" : 333.333333,
+  "sign" : "PISCES",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 232,
+  "start" : 333.333333,
+  "end" : 335.444444,
+  "sign" : "PISCES",
+  "sub_lord" : "SATURN"
+}, {
+  "number" : 233,
+  "start" : 335.444444,
+  "end" : 337.333333,
+  "sign" : "PISCES",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 234,
+  "start" : 337.333333,
+  "end" : 338.111111,
+  "sign" : "PISCES",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 235,
+  "start" : 338.111111,
+  "end" : 340.333333,
+  "sign" : "PISCES",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 236,
+  "start" : 340.333333,
+  "end" : 341.0,
+  "sign" : "PISCES",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 237,
+  "start" : 341.0,
+  "end" : 342.111111,
+  "sign" : "PISCES",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 238,
+  "start" : 342.111111,
+  "end" : 342.888889,
+  "sign" : "PISCES",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 239,
+  "start" : 342.888889,
+  "end" : 344.888889,
+  "sign" : "PISCES",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 240,
+  "start" : 344.888889,
+  "end" : 346.666667,
+  "sign" : "PISCES",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 241,
+  "start" : 346.666667,
+  "end" : 348.555556,
+  "sign" : "PISCES",
+  "sub_lord" : "MERCURY"
+}, {
+  "number" : 242,
+  "start" : 348.555556,
+  "end" : 349.333333,
+  "sign" : "PISCES",
+  "sub_lord" : "KETU"
+}, {
+  "number" : 243,
+  "start" : 349.333333,
+  "end" : 351.555556,
+  "sign" : "PISCES",
+  "sub_lord" : "VENUS"
+}, {
+  "number" : 244,
+  "start" : 351.555556,
+  "end" : 352.222222,
+  "sign" : "PISCES",
+  "sub_lord" : "SUN"
+}, {
+  "number" : 245,
+  "start" : 352.222222,
+  "end" : 353.333333,
+  "sign" : "PISCES",
+  "sub_lord" : "MOON"
+}, {
+  "number" : 246,
+  "start" : 353.333333,
+  "end" : 354.111111,
+  "sign" : "PISCES",
+  "sub_lord" : "MARS"
+}, {
+  "number" : 247,
+  "start" : 354.111111,
+  "end" : 356.111111,
+  "sign" : "PISCES",
+  "sub_lord" : "RAHU"
+}, {
+  "number" : 248,
+  "start" : 356.111111,
+  "end" : 357.888889,
+  "sign" : "PISCES",
+  "sub_lord" : "JUPITER"
+}, {
+  "number" : 249,
+  "start" : 357.888889,
+  "end" : 360.0,
+  "sign" : "PISCES",
+  "sub_lord" : "SATURN"
+} ]
