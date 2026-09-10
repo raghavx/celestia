@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -34,7 +35,8 @@ public record GoldenChart(
         Map<Graha, NodeAgencyRef> nodeAgency,
         RulingPlanetsRef rulingPlanets,
         DashaRef dasha,
-        HoraryRef horary) {
+        HoraryRef horary,
+        DailyRef daily) {
 
     /** Reference values for one graha (SPEC-001 + SPEC-002 bhava / rasi house). */
     public record Expected(
@@ -77,6 +79,23 @@ public record GoldenChart(
             Map<String, Set<String>> rulingPlanetSources) {}
 
     public record HoraryPlacementRef(double longitude, int bhava, int rasiHouse) {}
+
+    /** SPEC-006: one worked daily-prediction reading. */
+    public record DailyRef(
+            LocalDate date, double longitude, Instant referenceInstant,
+            List<String> runningLords,
+            Map<Graha, Map<Integer, Set<Integer>>> significationsByLord,
+            List<ActivatedRef> activated, boolean lordChangesWithinDay,
+            String moonSubLord, String sunSubLord,
+            Set<Integer> moonSupports, Set<Integer> sunSupports,
+            boolean moonSubLordChangesWithinDay,
+            Map<String, VerdictRef> verdicts) {}
+
+    public record ActivatedRef(int house, int strength, List<String> lords) {}
+
+    public record VerdictRef(
+            String verdict, Set<Integer> favourableHit, Set<Integer> obstructiveHit,
+            List<String> lords, List<String> transits) {}
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -246,9 +265,53 @@ public record GoldenChart(
                         Map.copyOf(hRp));
             }
 
+            DailyRef daily = null;
+            JsonNode dayNode = root.at("/expected/daily");
+            if (dayNode != null && !dayNode.isMissingNode()) {
+                JsonNode dz = dayNode.get("dasha");
+                JsonNode tz = dayNode.get("transit");
+
+                Map<Graha, Map<Integer, Set<Integer>>> byLord = new EnumMap<>(Graha.class);
+                dz.get("significations_by_lord").fields().forEachRemaining(e -> {
+                    Map<Integer, Set<Integer>> houses = new TreeMap<>();
+                    e.getValue().fields().forEachRemaining(h -> {
+                        Set<Integer> steps = new LinkedHashSet<>();
+                        h.getValue().forEach(s -> steps.add(s.asInt()));
+                        houses.put(Integer.parseInt(h.getKey()), Set.copyOf(steps));
+                    });
+                    byLord.put(Graha.valueOf(e.getKey()), Map.copyOf(houses));
+                });
+
+                List<ActivatedRef> activated = new ArrayList<>();
+                for (JsonNode a : dz.get("activated")) {
+                    activated.add(new ActivatedRef(
+                            a.get("house").asInt(), a.get("strength").asInt(),
+                            strings(a.get("lords"))));
+                }
+
+                Map<String, VerdictRef> verdicts = new LinkedHashMap<>();
+                for (JsonNode v : dayNode.get("verdicts")) {
+                    verdicts.put(v.get("matter").asText(), new VerdictRef(
+                            v.get("verdict").asText(),
+                            ints(v.get("favourable_hit")), ints(v.get("obstructive_hit")),
+                            strings(v.get("lords")), strings(v.get("transits"))));
+                }
+
+                daily = new DailyRef(
+                        LocalDate.parse(dayNode.get("date").asText()),
+                        dayNode.get("longitude").asDouble(),
+                        Instant.parse(dayNode.get("reference_instant").asText()),
+                        strings(dz.get("running_lords")), Map.copyOf(byLord),
+                        List.copyOf(activated), dz.get("lord_changes_within_day").asBoolean(),
+                        tz.get("moon_sub_lord").asText(), tz.get("sun_sub_lord").asText(),
+                        ints(tz.get("moon_supports")), ints(tz.get("sun_supports")),
+                        tz.get("moon_sub_lord_changes_within_day").asBoolean(),
+                        Map.copyOf(verdicts));
+            }
+
             return new GoldenChart(id, instant, lat, lon, expected, List.copyOf(cusps),
                     Map.copyOf(angles), Map.copyOf(byHouse), Map.copyOf(byGraha),
-                    Map.copyOf(nodeAgency), rp, dasha, horary);
+                    Map.copyOf(nodeAgency), rp, dasha, horary, daily);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -267,6 +330,14 @@ public record GoldenChart(
             arr.forEach(n -> out.add(n.asText()));
         }
         return List.copyOf(out);
+    }
+
+    private static Set<Integer> ints(JsonNode arr) {
+        Set<Integer> out = new LinkedHashSet<>();
+        if (arr != null) {
+            arr.forEach(n -> out.add(n.asInt()));
+        }
+        return Set.copyOf(out);
     }
 
     private static Integer optInt(JsonNode parent, String field) {

@@ -25,8 +25,8 @@
     "position_flags": "SEFLG_SIDEREAL | SEFLG_SPEED (SWIEPH, MOSEPH fallback)"
   },
   "expected": {
-    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.5",
-    "generated_at": "2026-09-09T19:12:51+00:00",
+    "generated_by": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.6",
+    "generated_at": "2026-09-10T03:55:21+00:00",
     "grahas": {
       "SUN": {
         "longitude": 331.430382,
@@ -840,13 +840,13 @@
     }
   },
   "verification": {
-    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.5",
+    "positions_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.6",
     "lordchain_human_check": "pending",
     "status": "expected_generated",
-    "houses_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.5",
-    "significators_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.5",
+    "houses_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.6",
+    "significators_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.6",
     "significators_human_check": "pending - see golden/README.md (SC-006)",
-    "dasha_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.5",
+    "dasha_reference": "pyswisseph 2.10.03 / SWIEPH / kp-crosscheck 0.6",
     "dasha_human_check": "pending - see golden/README.md (SC-006)"
   }
 }

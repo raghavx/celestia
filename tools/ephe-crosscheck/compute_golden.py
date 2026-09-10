@@ -518,7 +518,138 @@ def compute_houses(chart: dict) -> dict:
     }
 
 
-def compute(chart: dict) -> tuple[dict, dict, dict, dict, dict, str]:
+# --- SPEC-006: daily prediction ruleset (v1 - see specs/006-daily-prediction/research.md) ---
+
+# research.md §1: matter -> (favourable houses, obstructive houses)
+HOUSE_GROUPS = {
+    "MARRIAGE": ({2, 7, 11}, {1, 6, 10}),
+    "CAREER": ({2, 6, 10, 11}, {1, 5, 9, 12}),
+    "WEALTH": ({2, 6, 10, 11}, {1, 5, 9, 12}),
+    "EDUCATION": ({4, 9, 11}, {3, 8, 10}),
+    "CHILDREN": ({2, 5, 11}, {1, 4, 10}),
+    "PROPERTY": ({4, 11, 12}, {3, 8, 10}),
+    "TRAVEL": ({3, 9, 12}, {4, 8}),
+    "LITIGATION": ({6, 11}, {5, 8, 12}),
+    "HEALTH_RECOVERY": ({5, 11}, {1, 6, 8, 12}),
+}
+
+
+def _running_lords_at(birth: dt.datetime, moon_lon: float, when: dt.datetime) -> list[str]:
+    """The five running Vimshottari lords (Maha..Prana) at `when`. Mirrors
+    compute_dasha's periodic-cycle walk (SPEC-004)."""
+    nak = int(moon_lon // float(NAK_DEG)) % 27
+    maha_lord = VIMS_NAMES[nak % 9]
+    frac = (Fraction(moon_lon).limit_denominator(10**12) - nak * NAK_DEG) / NAK_DEG
+    elapsed_s = frac * VIMS_YEARS[maha_lord] * YEAR_SECONDS
+    q = elapsed_s + Fraction(round((when - birth).total_seconds()))
+    cyc = q // CYCLE_SECONDS
+    off = q - cyc * CYCLE_SECONDS
+    canonical = _split(Fraction(0), Fraction(CYCLE_SECONDS), maha_lord)
+    lord, seg_start, seg_end = next(c for c in canonical if c[1] <= off < c[2])
+    periods = [(lord, cyc * CYCLE_SECONDS + seg_start, cyc * CYCLE_SECONDS + seg_end)]
+    for _ in _DASHA_LEVELS[1:]:
+        plord, ps, pe = periods[-1]
+        for child in _split(ps, pe - ps, plord):
+            if child[1] <= q < child[2]:
+                periods.append((child[0], child[1], child[2]))
+                break
+    return [p[0] for p in periods]
+
+
+def _transit_lon(when: dt.datetime, planet: int) -> float:
+    _, jd = swe.utc_to_jd(when.year, when.month, when.day, when.hour, when.minute,
+                          when.second + when.microsecond / 1e6, swe.GREG_CAL)
+    xx, _ = swe.calc_ut(jd, planet, swe.FLG_SIDEREAL | swe.FLG_SWIEPH)
+    return xx[0] % 360.0
+
+
+def compute_daily(chart: dict, out: dict, significators: dict) -> dict:
+    """SPEC-006: the v1 daily reading at birth + 40 Julian years, local noon."""
+    birth = dt.datetime.fromisoformat(chart["birth"]["utc_instant"].replace("Z", "+00:00"))
+    lon = chart["birth"]["longitude"]
+    by_graha = significators["by_graha"]
+
+    ref_approx = birth + dt.timedelta(seconds=40 * YEAR_SECONDS)
+    date = (ref_approx + dt.timedelta(hours=lon / 15.0)).date()
+    lmt_offset_s = round(lon / 15.0 * 3600.0)
+    ref = (dt.datetime(date.year, date.month, date.day, 12, tzinfo=dt.timezone.utc)
+           - dt.timedelta(seconds=lmt_offset_s))
+    before, after = ref - dt.timedelta(hours=12), ref + dt.timedelta(hours=12)
+
+    moon_lon = out["MOON"]["longitude"]
+    running = _running_lords_at(birth, moon_lon, ref)
+    running_before = _running_lords_at(birth, moon_lon, before)
+    running_after = _running_lords_at(birth, moon_lon, after)
+    lord_changes = running != running_before or running != running_after
+
+    # activated house set: distinct running lords that signify each house
+    activated: dict[int, set] = {}
+    for lord in running:
+        for h in by_graha.get(lord, {}):
+            activated.setdefault(int(h), set()).add(lord)
+
+    # transit: sub lord of the transiting Moon / Sun -> its natal significations
+    moon_chain = lord_chain(_transit_lon(ref, swe.MOON))
+    sun_chain = lord_chain(_transit_lon(ref, swe.SUN))
+    moon_before = lord_chain(_transit_lon(before, swe.MOON))
+    moon_after = lord_chain(_transit_lon(after, swe.MOON))
+    moon_supports = {int(h) for h in by_graha.get(moon_chain["sub_lord"], {})}
+    sun_supports = {int(h) for h in by_graha.get(sun_chain["sub_lord"], {})}
+    transit_supported = moon_supports | sun_supports
+    body_supports = {"MOON": moon_supports, "SUN": sun_supports}
+
+    verdicts = []
+    for matter, (fav, obs) in HOUSE_GROUPS.items():
+        fav_active = {h for h in fav if h in activated}
+        obs_active = {h for h in obs if h in activated}
+        fav_strength = sum(len(activated[h]) for h in fav_active)
+        obs_strength = sum(len(activated[h]) for h in obs_active)
+        fav_triggered = fav_active & transit_supported
+        if not fav_active and not obs_active:
+            v = "QUIET"
+        elif obs_strength > fav_strength:
+            v = "UNFAVOURABLE"
+        elif fav_active and fav_triggered:
+            v = "FAVOURABLE"
+        else:
+            v = "MIXED"
+        hit = fav_active | obs_active
+        lords = sorted({lord for h in hit for lord in activated.get(h, ())}, key=GRAHA_NAMES.index)
+        transits = sorted(b for b, s in body_supports.items() if fav_triggered & s)
+        verdicts.append({
+            "matter": matter, "verdict": v,
+            "favourable_hit": sorted(fav_active), "obstructive_hit": sorted(obs_active),
+            "lords": lords, "transits": transits,
+        })
+
+    return {
+        "date": date.isoformat(),
+        "longitude": lon,
+        "reference_instant": ref.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "dasha": {
+            "running_lords": running,
+            "significations_by_lord": {lord: by_graha.get(lord, {}) for lord in dict.fromkeys(running)},
+            "activated": [
+                {"house": h, "strength": len(activated[h]),
+                 "lords": sorted(activated[h], key=GRAHA_NAMES.index)}
+                for h in sorted(activated)
+            ],
+            "lord_changes_within_day": lord_changes,
+        },
+        "transit": {
+            "moon_sub_lord": moon_chain["sub_lord"],
+            "sun_sub_lord": sun_chain["sub_lord"],
+            "moon_supports": sorted(moon_supports),
+            "sun_supports": sorted(sun_supports),
+            "moon_sub_lord_changes_within_day":
+                moon_before["sub_lord"] != moon_chain["sub_lord"]
+                or moon_after["sub_lord"] != moon_chain["sub_lord"],
+        },
+        "verdicts": verdicts,
+    }
+
+
+def compute(chart: dict) -> tuple[dict, dict, dict, dict, dict, dict, str]:
     swe.set_sid_mode(swe.SIDM_KRISHNAMURTI, 0, 0)   # ADR-0003: constant value 5
     jd = _jd_ut(chart["birth"]["utc_instant"])
 
@@ -556,9 +687,12 @@ def compute(chart: dict) -> tuple[dict, dict, dict, dict, dict, str]:
     # SPEC-004: Vimshottari dasha
     dasha = compute_dasha(chart, out)
 
+    # SPEC-006: daily prediction
+    daily = compute_daily(chart, out, significators)
+
     swe_ver = getattr(swe, "version", "unknown")
-    return (out, houses, significators, node_agency, dasha,
-            f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.5")
+    return (out, houses, significators, node_agency, dasha, daily,
+            f"pyswisseph {swe_ver} / {model} / kp-crosscheck 0.6")
 
 
 def _entry(lon: float, speed: float) -> dict:
@@ -586,7 +720,7 @@ def main() -> int:
     exit_code = 0
     for p in args.paths:
         chart = json.loads(p.read_text())
-        computed, houses, significators, node_agency, dasha, generated_by = compute(chart)
+        computed, houses, significators, node_agency, dasha, daily, generated_by = compute(chart)
         prior = chart.get("expected", {}).get("grahas", {})
         prior_cusps = chart.get("expected", {}).get("cusps", [])
         prior_sig = chart.get("expected", {}).get("significators", {}).get("by_house", [])
@@ -637,6 +771,8 @@ def main() -> int:
                 expected["ruling_planets"] = compute_ruling_planets(RP_JUDGMENT)
             if chart.get("expected", {}).get("horary") is not None or chart["id"] == "obama-1961":
                 expected["horary"] = compute_horary(HORARY_QUERY)
+            if chart.get("expected", {}).get("daily") is not None or chart["id"] == "obama-1961":
+                expected["daily"] = daily
             chart["expected"] = expected
             v = chart.setdefault("verification", {})
             v["positions_reference"] = generated_by
@@ -648,6 +784,9 @@ def main() -> int:
             if "horary" in expected:
                 v["horary_reference"] = generated_by
                 v.setdefault("horary_human_check", "pending - see golden/README.md (SC-006)")
+            if "daily" in expected:
+                v["daily_reference"] = generated_by
+                v.setdefault("daily_human_check", "pending - see golden/README.md (SC-006)")
             if v.get("status") == "birth_data_sourced":
                 v["status"] = "expected_generated"
             p.write_text(json.dumps(chart, indent=2) + "\n")
