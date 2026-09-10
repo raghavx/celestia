@@ -66,3 +66,14 @@
   versioned chart cache, and the identity store. US4/US5/US6 are P2.
 - Ready for `/speckit-clarify` (optional) / `/speckit-plan` / `/speckit-tasks` /
   `/speckit-implement`.
+- `/speckit-analyze` (2026-09-11, post-tasks): no CRITICAL/HIGH, coverage 100%.
+  Applied P1 (new `ChartCacheGoldenIT` + `EngineConfig` must use the golden
+  suite's `SwissEphemerisConfig` — ties the cache path to the Constitution III
+  gate), P2 (FR-010: `inbound_event` / `outbox_message` payload deletion is
+  SPEC-009's "forget me" extension — it owns those payloads), P3 (`dasha_period`
+  table created but **not populated** by SPEC-008 — SPEC-013 writes it; avoids
+  the "dead schema" the billing tables were deferred to avoid), P4 (SC-005
+  reworded — "no geocoder call" is SPEC-007's `CachingGeocoder`, not testable
+  in a `GeocodeCache`), P5 (`birth_data.flags` = comma-joined name list, pinned).
+  P6 (transactional-rollback test) and P7 (US3 test seeds via US1/US2) accepted
+  LOW.

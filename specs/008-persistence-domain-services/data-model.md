@@ -40,7 +40,7 @@ MySQL 8.4, `utf8mb4_0900_ai_ci`. All DDL via Flyway `V1..V6`. Entities are
 | `offset_applied` | `VARCHAR(16)` | `ZoneOffset.getId()` |
 | `geocode_source` | `VARCHAR(32)` | |
 | `stated_zone_id` | `VARCHAR(64)` null | set ⇔ `ZONE_CONFLICT` |
-| `flags` | `VARCHAR(255)` | comma-joined `BirthMomentFlag` names (or a small JSON array) |
+| `flags` | `VARCHAR(255)` | comma-joined `BirthMomentFlag` names, e.g. `"DST_GAP,POLAR_LATITUDE"`; empty string = no flags |
 | `created_at` / `updated_at` | `TIMESTAMP` | |
 
 ### `chart` (V3)
@@ -62,9 +62,14 @@ MySQL 8.4, `utf8mb4_0900_ai_ci`. All DDL via Flyway `V1..V6`. Entities are
 `id`, `chart_id` (FK → `chart` `ON DELETE CASCADE`), `level` (`VARCHAR(16)` —
 `MAHADASHA`…`PRANA`), `lord` (`VARCHAR(12)`), `start_utc` / `end_utc`
 (`TIMESTAMP(0)`), `parent_id` (`BIGINT` null, self-FK). Index `(chart_id, level)`.
-Rows are a **flattened projection** of `DashaTimeline` for query convenience;
-`ChartCacheService` still returns the computed `DashaTimeline` object from
-`computed_json`, not these rows (they exist for SPEC-013/015 reporting).
+
+**SPEC-008 creates the table but does NOT populate it.** `ChartCacheService`
+returns the computed `DashaTimeline` object from `computed_json`; a flattened
+row-per-period projection is only useful for the range queries SPEC-013 /
+SPEC-015 will run, so **SPEC-013 owns writing these rows** (and the "forget me"
+cascade already covers them via the `chart` FK). Landing the empty table here
+keeps the FK stable and avoids a later `chart`-touching migration; populating it
+now would be the "dead schema" the billing tables were deferred to avoid.
 
 ### `horary_query` (V3)
 

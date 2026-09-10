@@ -248,7 +248,11 @@ validated in CI.
   `chart`, `dasha_period`, `horary_query`, and `prediction` rows and anonymise
   `app_user` (clear `display_name` / `wa_id`, retain a non-reversible phone
   hash, set `deleted_at`). Payment/tax records are out of scope here and exempt
-  (ADR-0016). The *scheduling* of the job is SPEC-012.
+  (ADR-0016). The *scheduling* of the job is SPEC-012. Deleting the user's
+  `inbound_event` / `outbox_message` payload rows (which can contain a phone
+  number or message text — "message bodies" in ADR-0016) is **SPEC-009's**
+  "forget me" extension: SPEC-009 owns those tables' payload semantics and the
+  raw-payload store they point at, so it removes them when it wires the worker.
 - **FR-011**: A `JpaGeocodeCache` MUST implement `com.celestia.geo.place.GeocodeCache`
   against `geocode_cache`, keyed on `query_norm`; `get` on a hit returns a
   `GeocodeResult` whose candidate list **equals** the stored one; `put` upserts.
@@ -319,8 +323,11 @@ validated in CI.
 - **SC-004**: "Forget me" leaves zero `birth_data` / `chart` / `dasha_period` /
   `horary_query` / `prediction` rows for the user and a non-reversible phone
   hash on `app_user`.
-- **SC-005**: A geocode-cache hit returns a candidate list equal to the stored
-  one across a fresh persistence context and makes no geocoder call.
+- **SC-005**: A geocode-cache hit returns a `GeocodeResult` whose candidate list
+  **equals** the stored one across a fresh persistence context; a second `put`
+  for the same `query_norm` updates in place (one row). (The "no geocoder call
+  on a hit" guarantee is SPEC-007's `CachingGeocoder`, already tested — a
+  `GeocodeCache` has no geocoder to call.)
 - **SC-006**: The Flyway migrations apply to an empty `mysql:8.4` and, on a
   second run, report no pending migrations and pass checksum validation; CI runs
   the persistence suite against the container.

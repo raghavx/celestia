@@ -54,11 +54,12 @@ New coverage:
 | US2 cold miss computes once (SC-002) | `ChartCacheServiceIT` (counting engine) |
 | US2 warm hit computes zero (SC-002) | `ChartCacheServiceIT` |
 | US2 stale `engine_version` recomputes + overwrites (SC-002) | `ChartCacheServiceIT`, `PredictionCacheServiceIT` |
+| US2 cached chart matches the golden gate (Constitution III) | `ChartCacheGoldenIT` |
 | US2 the current version string | `CurrentEngineVersionTest` |
 | US3 concurrent first-contact → one row (SC-003) | `UserAccountServiceIT` |
 | US3 consent write-once | `UserAccountServiceIT` |
 | US3 "forget me" removes PII (SC-004) | `UserAccountServiceIT` |
-| US4 geocode cache hit equal, no call (SC-005) | `JpaGeocodeCacheIT` |
+| US4 geocode cache hit equal + upsert (SC-005) | `JpaGeocodeCacheIT` |
 | US5 duplicate `wa_message_id` no-op (SC-007) | `InboxStoreIT` |
 | US5 claim not double-claimed | `InboxStoreIT`, `OutboxStoreIT` |
 | US6 migrations apply + re-runnable + validate (SC-006) | `FlywayMigrationIT` |

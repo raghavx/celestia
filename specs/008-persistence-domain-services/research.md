@@ -50,10 +50,17 @@ would carry; otherwise recompute, overwrite, return fresh.
      return it.
   4. else compute via `NatalChartFactory` (+ `SignificatorTable.of`,
      `DashaTimeline.from`, `RulingPlanetsFactory`), serialise, **upsert** the
-     `chart` row and replace its `dasha_period` children, return fresh.
+     `chart` row (+ a `horary_query` row for horary), return fresh. The
+     `dasha_period` table is **not** written by SPEC-008 (SPEC-013 owns it).
 - **When in doubt, recompute.** A JSON deserialise failure, a missing row, an
   unrecognised `engine_version` — all fall through to recompute. Recompute is
   always correct; a bad cache hit is not (principle III).
+- **Tied to the golden gate.** `EngineConfig` wires the same
+  `SwissEphemerisConfig` defaults the golden-chart suite uses; `ChartCacheGoldenIT`
+  cold-computes a golden fixture through `ChartCacheService` and asserts the
+  stored/served chart matches the pinned golden values and
+  `CurrentEngineVersion.id()` matches the golden's `engineVersion`. So the cache
+  path cannot drift from the Constitution III gate.
 - **Lazy** — recomputation happens on the next read. No background sweep; that is
   SPEC-016 ops. A deploy that changes `RULES` needs no migration — the next read
   per user self-heals.
@@ -61,9 +68,8 @@ would carry; otherwise recompute, overwrite, return fresh.
   Resolution: the `chart` row has a unique key on `(user_id, kind)`; the loser's
   `INSERT` hits the constraint → catch and re-read (the value is identical
   anyway, so last-write-wins is also safe). No lock needed.
-- **`@Transactional`**: the chart write + its `dasha_period` delete/insert are
-  one transaction (FR-016). `forget(userId)` is one transaction across five
-  tables.
+- **`@Transactional`**: the chart write (+ its `horary_query` row) is one
+  transaction (FR-016). `forget(userId)` is one transaction across five tables.
 
 ## 3. Chart / prediction JSON
 
@@ -185,7 +191,7 @@ the domain aggregate, produced by a dedicated codec.
 | # | Topic | Decision |
 |---|-------|----------|
 | 1 | Layering | JPA in `agent.persistence`; `store` package the only public surface; ports for domain needs; new ArchUnit rule |
-| 2 | Versioned cache | serve only on exact `engine_version` match; recompute when in doubt; lazy, no sweep; unique-key race handling |
+| 2 | Versioned cache | serve only on exact `engine_version` match; recompute when in doubt; lazy, no sweep; unique-key race handling; `ChartCacheGoldenIT` ties it to the golden gate; `dasha_period` table created but not written (SPEC-013) |
 | 3 | Chart JSON | Jackson + `schema` tag + `BigFraction`-as-string; deserialise failure ⇒ miss ⇒ recompute |
 | 4 | Identity | `findOrCreate` catches the unique-key race and re-reads; `consent_at` write-once; `forget` = tx delete PII + SHA-256 phone hash |
 | 5 | Geocode cache | `JpaGeocodeCache` implements the `geo` port; `results_json`; upsert on `query_norm` |

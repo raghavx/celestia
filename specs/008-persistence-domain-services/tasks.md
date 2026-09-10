@@ -44,8 +44,9 @@ accepted by the plan.
   TIMESTAMP(0)`; `lat`/`lon` `DECIMAL(9,6)`.
 - [ ] T005 `db/migration/V3__chart_cache.sql` — `chart` (UNIQUE `(user_id, kind)`,
   `computed_json JSON`, `engine_version VARCHAR(128)`), `dasha_period` (FK →
-  `chart` cascade, self-FK `parent_id`), `horary_query` (FK → `chart` cascade,
-  `number_1_249` 1..249).
+  `chart` cascade, self-FK `parent_id`) — **table only, not populated by
+  SPEC-008** (SPEC-013 writes it; data-model.md), `horary_query` (FK → `chart`
+  cascade, `number_1_249` 1..249).
 - [ ] T006 `db/migration/V4__prediction_cache.sql` — `prediction`: UNIQUE
   `(user_id, for_date, kind)`, `payload_json JSON`, `engine_version`, FK →
   `app_user` cascade.
@@ -133,8 +134,10 @@ user, reloaded losslessly.
 - [ ] T021 [US1] `persistence/store/BirthDataStore.java` + `StoredBirth` (a
   carrier exposing the `ResolvedBirth`-equivalent fields + `birthData()`) —
   `save(long userId, String name, String placeQuery, ResolvedBirth)` upserts by
-  `user_id`; `load(long userId)` maps the entity back. Flag list ↔
-  `EnumSet<BirthMomentFlag>`.
+  `user_id`; `load(long userId)` maps the entity back. `flags` column ↔
+  `EnumSet<BirthMomentFlag>` as a **comma-joined name list** (empty string = no
+  flags); `birth_utc` written to `TIMESTAMP(0)` and reloaded to the exact
+  `Instant` (no nanos).
 
 **Checkpoint**: onboarding (SPEC-010) can persist a birth; Q&A (SPEC-015) can read it.
 
@@ -159,6 +162,13 @@ recompute + overwrite. Constitution III.
 - [ ] T024 [P] [US2] `PredictionCacheServiceIT` — same, keyed on
   `(user, for_date)`; changing the date recomputes; a stale `engine_version`
   recomputes.
+- [ ] T024b [P] [US2] `ChartCacheGoldenIT` (extends `PersistenceIT`) — seed a
+  **golden-chart** birth (reuse a `core/src/test/resources/golden` fixture);
+  `ChartCacheService.natalChart` cold-computes it and the stored/served result
+  matches the golden's pinned positions / cusps / significators, and
+  `CurrentEngineVersion.id(birthData)` equals the golden's `engineVersion`.
+  Ties the cache to the Constitution III golden gate — `EngineConfig` must wire
+  the same `SwissEphemerisConfig` the golden suite uses.
 
 ### Implementation
 
@@ -167,9 +177,11 @@ recompute + overwrite. Constitution III.
   `expected = currentEngineVersion.id(birthData)`, serve the `chart` row on
   match + deserialisable, else compute via `EngineConfig` beans
   (`NatalChartFactory` + `SignificatorTable.of` + `DashaTimeline.from` +
-  `RulingPlanetsFactory`), `@Transactional` upsert of `chart` + replace
-  `dasha_period` children, return fresh. `horaryChart(userId, number)` for
-  `kind = HORARY` + a `horary_query` row. Unique-key race → catch + re-read.
+  `RulingPlanetsFactory`), `@Transactional` upsert of `chart` (+ a
+  `horary_query` row for horary), return fresh. **No `dasha_period` write** —
+  that table is SPEC-013's (data-model.md). Unique-key race → catch + re-read.
+  `EngineConfig` MUST use the `SwissEphemerisConfig` defaults the golden suite
+  uses so cached charts match the gated values (T024b).
 - [ ] T026 [US2] `persistence/store/PredictionCacheService.java` —
   `dailyPrediction(long userId, LocalDate date)`: keyed `(user_id, for_date,
   DAILY)`; serve-or-recompute via `DailyPredictionFactory`; `@Transactional`

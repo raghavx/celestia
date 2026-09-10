@@ -71,8 +71,8 @@ deserialise (sub-millisecond, no engine call — SC-002). A cold miss is one
   me" hard-deletes PII rows now (FR-010). Column encryption at rest is SPEC-016.
 - FR-001/018 — all DDL via immutable Flyway migrations; `ddl-auto: validate`;
   `flyway validate` in CI.
-- FR-016 — multi-table writes (chart + `dasha_period`; "forget me") are
-  transactional.
+- FR-016 — multi-table writes (chart + `horary_query`; "forget me" across five
+  tables) are transactional.
 
 **Scale/Scope**: 9 tables; ~7 services; one `birth_data` + one `chart` +
 one `prediction`-per-date per user; the geocode cache grows with distinct
@@ -86,7 +86,7 @@ queries; the inbox/outbox are transient.
 |-----------|----------|--------|
 | I Spec-Driven Delivery | yes | PASS — spec approved, checklist 16/16, plan precedes code |
 | II Deterministic pure core | **yes, central** | PASS — JPA lands only in `com.celestia.agent.persistence`; a new ArchUnit rule bans `jakarta.persistence` / `org.springframework.data` / `org.flywaydb` / JDBC from the pure packages; `geo.GeocodeCache` port unchanged, adapter in `agent` |
-| III Calculation Correctness Is Gated | **yes, central** | PASS — `ChartCacheService` / `PredictionCacheService` recompute on any `engine_version` mismatch and overwrite; SC-002 verifies with a counting engine; the golden suite is untouched |
+| III Calculation Correctness Is Gated | **yes, central** | PASS — `ChartCacheService` / `PredictionCacheService` recompute on any `engine_version` mismatch and overwrite; SC-002 verifies with a counting engine; `ChartCacheGoldenIT` ties a cold cache-compute to a golden-chart fixture so the cache path shares the golden gate (`EngineConfig` wires the golden suite's `SwissEphemerisConfig` defaults); the golden suite itself is untouched |
 | IV LLM interprets, never calculates | no | N/A — no LLM in this spec |
 | V Astrology-only guarded path | no | N/A — no chat path yet |
 | VI Deterministic conversation flows | partial | PASS — `app_user.onboarding_state` is a column; the FSM is SPEC-010 |
@@ -122,7 +122,7 @@ agent/src/main/resources/application.yml  # datasource (env), jpa.hibernate.ddl-
 agent/src/main/resources/db/migration/
 ├── V1__identity.sql                   # app_user
 ├── V2__birth_data.sql
-├── V3__chart_cache.sql                # chart, dasha_period, horary_query
+├── V3__chart_cache.sql                # chart, horary_query, dasha_period (table only — SPEC-013 populates)
 ├── V4__prediction_cache.sql           # prediction
 ├── V5__geocode_cache.sql
 └── V6__async_io.sql                   # inbound_event, outbox_message
