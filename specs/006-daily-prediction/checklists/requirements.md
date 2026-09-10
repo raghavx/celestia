@@ -59,3 +59,11 @@
   needs all of US1–US3. US5 is the CI gate.
 - Ready for `/speckit-clarify` (optional) / `/speckit-plan` / `/speckit-tasks` /
   `/speckit-implement`.
+- `/speckit-analyze` (2026-09-10, post-tasks): D1 remediated — T001 emits the
+  `transit` sub lords / supports / within-day flags and T018 asserts them
+  (backs SC-003, previously only unit-tested). D2 — the golden case is pinned to
+  `birthDate + 40 Julian years` at the birth longitude (research.md §4;
+  T001/T002/quickstart). D3 — T011 creates a `prediction`-package
+  `SyntheticChart` helper (SPEC-003/004's are package-private). D4 (SC-005 50 ms
+  vs the 150 ms guard) and D5 (no automated engine-version check) accepted LOW;
+  SC-006 / T003 still open.

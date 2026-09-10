@@ -93,6 +93,11 @@ The reading carries `referenceInstant` and the two within-day change flags (§2,
 outside the ephemeris range → the transit positions come back `REDUCED`; the
 reading is still produced (FR-012).
 
+**Golden case**: the extended golden file uses `date = birthDate + 40 Julian
+years` (the SPEC-004 convention) at `longitude = the chart's birth longitude`.
+Forty years puts every golden chart into a non-first Mahadasha with meaningful
+significations; it is independent of the wall clock.
+
 ## 5. The v1 verdict rule
 
 For matter `M` with favourable set `F`, obstructive set `O`, the activated house

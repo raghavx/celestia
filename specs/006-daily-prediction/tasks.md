@@ -26,16 +26,19 @@ module, no new dependency, no new ADR.
 ## Phase 1: Setup
 
 - [ ] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with the
-  daily-prediction case (research.md §1–§5): a fixed date + longitude →
-  `expected.daily` — the reference instant, the activated house set with
-  strengths + lords, the Moon / Sun supported sets, and the per-matter verdicts
-  with `favourable_hit` / `obstructive_hit` / `lords` / `transits`. Replicate the
+  daily-prediction case (research.md §1–§5): `date = birthDate + 40 Julian years`
+  at `longitude = the chart's birth longitude` (research.md §4) →
+  `expected.daily` — the reference instant, `dasha` (per-lord significations, the
+  activated house set with strengths + lords, `lord_changes_within_day`),
+  `transit` (`moon_sub_lord`, `sun_sub_lord`, `moon_supports`, `sun_supports`,
+  `moon_sub_lord_changes_within_day`), and the per-matter verdicts with
+  `favourable_hit` / `obstructive_hit` / `lords` / `transits`. Replicate the
   house-group table, the running-lord ∩ significators step, the sub-lord transit
   rule, and the 4-row verdict function. Emit into one golden file (`obama-1961`).
 - [ ] T002 Regenerate the golden files (`--write`); verify determinism (re-run,
   diff `expected`). Update `core/src/test/resources/golden/README.md` with the
-  `expected.daily` shape, the fixed date / longitude, and the `daily_human_check`
-  protocol.
+  `expected.daily` shape, the `birth + 40 years` date + birth-longitude
+  convention, and the `daily_human_check` protocol.
 - [ ] T003 [P] SC-006: walk **one** reading by hand (running lords → natal
   significations → transit sub lord → verdict per matter) and check the §1
   house-group table against K. S. Krishnamurti's *KP Readers* house-signification
@@ -101,8 +104,10 @@ significations, and the activated house set with strengths.
 
 - [ ] T011 [P] [US2] `DashaSignificatorsTest` in
   `core/src/test/java/com/celestia/core/prediction/DashaSignificatorsTest.java` —
-  with a synthetic `NatalChart` (a small test-tree helper): for every running
-  lord `L`, `significationsByLord.get(L)` == `SignificatorTable.of(chart)
+  first add `core/src/test/java/com/celestia/core/prediction/SyntheticChart.java`
+  (mirror SPEC-004's `com.celestia.core.dasha.SyntheticChart` — SPEC-003/004's are
+  package-private and unreachable here). With a synthetic `NatalChart`: for every
+  running lord `L`, `significationsByLord.get(L)` == `SignificatorTable.of(chart)
   .grahaSignificators(L)`; `activated` is exactly the union; `strengthOf(h)` ==
   the count of running lords signifying `h`; a house no running lord signifies is
   absent; `lordChangesWithinDay` true when a level's lord differs at `t ± 12 h`
@@ -132,7 +137,8 @@ chains and the houses each supports.
 
 - [ ] T014 [P] [US3] `TransitContributionTest` in
   `core/src/test/java/com/celestia/core/prediction/TransitContributionTest.java` —
-  hand-set Moon / Sun longitudes: `moonChain` == `KpLordage.chainFor(moonLon)`;
+  hand-set Moon / Sun longitudes over a synthetic `NatalChart` (the T011 helper):
+  `moonChain` == `KpLordage.chainFor(moonLon)`;
   `moonSupports` == `SignificatorTable.of(chart).grahaSignificators(moonChain
   .subLord()).houses().keySet()`; likewise the Sun; `supported()` == the union;
   `moonSubLordChangesWithinDay` true when the Moon's sub lord differs at `t ± 12 h`
@@ -171,9 +177,11 @@ transits match; each verdict reproducible by hand.
   cases; **traceability**: rebuild each `verdict` from the `MatterVerdict` fields
   (`favourableHit` / `obstructiveHit` / `lords` / `transits`) and the §5 table
 - [ ] T018 [P] [US4] `DailyPredictionGoldenTest` (full) — golden case:
-  `referenceInstant`, and for every `Matter` the `verdict` + `favourableHit` +
-  `obstructiveHit` + `lords` + `transits` == `expected.daily`; `@EnabledIf`
-  ephemeris data
+  `referenceInstant`; `transit.moonChain().subLord()` / `sunChain().subLord()`,
+  `transit.moonSupports()` / `sunSupports()`, `dasha.lordChangesWithinDay` and
+  `transit.moonSubLordChangesWithinDay` == `expected.daily` (SC-003); and for
+  every `Matter` the `verdict` + `favourableHit` + `obstructiveHit` + `lords` +
+  `transits` == `expected.daily`; `@EnabledIf` ephemeris data
 - [ ] T019 [P] [US4] `DailyPredictionFactoryTest` (`@EnabledIf`) — `predict(chart,
   date, longitude)`: a date before the birth date → `IllegalArgumentException`;
   `referenceInstant` == `date` 12:00 UTC − `round(longitude/15·3600) s`; a

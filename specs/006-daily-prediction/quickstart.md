@@ -14,7 +14,8 @@ Builds on SPEC-002, SPEC-003, SPEC-004 (merged to `master`). Branch
     python compute_golden.py ../../core/src/test/resources/golden/*.json --write
   ```
 
-  (`--write` now also emits `expected.daily` for a fixed date + longitude — the
+  (`--write` now also emits `expected.daily` for `birthDate + 40 years` at the
+  birth longitude — the
   reference instant, the activated house set with strengths, the Moon / Sun
   supported sets, and the per-matter verdicts.)
 
@@ -40,7 +41,9 @@ New coverage:
 |---------------|------|
 | US1 house-group taxonomy (SC-001) | `core.prediction.HouseGroupsTest` |
 | US2 dasha significators == SPEC-003/004 (SC-002) | `core.prediction.DashaSignificatorsTest`, golden `DailyPredictionGoldenTest` |
-| US3 transit sub-lord rule (SC-003) | `core.prediction.TransitContributionTest`, golden |
+| US3 transit sub-lord rule (SC-003) | `core.prediction.TransitContributionTest`, golden `DailyPredictionGoldenTest` (transit chains + supports + within-day flags) |
+| US4 date-before-birth, reference instant, REDUCED | `core.prediction.DailyPredictionFactoryTest` |
+| foundational value types | `core.prediction.FoundationalTypesTest` |
 | US4 the four verdicts (SC-004) | `core.prediction.VerdictRuleTest`, `VerdictRulePropertyTest` (jqwik) |
 | US4 traceability (FR-017) | `core.prediction.VerdictRuleTest` — every verdict rebuilt from its `MatterVerdict` fields |
 | US5 determinism | `core.prediction.DailyPredictionDeterminismTest` |
