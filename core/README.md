@@ -4,7 +4,8 @@ Pure-Java KP domain. No Spring, no DB, no network, no wall clock (enforced by
 `DeterminismArchitectureTest`). Delivered: longitude decomposition and the
 Vimshottari partition (SPEC-001), the natal chart with cusps and bhavas
 (SPEC-002), the four-step significators and ruling planets (SPEC-003), the
-Vimshottari dasha timeline (SPEC-004), the KP horary 1–249 chart (SPEC-005).
+Vimshottari dasha timeline (SPEC-004), the KP horary 1–249 chart (SPEC-005), the
+daily-prediction ruleset (SPEC-006).
 
 ## Public API
 
@@ -27,6 +28,9 @@ Vimshottari dasha timeline (SPEC-004), the KP horary 1–249 chart (SPEC-005).
 | `horary.Horary249.arc(int)` / `.arcs()` | the KP horary 1–249 map — number &rarr; `HoraryArc` (bounds, sign, lord chain; sub lord = the answer's determinant) |
 | `horary.HoraryChartFactory` | `ascendant(number)` (clock-independent) / `cast(number, BirthData)` &rarr; `NatalChart` (cusp 1 = the number's Ascendant) |
 | `horary.HoraryRulingPlanets.at(...)` | SPEC-003 ruling planets with the number's Ascendant for the lagna lords |
+| `prediction.HouseGroups.fromKey(String)` / `prediction.Matter` | the KP house-group taxonomy — `explainHouseGrouping` (matter &rarr; favourable / obstructive houses) |
+| `prediction.DailyPredictionFactory.predict(NatalChart, LocalDate, longitude)` | the v1 daily reading — running lords &cap; significators, the sub-lord transit rule, a per-matter `Verdict` + its evidence |
+| `prediction.DailyPrediction` / `MatterVerdict` / `DashaSignificators` / `TransitContribution` | structured value objects (no prose — Constitution IV) |
 
 `org.apache.commons.numbers.fraction.BigFraction` is part of the public API
 (`Span.start()/end()`) — see `specs/001-ephemeris-primitives/contracts/`.

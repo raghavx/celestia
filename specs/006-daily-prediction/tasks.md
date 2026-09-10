@@ -216,9 +216,9 @@ transits match; each verdict reproducible by hand.
 
 ## Phase 7: User Story 5 — Reproducible correctness (P2)
 
-- [ ] T023 [P] [US5] `DailyPredictionDeterminismTest` — `compute(...)` twice on
+- [x] T023 [P] [US5] `DailyPredictionDeterminismTest` — `compute(...)` twice on
   the golden case → equal `DailyPrediction`; `predict(...)` twice → equal
-- [ ] T024 [US5] `.github/workflows/ci.yml` — add `DailyPredictionGoldenTest` and
+- [x] T024 [US5] `.github/workflows/ci.yml` — add `DailyPredictionGoldenTest` and
   `DailyPredictionDeterminismTest` to the OS-matrix determinism step
 
 **Checkpoint**: the daily reading is a CI gate.
@@ -227,21 +227,21 @@ transits match; each verdict reproducible by hand.
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T025 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the
+- [x] T025 [P] `core/src/main/java/com/celestia/core/REFERENCES.md` — add the
   house-group table (cite KSK's *KP Readers* house significations; the 12th-from
   negation), the **v1** sub-lord transit rule, the local-noon reference-instant
   rule, and the **v1** 4-row verdict function (with the exact thresholds); add
   `prediction.Matter`, `prediction.VerdictRule`, `prediction.DailyPredictionFactory`
   to the `EngineVersion` bump list; mark the whole ruleset "v1 — see
   `specs/006-daily-prediction/research.md`"
-- [ ] T026 [P] `DailyPredictionPerformanceTest` `@Tag("perf")` in
+- [x] T026 [P] `DailyPredictionPerformanceTest` `@Tag("perf")` in
   `core/src/test/java/com/celestia/core/prediction/DailyPredictionPerformanceTest.java`
   — a full reading (given a cast `NatalChart`) under a 150 ms warm guard (SC-005
   target 50 ms); excluded from the default run
-- [ ] T027 [P] Update `core/README.md` (+ `HouseGroups` / `explainHouseGrouping`,
+- [x] T027 [P] Update `core/README.md` (+ `HouseGroups` / `explainHouseGrouping`,
   `DailyPredictionFactory`)
-- [ ] T028 Run `specs/006-daily-prediction/quickstart.md` end to end; fix drift
-- [ ] T029 `./mvnw -q verify` — full reactor green incl.
+- [x] T028 Run `specs/006-daily-prediction/quickstart.md` end to end; fix drift
+- [x] T029 `./mvnw -q verify` — full reactor green incl.
   `DeterminismArchitectureTest` / `LayeringArchitectureTest`
 
 ---

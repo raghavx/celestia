@@ -33,6 +33,11 @@ references are acceptable where an ADR settled the choice.
 | **KP horary 1–249 table**: the 243 nakshatra sub-lord divisions, each split wherever it crosses a 30&deg; sign boundary, numbered in longitude order — exactly 249 arcs | `core.horary.Horary249` | K. S. Krishnamurti, *Krishnamurti Padhdhati* (horary / *Prasna* volume); the 249 table |
 | **Horary Ascendant = the midpoint of the number's arc** — the sub lord (the judged quantity) is constant over the arc, so the choice is judgement-neutral | `core.horary.HoraryChartFactory.ascendant` | KP horary practice (the number fixes the Ascendant sub) |
 | **Horary house cusps**: cusp 1 = the number's Ascendant; cusps 2–12 = Placidus from the RAMC that yields that Ascendant at the judgment latitude — closed-form inversion of the Ascendant equation, sidereal&harr;tropical via the instant's ayanamsa | `ephemeris.swisseph.SwissEphemerisHoraryHouseProvider` | J. Meeus, *Astronomical Algorithms* (2nd ed.) ch. 13 & the house-cusp formulae |
+| **Daily-prediction house groups** (`v1`): per matter a favourable house set and an obstructive set (the 12th-from-each-favourable "negation" houses) — marriage 2/7/11 vs 1/6/10, career 2/6/10/11 vs 1/5/9/12, &hellip; | `core.prediction.Matter` | K. S. Krishnamurti, *KP Readers* III–IV (house significations); the 12th-from negation is standard KP. **v1** — see `specs/006-daily-prediction/research.md` §1 |
+| **Dasha significators** for a date: the five running Vimshottari lords (SPEC-004) &cap; each lord's natal `grahaSignificators` (SPEC-003); a house's activation strength = the count of distinct running lords that signify it | `core.prediction.DashaSignificators` | KP timing practice (the dasha lord must be a significator of the matter) |
+| **v1 transit rule**: a transiting body **supports** house H iff its **sub lord** is a natal significator of H; only the Moon (day) and the Sun (fortnight) in v1 | `core.prediction.TransitContribution` | K. S. Krishnamurti (transit through the sub of a significator); **v1** — star-lord agreement / slow planets / aspects are v2 |
+| **Reference instant** for a daily reading = **local noon** of the date (`date 12:00 − longitude/15 h`); the reading flags any within-day change of a running lord or the Moon's sub lord | `core.prediction.DailyPredictionFactory` | **v1 design choice** — the true civil timezone is SPEC-007 |
+| **v1 verdict rule**: `QUIET` if neither the matter's favourable nor obstructive houses are dasha-activated; `UNFAVOURABLE` if `Σ obstructive-strength > Σ favourable-strength` (strict); `FAVOURABLE` if a favourable house is activated **and** transit-triggered and not outweighed; `MIXED` otherwise | `core.prediction.VerdictRule` | **v1 design choice** — see `specs/006-daily-prediction/research.md` §5 |
 
 ## Engine version bump procedure
 
@@ -41,8 +46,10 @@ whenever any rule above changes -- including rules that live in `core`
 (`Sign`, `Nakshatra`, `VimshottariPartition`, `KpLordage`, `Longitudes`,
 `judgement.SignificatorTable`, `judgement.RulingPlanetsFactory`,
 `judgement.KpWeekday`, `dasha.VimshottariSplit`, `dasha.DashaTimeline` — including
-the 365.25-day year — and `horary.Horary249` / `horary.HoraryChartFactory`, plus
-`ephemeris.swisseph.SwissEphemerisHoraryHouseProvider`'s RAMC inversion). `core`
+the 365.25-day year — `horary.Horary249` / `horary.HoraryChartFactory`, plus
+`ephemeris.swisseph.SwissEphemerisHoraryHouseProvider`'s RAMC inversion, and the
+whole `prediction.*` v1 ruleset — `Matter`, `VerdictRule`,
+`DailyPredictionFactory`). `core`
 cannot reference `EngineVersion` (no dependency back to nothing -- `ephemeris` is
 the lower layer), so the coupling is a documented manual step. A change without a
 bump is caught by the golden-chart snapshot suite drifting with no version change.
