@@ -79,7 +79,7 @@ module, no new dependency, no new ADR.
 
 ### Tests (write first)
 
-- [ ] T009 [P] [US1] `HouseGroupsTest` in
+- [x] T009 [P] [US1] `HouseGroupsTest` in
   `core/src/test/java/com/celestia/core/prediction/HouseGroupsTest.java` —
   `HouseGroups.fromKey("marriage")` == `Matter.MARRIAGE`; an unknown key →
   `IllegalArgumentException`; every `Matter.key()` round-trips through
@@ -88,7 +88,7 @@ module, no new dependency, no new ADR.
 
 ### Implementation
 
-- [ ] T010 [US1] `HouseGroups.fromKey(String)` (unknown → `IllegalArgumentException`)
+- [x] T010 [US1] `HouseGroups.fromKey(String)` (unknown → `IllegalArgumentException`)
   and `all()` in `core/src/main/java/com/celestia/core/prediction/HouseGroups.java`
 
 **Checkpoint**: `explainHouseGrouping` answerable.
