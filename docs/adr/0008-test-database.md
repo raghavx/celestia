@@ -1,7 +1,8 @@
 # ADR 0008: Local and CI database for tests
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-09-02
+- **Accepted:** 2026-09-11 (SPEC-008 `/speckit-plan`)
 - **Decision ref:** D8 (PROJECT_PLAN.md §2)
 
 ## Context
@@ -20,13 +21,19 @@ dev machine currently has no Docker.
 
 ## Decision
 
-_Proposed:_ Option 1. Testcontainers with `mysql:8.4`, a shared `@Testcontainers`
-base test class, and reuse enabled for fast local iteration. Devs install Colima.
-Option 2 is documented as the fallback for environments without a container
-runtime.
+Option 1. Testcontainers with `mysql:8.4`, a shared `@ServiceConnection` base
+test class (`PersistenceIT`), and reuse enabled for fast local iteration. A
+developer supplies a container runtime — **Colima**, or **Podman**
+(`podman machine start` + `DOCKER_HOST` pointing at its socket; already installed
+on the current dev box), or a local **MySQL 8.4** as the no-runtime fallback
+(Option 2).
 
 ## Consequences
 
-- One-time Colima install per dev machine; note in the README.
+- One-time container-runtime setup per dev machine; noted in
+  `specs/008-persistence-domain-services/quickstart.md` and the README.
 - First integration-test run is slower (image pull).
 - CI: Docker is available on `ubuntu-latest`, so Testcontainers works there too.
+- Where the dev machine cannot start a runtime, the persistence integration
+  tests are written and verified in CI; the unit-level tests (codecs,
+  `CurrentEngineVersion`, ArchUnit) run everywhere.
