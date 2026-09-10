@@ -102,7 +102,7 @@ significations, and the activated house set with strengths.
 
 ### Tests (write first)
 
-- [ ] T011 [P] [US2] `DashaSignificatorsTest` in
+- [x] T011 [P] [US2] `DashaSignificatorsTest` in
   `core/src/test/java/com/celestia/core/prediction/DashaSignificatorsTest.java` —
   first add `core/src/test/java/com/celestia/core/prediction/SyntheticChart.java`
   (mirror SPEC-004's `com.celestia.core.dasha.SyntheticChart` — SPEC-003/004's are
@@ -111,13 +111,13 @@ significations, and the activated house set with strengths.
   .grahaSignificators(L)`; `activated` is exactly the union; `strengthOf(h)` ==
   the count of running lords signifying `h`; a house no running lord signifies is
   absent; `lordChangesWithinDay` true when a level's lord differs at `t ± 12 h`
-- [ ] T012 [P] [US2] `DailyPredictionGoldenTest` (dasha section) — for the golden
+- [x] T012 [P] [US2] `DailyPredictionGoldenTest` (dasha section) — for the golden
   case, `dasha.significationsByLord` and `dasha.activated` (+ strengths) match
   `expected.daily`; `@EnabledIf` ephemeris data
 
 ### Implementation
 
-- [ ] T013 [US2] `DashaSignificators` record + `DashaSignificators.compute(
+- [x] T013 [US2] `DashaSignificators` record + `DashaSignificators.compute(
   SignificatorTable table, DashaTimeline timeline, Instant referenceInstant)` in
   `core/src/main/java/com/celestia/core/prediction/DashaSignificators.java` —
   `running(t, 5)`; per-lord `grahaSignificators`; activated set (union) with
@@ -135,7 +135,7 @@ chains and the houses each supports.
 
 ### Tests (write first)
 
-- [ ] T014 [P] [US3] `TransitContributionTest` in
+- [x] T014 [P] [US3] `TransitContributionTest` in
   `core/src/test/java/com/celestia/core/prediction/TransitContributionTest.java` —
   hand-set Moon / Sun longitudes over a synthetic `NatalChart` (the T011 helper):
   `moonChain` == `KpLordage.chainFor(moonLon)`;
@@ -145,7 +145,7 @@ chains and the houses each supports.
 
 ### Implementation
 
-- [ ] T015 [US3] `TransitContribution` record + `TransitContribution.compute(
+- [x] T015 [US3] `TransitContribution` record + `TransitContribution.compute(
   SignificatorTable table, double moonLon, double sunLon, double moonLonBefore,
   double moonLonAfter)` in
   `core/src/main/java/com/celestia/core/prediction/TransitContribution.java` —
@@ -165,42 +165,42 @@ transits match; each verdict reproducible by hand.
 
 ### Tests (write first)
 
-- [ ] T016 [P] [US4] `VerdictRulePropertyTest` (jqwik) in
+- [x] T016 [P] [US4] `VerdictRulePropertyTest` (jqwik) in
   `core/src/test/java/com/celestia/core/prediction/VerdictRulePropertyTest.java` —
   over random (favourable set, obstructive set, activated house→strength map,
   transit-supported set): exactly one of the 4 rows matches; `QUIET` iff
   `favActive` and `obsActive` both empty; `UNFAVOURABLE` iff `obsStrength >
   favStrength` (strict); `FAVOURABLE` iff `favActive` non-empty, `favTriggered`
   non-empty, and not row 2; `MIXED` otherwise (research.md §5)
-- [ ] T017 [P] [US4] `VerdictRuleTest` — the four spec acceptance scenarios
+- [x] T017 [P] [US4] `VerdictRuleTest` — the four spec acceptance scenarios
   (FAVOURABLE, MIXED = ripe-not-triggered, UNFAVOURABLE, QUIET) as concrete
   cases; **traceability**: rebuild each `verdict` from the `MatterVerdict` fields
   (`favourableHit` / `obstructiveHit` / `lords` / `transits`) and the §5 table
-- [ ] T018 [P] [US4] `DailyPredictionGoldenTest` (full) — golden case:
+- [x] T018 [P] [US4] `DailyPredictionGoldenTest` (full) — golden case:
   `referenceInstant`; `transit.moonChain().subLord()` / `sunChain().subLord()`,
   `transit.moonSupports()` / `sunSupports()`, `dasha.lordChangesWithinDay` and
   `transit.moonSubLordChangesWithinDay` == `expected.daily` (SC-003); and for
   every `Matter` the `verdict` + `favourableHit` + `obstructiveHit` + `lords` +
   `transits` == `expected.daily`; `@EnabledIf` ephemeris data
-- [ ] T019 [P] [US4] `DailyPredictionFactoryTest` (`@EnabledIf`) — `predict(chart,
+- [x] T019 [P] [US4] `DailyPredictionFactoryTest` (`@EnabledIf`) — `predict(chart,
   date, longitude)`: a date before the birth date → `IllegalArgumentException`;
   `referenceInstant` == `date` 12:00 UTC − `round(longitude/15·3600) s`; a
   year-1600 birth or date → `Accuracy.REDUCED`, no exception; deterministic
 
 ### Implementation
 
-- [ ] T020 [US4] `VerdictRule.evaluate(Matter matter, DashaSignificators dasha,
+- [x] T020 [US4] `VerdictRule.evaluate(Matter matter, DashaSignificators dasha,
   Set<Integer> transitSupported)` → `MatterVerdict` in
   `core/src/main/java/com/celestia/core/prediction/VerdictRule.java` — the 4-row
   total function (research.md §5); populate `favourableHit` / `obstructiveHit` /
   `lords` (running lords that activated the hit houses) / `transits`
-- [ ] T021 [US4] `MatterVerdict` record (`Matter, Verdict, Set<Integer>
+- [x] T021 [US4] `MatterVerdict` record (`Matter, Verdict, Set<Integer>
   favourableHit, Set<Integer> obstructiveHit, Set<Graha> lords, Set<TransitBody>
   transits`) and `DailyPrediction` record (`Instant referenceInstant,
   DashaSignificators dasha, TransitContribution transit, List<MatterVerdict>
   verdicts, Accuracy accuracy, EngineVersion engineVersion`; `verdictFor(Matter)`)
   in `core/src/main/java/com/celestia/core/prediction/`
-- [ ] T022 [US4] `DailyPredictionFactory` in
+- [x] T022 [US4] `DailyPredictionFactory` in
   `core/src/main/java/com/celestia/core/prediction/DailyPredictionFactory.java` —
   `DailyPredictionFactory(PositionProvider positions)`; `predict(NatalChart,
   LocalDate date, double longitude)` computes `referenceInstant`, rejects a date
