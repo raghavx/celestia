@@ -2,3 +2,10 @@
 # A different implementation lineage from the Java port the engine uses, so
 # agreement between the two is meaningful (spec.md SC-002).
 pyswisseph>=2.10.3.2
+
+# SPEC-007 birth-moment corpus (--birthmoments): lat/lon -> IANA zone via a
+# different polygon dataset than the engine's `timeshape`, and local -> UTC via
+# the system IANA tzdata (a separate copy from the JRE's bundled tzdb).
+timezonefinder>=6.5
+backports.zoneinfo; python_version < "3.9"
+tzdata

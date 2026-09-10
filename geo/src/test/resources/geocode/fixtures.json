@@ -1,0 +1,48 @@
+{
+  "_comment": "FixtureGeocoder data for SPEC-007 tests and local dev. Keyed by normalised query (QueryNormalizer.normalize). Not the real geocoder — the OpenCage adapter lands with SPEC-009/010 (ADR-0013).",
+  "queries": {
+    "mumbai": [
+      {"id": "osm:1", "displayName": "Mumbai", "country": "India", "adminRegion": "Maharashtra", "latitude": 19.076, "longitude": 72.8777, "source": "fixture"}
+    ],
+    "bandra, mumbai": [
+      {"id": "osm:2", "displayName": "Bandra, Mumbai", "country": "India", "adminRegion": "Maharashtra", "latitude": 19.0596, "longitude": 72.8295, "source": "fixture"}
+    ],
+    "pune": [
+      {"id": "osm:3", "displayName": "Pune", "country": "India", "adminRegion": "Maharashtra", "latitude": 18.5204, "longitude": 73.8567, "source": "fixture"}
+    ],
+    "kolkata": [
+      {"id": "osm:4", "displayName": "Kolkata", "country": "India", "adminRegion": "West Bengal", "latitude": 22.5726, "longitude": 88.3639, "source": "fixture"}
+    ],
+    "chennai": [
+      {"id": "osm:5", "displayName": "Chennai", "country": "India", "adminRegion": "Tamil Nadu", "latitude": 13.0827, "longitude": 80.2707, "source": "fixture"}
+    ],
+    "bengaluru": [
+      {"id": "osm:6", "displayName": "Bengaluru", "country": "India", "adminRegion": "Karnataka", "latitude": 12.9716, "longitude": 77.5946, "source": "fixture"}
+    ],
+    "delhi": [
+      {"id": "osm:7", "displayName": "Delhi", "country": "India", "adminRegion": "Delhi", "latitude": 28.7041, "longitude": 77.1025, "source": "fixture"}
+    ],
+    "springfield": [
+      {"id": "osm:us-il", "displayName": "Springfield, Illinois", "country": "United States", "adminRegion": "Illinois", "latitude": 39.7817, "longitude": -89.6501, "source": "fixture"},
+      {"id": "osm:us-mo", "displayName": "Springfield, Missouri", "country": "United States", "adminRegion": "Missouri", "latitude": 37.2089, "longitude": -93.2923, "source": "fixture"},
+      {"id": "osm:us-ma", "displayName": "Springfield, Massachusetts", "country": "United States", "adminRegion": "Massachusetts", "latitude": 42.1015, "longitude": -72.5898, "source": "fixture"}
+    ],
+    "london": [
+      {"id": "osm:gb", "displayName": "London", "country": "United Kingdom", "adminRegion": "England", "latitude": 51.5074, "longitude": -0.1278, "source": "fixture"},
+      {"id": "osm:ca-on", "displayName": "London, Ontario", "country": "Canada", "adminRegion": "Ontario", "latitude": 42.9849, "longitude": -81.2453, "source": "fixture"}
+    ],
+    "paris": [
+      {"id": "osm:fr", "displayName": "Paris", "country": "France", "adminRegion": "Ile-de-France", "latitude": 48.8566, "longitude": 2.3522, "source": "fixture"},
+      {"id": "osm:us-tx", "displayName": "Paris, Texas", "country": "United States", "adminRegion": "Texas", "latitude": 33.6609, "longitude": -95.5555, "source": "fixture"}
+    ],
+    "new york": [
+      {"id": "osm:us-ny", "displayName": "New York", "country": "United States", "adminRegion": "New York", "latitude": 40.7128, "longitude": -74.006, "source": "fixture"}
+    ],
+    "tokyo": [
+      {"id": "osm:jp", "displayName": "Tokyo", "country": "Japan", "adminRegion": "Tokyo", "latitude": 35.6762, "longitude": 139.6503, "source": "fixture"}
+    ],
+    "sydney": [
+      {"id": "osm:au", "displayName": "Sydney", "country": "Australia", "adminRegion": "New South Wales", "latitude": -33.8688, "longitude": 151.2093, "source": "fixture"}
+    ]
+  }
+}
