@@ -114,4 +114,42 @@ class DeterminismArchitectureTest {
                 .allowEmptyShould(true)
                 .check(celestia);
     }
+
+    @Test
+    void timeshapeTypesDoNotLeakFromGeoPublicApi() {
+        DescribedPredicate<JavaClass> timeshape = DescribedPredicate.describe(
+                "a net.iakovlev (timeshape) type",
+                c -> c.getPackageName().startsWith("net.iakovlev"));
+
+        methods()
+                .that()
+                .areDeclaredInClassesThat()
+                .resideInAPackage("com.celestia.geo..")
+                .and()
+                .arePublic()
+                .should()
+                .notHaveRawReturnType(timeshape)
+                .andShould()
+                .notHaveRawParameterTypes(new DescribedPredicate<>("include a net.iakovlev type") {
+                    @Override
+                    public boolean test(List<JavaClass> params) {
+                        return params.stream().anyMatch(timeshape);
+                    }
+                })
+                .as("SPEC-007 FR-011: timeshape stays behind TimeZoneResolver — not in the geo public API")
+                .allowEmptyShould(true)
+                .check(celestia);
+
+        fields()
+                .that()
+                .areDeclaredInClassesThat()
+                .resideInAPackage("com.celestia.geo..")
+                .and()
+                .arePublic()
+                .should()
+                .notHaveRawType(timeshape)
+                .as("SPEC-007 FR-011: no timeshape type in a public field of com.celestia.geo")
+                .allowEmptyShould(true)
+                .check(celestia);
+    }
 }

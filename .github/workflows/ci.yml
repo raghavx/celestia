@@ -47,10 +47,10 @@ jobs:
         run: |
           # The real cross-platform check is these tests asserting computed ==
           # stored on each OS; the JSON fingerprint below is a coarse extra guard.
-          ./mvnw -q -B -ntp -pl core -am test \
-            -Dtest=GoldenChartTest,DeterminismTest,NatalChartGoldenTest,NatalChartDeterminismTest,SignificatorGoldenTest,GrahaSignificatorGoldenTest,NodeAgencyGoldenTest,RulingPlanetsGoldenTest,SignificatorDeterminismTest,RulingPlanetsDeterminismTest,DashaGoldenTest,RunningDashaGoldenTest,DashaWindowGoldenTest,DashaDeterminismTest,Horary249SnapshotTest,HoraryGoldenTest,HoraryRulingPlanetsGoldenTest,HoraryDeterminismTest,DailyPredictionGoldenTest,DailyPredictionDeterminismTest \
+          ./mvnw -q -B -ntp -pl core,geo -am test \
+            -Dtest=GoldenChartTest,DeterminismTest,NatalChartGoldenTest,NatalChartDeterminismTest,SignificatorGoldenTest,GrahaSignificatorGoldenTest,NodeAgencyGoldenTest,RulingPlanetsGoldenTest,SignificatorDeterminismTest,RulingPlanetsDeterminismTest,DashaGoldenTest,RunningDashaGoldenTest,DashaWindowGoldenTest,DashaDeterminismTest,Horary249SnapshotTest,HoraryGoldenTest,HoraryRulingPlanetsGoldenTest,HoraryDeterminismTest,DailyPredictionGoldenTest,DailyPredictionDeterminismTest,BirthMomentCorpusTest,TimeZoneResolverGoldenTest,GeoDeterminismTest \
             -Dsurefire.failIfNoSpecifiedTests=false
-          find core/src/test/resources/golden -name '*.json' -exec shasum -a 256 {} + \
+          find core/src/test/resources/golden geo/src/test/resources/birthmoments -name '*.json' -exec shasum -a 256 {} + \
             | sort > golden-fingerprint-${{ matrix.os }}.txt
           cat golden-fingerprint-${{ matrix.os }}.txt
 
