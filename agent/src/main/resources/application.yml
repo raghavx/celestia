@@ -2,6 +2,26 @@ spring:
   application:
     name: celestia-agent
 
+  # SPEC-008: MySQL 8.4 via Flyway. Credentials come from the environment
+  # (DB_URL / DB_USER / DB_PASSWORD); the defaults are for a local dev MySQL.
+  # Secrets are never literal in this file.
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/celestia?useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USER:celestia}
+    password: ${DB_PASSWORD:celestia}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    validate-on-migrate: true
+    baseline-on-migrate: false
+
 server:
   port: 8080
 
@@ -15,6 +35,5 @@ management:
       probes:
         enabled: true
 
-# Phase-specific config (datasource, Flyway, Spring AI / Ollama, WhatsApp, Razorpay)
-# is added in the spec that introduces it. Secrets come from the environment,
-# never from this file. See PROJECT_PLAN.md.
+# Phase-specific config (Spring AI / Ollama, WhatsApp, Razorpay) is added in the
+# spec that introduces it. See PROJECT_PLAN.md.
