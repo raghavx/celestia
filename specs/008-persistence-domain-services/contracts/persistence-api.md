@@ -35,11 +35,14 @@ builds on this layer), SPEC-014 (`guardrail_event` will be added), SPEC-015
 
 | Method | Contract |
 |--------|----------|
-| `NatalChartBundle natalChart(long userId)` | Loads `birth_data`; computes `expected = CurrentEngineVersion.id(birthData)`. If the `chart` row (`user_id`, `NATAL`) exists, `engine_version == expected`, and `computed_json` deserialises → return it with **no engine call**. Otherwise compute via `core`, upsert the row + replace `dasha_period` children (`@Transactional`), return fresh. |
-| `HoraryChartBundle horaryChart(long userId, int number)` | As above for `kind = HORARY` + a `horary_query` row; `number` in 1..249. |
+| `NatalChartBundle natalChart(long userId)` | Loads `birth_data`; computes `expected = CurrentEngineVersion.id(birthData)`. If the `chart` row (`user_id`, `NATAL`) exists, `engine_version == expected`, and `computed_json` deserialises → return it with **no `PositionProvider` / `HouseProvider` call**. Otherwise compute via `core`, upsert the row (`@Transactional`), return fresh. |
+| ~~`HoraryChartBundle horaryChart(...)`~~ | **Deferred to SPEC-015** — a horary chart needs a judgment moment + place, which SPEC-008 has no input for. The `chart.HORARY` kind and `horary_query` table are created and ready. |
 
 `NatalChartBundle` = `{ NatalChart chart, SignificatorTable significators,
-DashaTimeline dasha, RulingPlanets rulingPlanets, String engineVersion }`.
+DashaTimeline dasha, String engineVersion }`. (`computed_json` stores the raw
+`EphemerisResult` + `HouseResult`; `NatalChart` is rebuilt with the pure
+`NatalChartFactory.assemble` and the significators / dasha re-derived on read —
+no ephemeris I/O. `RulingPlanets` is not a natal-chart property.)
 
 ## `PredictionCacheService`
 

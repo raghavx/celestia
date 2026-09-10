@@ -26,41 +26,41 @@ accepted by the plan.
 
 ## Phase 1: Setup
 
-- [ ] T001 `agent/pom.xml` — add `org.springframework.boot:spring-boot-starter-data-jpa`,
+- [x] T001 `agent/pom.xml` — add `org.springframework.boot:spring-boot-starter-data-jpa`,
   `com.mysql:mysql-connector-j`, `org.flywaydb:flyway-core`,
   `org.flywaydb:flyway-mysql`; test scope `org.springframework.boot:spring-boot-testcontainers`,
   `org.testcontainers:mysql`, `org.testcontainers:junit-jupiter` (versions from
   the Spring Boot BOM); drop the "Phase 3" reservation comment.
-- [ ] T002 `agent/src/main/resources/application.yml` — `spring.datasource`
+- [x] T002 `agent/src/main/resources/application.yml` — `spring.datasource`
   (url/username/password from env: `DB_URL` / `DB_USER` / `DB_PASSWORD`, sane
   local defaults), `spring.jpa.hibernate.ddl-auto: validate`,
   `spring.jpa.open-in-view: false`, `spring.flyway.enabled: true`. Secrets never
   literal.
-- [ ] T003 `agent/src/main/resources/db/migration/V1__identity.sql` — `app_user`
+- [x] T003 `agent/src/main/resources/db/migration/V1__identity.sql` — `app_user`
   (data-model.md): `phone_e164` UNIQUE, `onboarding_state` default `NEW`,
   `guardrail_strikes` default 0, timestamps; `utf8mb4_0900_ai_ci`.
-- [ ] T004 `db/migration/V2__birth_data.sql` — `birth_data`: `user_id` UNIQUE +
+- [x] T004 `db/migration/V2__birth_data.sql` — `birth_data`: `user_id` UNIQUE +
   FK → `app_user` `ON DELETE CASCADE`; all place/time columns; `birth_utc
   TIMESTAMP(0)`; `lat`/`lon` `DECIMAL(9,6)`.
-- [ ] T005 `db/migration/V3__chart_cache.sql` — `chart` (UNIQUE `(user_id, kind)`,
+- [x] T005 `db/migration/V3__chart_cache.sql` — `chart` (UNIQUE `(user_id, kind)`,
   `computed_json JSON`, `engine_version VARCHAR(128)`), `dasha_period` (FK →
   `chart` cascade, self-FK `parent_id`) — **table only, not populated by
   SPEC-008** (SPEC-013 writes it; data-model.md), `horary_query` (FK → `chart`
   cascade, `number_1_249` 1..249).
-- [ ] T006 `db/migration/V4__prediction_cache.sql` — `prediction`: UNIQUE
+- [x] T006 `db/migration/V4__prediction_cache.sql` — `prediction`: UNIQUE
   `(user_id, for_date, kind)`, `payload_json JSON`, `engine_version`, FK →
   `app_user` cascade.
-- [ ] T007 `db/migration/V5__geocode_cache.sql` — `geocode_cache`: `query_norm`
+- [x] T007 `db/migration/V5__geocode_cache.sql` — `geocode_cache`: `query_norm`
   UNIQUE, `results_json JSON`, timestamps.
-- [ ] T008 `db/migration/V6__async_io.sql` — `inbound_event` (`wa_message_id`
+- [x] T008 `db/migration/V6__async_io.sql` — `inbound_event` (`wa_message_id`
   UNIQUE, `status` default `NEW`, `attempts`, index `(status, received_at)`),
   `outbox_message` (`status` default `PENDING`, `attempts`, `error`, index
   `(status, created_at)`).
-- [ ] T009 [P] `agent/src/test/java/com/celestia/agent/persistence/PersistenceIT.java`
+- [x] T009 [P] `agent/src/test/java/com/celestia/agent/persistence/PersistenceIT.java`
   — abstract base: `@SpringBootTest` (or `@DataJpaTest` + `@AutoConfigure…`),
   `@Testcontainers`, `static @ServiceConnection MySQLContainer<>("mysql:8.4")`
   with `withReuse(true)`, one container per hierarchy.
-- [ ] T010 [P] `agent/src/main/java/com/celestia/agent/persistence/json/PersistenceJson.java`
+- [x] T010 [P] `agent/src/main/java/com/celestia/agent/persistence/json/PersistenceJson.java`
   — a shared `ObjectMapper`: `JavaTimeModule`, dates as ISO strings, a
   `BigFraction` serialiser/deserialiser (`"num/den"`), fail on unknown enum;
   records native.
@@ -69,44 +69,44 @@ accepted by the plan.
 
 ## Phase 2: Foundational (blocking — no user story starts until this is done)
 
-- [ ] T011 [P] `persistence/entity/AppUserEntity.java` +
+- [x] T011 [P] `persistence/entity/AppUserEntity.java` +
   `BirthDataEntity.java` — `@Entity`, column mapping per data-model.md;
   package-private setters where possible; no domain logic.
-- [ ] T012 [P] `persistence/entity/` — `ChartEntity`, `DashaPeriodEntity`,
+- [x] T012 [P] `persistence/entity/` — `ChartEntity`, `DashaPeriodEntity`,
   `HoraryQueryEntity`, `PredictionEntity` (`@Entity`, FKs, `@Column
   columnDefinition = "json"` for the JSON columns via a `String` field or an
   `AttributeConverter`).
-- [ ] T013 [P] `persistence/entity/` — `GeocodeCacheEntity`,
+- [x] T013 [P] `persistence/entity/` — `GeocodeCacheEntity`,
   `InboundEventEntity`, `OutboxMessageEntity`.
-- [ ] T014 [P] `persistence/repository/` — Spring Data JPA interfaces:
+- [x] T014 [P] `persistence/repository/` — Spring Data JPA interfaces:
   `AppUserRepository` (`findByPhoneE164`), `BirthDataRepository`
   (`findByUserId`), `ChartRepository` (`findByUserIdAndKind`),
   `DashaPeriodRepository`, `HoraryQueryRepository`, `PredictionRepository`
   (`findByUserIdAndForDateAndKind`), `GeocodeCacheRepository`
   (`findByQueryNorm`), `InboundEventRepository`, `OutboxMessageRepository`.
-- [ ] T015 [P] `persistence/EngineConfig.java` — `@Configuration` providing
+- [x] T015 [P] `persistence/EngineConfig.java` — `@Configuration` providing
   `SwissEphemerisConfig` (from `application.yml` props / defaults),
   `PositionProvider`, `HouseProvider`, `HoraryHouseProvider`, `SunriseProvider`,
   and the `core` factories (`NatalChartFactory`, `HoraryChartFactory`,
   `DashaTimelineFactory`, `DailyPredictionFactory`, `RulingPlanetsFactory`) as
   beans.
-- [ ] T016 [P] `persistence/CurrentEngineVersion.java` + `CurrentEngineVersionTest.java`
+- [x] T016 [P] `persistence/CurrentEngineVersion.java` + `CurrentEngineVersionTest.java`
   (unit, **no container**) — `forBirth(BirthData)` / `id(BirthData)`:
   `EngineVersion.RULES` + `TimeScales.DELTA_T_MODEL` + config `sePort` +
   `swieph:<id>` / `moseph` predicted from the birth year vs the `.se1` range;
   test both accuracy branches and a `RULES`-bump flip.
-- [ ] T017 [P] `persistence/json/` — `ChartCodec`, `PredictionCodec`,
+- [x] T017 [P] `persistence/json/` — `ChartCodec`, `PredictionCodec`,
   `GeocodeResultCodec` (each `write(domain) -> String`, `read(String) ->
   Optional<domain>`; a `"schema"` int; **any exception on read → `Optional.empty()`**)
   + `…CodecTest` (unit, no container) — round-trip a fixture aggregate; a
   corrupted / unknown-schema payload → empty.
-- [ ] T018 [P] `agent/src/test/java/com/celestia/agent/architecture/PersistenceArchitectureTest.java`
+- [x] T018 [P] `agent/src/test/java/com/celestia/agent/architecture/PersistenceArchitectureTest.java`
   — `noClasses().that().resideInAnyPackage("com.celestia.ephemeris..",
   "com.celestia.core..", "com.celestia.geo..", "com.celestia.billing..",
   "com.celestia.guardrail..").should().dependOnClassesThat().resideInAnyPackage(
   "jakarta.persistence..", "org.springframework.data..", "org.hibernate..",
   "org.flywaydb..", "java.sql..", "javax.sql..", "com.zaxxer.hikari..")`.
-- [ ] T019 `agent/src/test/java/com/celestia/agent/persistence/FlywayMigrationIT.java`
+- [x] T019 `agent/src/test/java/com/celestia/agent/persistence/FlywayMigrationIT.java`
   (extends `PersistenceIT`) — the context starts (migrations applied); assert
   every in-scope table exists with its unique keys; a second `flyway.migrate()`
   reports no pending; `flyway.validate()` passes.
@@ -123,7 +123,7 @@ user, reloaded losslessly.
 
 ### Tests (write first)
 
-- [ ] T020 [P] [US1] `BirthDataStoreIT` (extends `PersistenceIT`) — for a set of
+- [x] T020 [P] [US1] `BirthDataStoreIT` (extends `PersistenceIT`) — for a set of
   SPEC-007-corpus births: `save` then `load`; assert `birth_utc` reloads to the
   exact `Instant`, `lat`/`lon`/`zone_id`/`birth_time_known`/flags identical, and
   `load(...).birthData()` equals the original `resolved.birthData()`; a second
@@ -131,7 +131,7 @@ user, reloaded losslessly.
 
 ### Implementation
 
-- [ ] T021 [US1] `persistence/store/BirthDataStore.java` + `StoredBirth` (a
+- [x] T021 [US1] `persistence/store/BirthDataStore.java` + `StoredBirth` (a
   carrier exposing the `ResolvedBirth`-equivalent fields + `birthData()`) —
   `save(long userId, String name, String placeQuery, ResolvedBirth)` upserts by
   `user_id`; `load(long userId)` maps the entity back. `flags` column ↔
@@ -150,19 +150,19 @@ recompute + overwrite. Constitution III.
 
 ### Tests (write first)
 
-- [ ] T022 [P] [US2] `agent/src/test/java/com/celestia/agent/persistence/CountingEngine.java`
+- [x] T022 [P] [US2] `agent/src/test/java/com/celestia/agent/persistence/CountingEngine.java`
   — decorators over `NatalChartFactory` / `HoraryChartFactory` /
   `DailyPredictionFactory` that count real computations; a `@TestConfiguration`
   swaps them in.
-- [ ] T023 [P] [US2] `ChartCacheServiceIT` (extends `PersistenceIT`) — cold miss
+- [x] T023 [P] [US2] `ChartCacheServiceIT` (extends `PersistenceIT`) — cold miss
   → exactly one computation, row stored with the current `engine_version`; warm
   hit → **zero** computations; a row pre-seeded with a stale `engine_version` →
   one computation, row overwritten, old JSON gone; a corrupt `computed_json` →
   recompute.
-- [ ] T024 [P] [US2] `PredictionCacheServiceIT` — same, keyed on
+- [x] T024 [P] [US2] `PredictionCacheServiceIT` — same, keyed on
   `(user, for_date)`; changing the date recomputes; a stale `engine_version`
   recomputes.
-- [ ] T024b [P] [US2] `ChartCacheGoldenIT` (extends `PersistenceIT`) — seed a
+- [x] T024b [P] [US2] `ChartCacheGoldenIT` (extends `PersistenceIT`) — seed a
   **golden-chart** birth (reuse a `core/src/test/resources/golden` fixture);
   `ChartCacheService.natalChart` cold-computes it and the stored/served result
   matches the golden's pinned positions / cusps / significators, and
@@ -172,7 +172,7 @@ recompute + overwrite. Constitution III.
 
 ### Implementation
 
-- [ ] T025 [US2] `persistence/store/ChartCacheService.java` + `NatalChartBundle`
+- [x] T025 [US2] `persistence/store/ChartCacheService.java` + `NatalChartBundle`
   / `HoraryChartBundle` — `natalChart(long userId)`: load `birth_data`,
   `expected = currentEngineVersion.id(birthData)`, serve the `chart` row on
   match + deserialisable, else compute via `EngineConfig` beans
@@ -182,7 +182,7 @@ recompute + overwrite. Constitution III.
   that table is SPEC-013's (data-model.md). Unique-key race → catch + re-read.
   `EngineConfig` MUST use the `SwissEphemerisConfig` defaults the golden suite
   uses so cached charts match the gated values (T024b).
-- [ ] T026 [US2] `persistence/store/PredictionCacheService.java` —
+- [x] T026 [US2] `persistence/store/PredictionCacheService.java` —
   `dailyPrediction(long userId, LocalDate date)`: keyed `(user_id, for_date,
   DAILY)`; serve-or-recompute via `DailyPredictionFactory`; `@Transactional`
   upsert.
@@ -197,7 +197,7 @@ recompute + overwrite. Constitution III.
 
 ### Tests (write first)
 
-- [ ] T027 [P] [US3] `UserAccountServiceIT` (extends `PersistenceIT`) — 20
+- [x] T027 [P] [US3] `UserAccountServiceIT` (extends `PersistenceIT`) — 20
   concurrent `findOrCreate` for one `phone_e164` → one row, no caller sees an
   exception (SC-003); `recordConsent` sets `consent_at` once and does not
   overwrite; after `save`-ing birth data + a chart + a prediction, `forget` →
@@ -206,7 +206,7 @@ recompute + overwrite. Constitution III.
 
 ### Implementation
 
-- [ ] T028 [US3] `persistence/store/UserAccountService.java` + `AppUserRef` —
+- [x] T028 [US3] `persistence/store/UserAccountService.java` + `AppUserRef` —
   `findOrCreate` (findByPhone → save → catch `DataIntegrityViolationException` →
   re-read); `recordConsent` (`UPDATE … WHERE consent_at IS NULL`); `forget`
   (`@Transactional`: delete PII rows via the repositories, then anonymise
@@ -220,14 +220,14 @@ recompute + overwrite. Constitution III.
 
 ### Tests (write first)
 
-- [ ] T029 [P] [US4] `JpaGeocodeCacheIT` (extends `PersistenceIT`) — `put` a
+- [x] T029 [P] [US4] `JpaGeocodeCacheIT` (extends `PersistenceIT`) — `put` a
   `GeocodeResult`, `get` it in a fresh persistence context → candidate list
   equal (SC-005); `get` on an absent key → empty; a second `put` for the same
   `query_norm` updates in place (one row); a corrupt `results_json` → empty.
 
 ### Implementation
 
-- [ ] T030 [US4] `persistence/store/JpaGeocodeCache.java` **implements
+- [x] T030 [US4] `persistence/store/JpaGeocodeCache.java` **implements
   `com.celestia.geo.place.GeocodeCache`** — `get`/`put` against
   `geocode_cache` via `GeocodeResultCodec`; `put` upserts on `query_norm`.
 
@@ -239,7 +239,7 @@ recompute + overwrite. Constitution III.
 
 ### Tests (write first)
 
-- [ ] T031 [P] [US5] `InboxStoreIT` + `OutboxStoreIT` (extend `PersistenceIT`) —
+- [x] T031 [P] [US5] `InboxStoreIT` + `OutboxStoreIT` (extend `PersistenceIT`) —
   `recordInbound` twice with one `wa_message_id` → one row, second is
   `Duplicate` (SC-007); `claimNext` marks the row so a second concurrent
   `claimNext` returns a different row or empty; `markProcessed` sets
@@ -248,7 +248,7 @@ recompute + overwrite. Constitution III.
 
 ### Implementation
 
-- [ ] T032 [US5] `persistence/store/InboxStore.java` (+ `RecordResult` sealed
+- [x] T032 [US5] `persistence/store/InboxStore.java` (+ `RecordResult` sealed
   interface, `ClaimedEvent`) and `OutboxStore.java` (+ `ClaimedMessage`) —
   idempotent insert on the unique key; `claimNext` via a native
   `SELECT … FOR UPDATE SKIP LOCKED` + status update; `attempts` incremented at
@@ -260,10 +260,10 @@ recompute + overwrite. Constitution III.
 
 ## Phase 8: User Story 6 — Migrations & real-MySQL harness (P2)
 
-- [ ] T033 [US6] Confirm `FlywayMigrationIT` (T019) asserts: all tables + unique
+- [x] T033 [US6] Confirm `FlywayMigrationIT` (T019) asserts: all tables + unique
   keys present, `utf8mb4` collation, second migrate is a no-op, `validate`
   passes. Add `spring.flyway.validate-on-migrate: true`.
-- [ ] T034 [US6] `.github/workflows/ci.yml` — confirm the persistence suite runs
+- [x] T034 [US6] `.github/workflows/ci.yml` — confirm the persistence suite runs
   in `verify` on `ubuntu-latest` (Docker present); add a short note; if helpful,
   a dedicated `flyway validate` step is optional (the IT already covers it).
 
@@ -273,14 +273,14 @@ recompute + overwrite. Constitution III.
 
 ## Phase 9: Polish & Cross-Cutting
 
-- [ ] T035 [P] `docs/persistence.md` (or `agent/README.md`) — the `store` API
+- [x] T035 [P] `docs/persistence.md` (or `agent/README.md`) — the `store` API
   surface, running the ITs (Colima / Podman `DOCKER_HOST` / local MySQL 8.4),
   the "immutable migrations" rule, the versioned-cache behaviour.
-- [ ] T036 [P] `agent/src/main/resources/db/migration/README.md` — the V1..V6
+- [x] T036 [P] `agent/src/main/resources/db/migration/README.md` — the V1..V6
   layout + FR-018 (never edit an applied migration).
-- [ ] T037 Run `specs/008-persistence-domain-services/quickstart.md` end to end
+- [x] T037 Run `specs/008-persistence-domain-services/quickstart.md` end to end
   (with a runtime if available); fix drift.
-- [ ] T038 `./mvnw -q verify` — full reactor green incl. `PersistenceArchitectureTest`,
+- [x] T038 `./mvnw -q verify` — full reactor green incl. `PersistenceArchitectureTest`,
   `LayeringArchitectureTest`, `DeterminismArchitectureTest`, the golden-chart
   suite, Spotless. Note which ITs were container-verified vs CI-only.
 
@@ -339,3 +339,39 @@ minus the ITs. State this plainly in the completion report.
 - Billing / payment / guardrail tables and `conversation` / `message` are **not**
   in this spec — SPEC-009 / 011 / 012 / 014 own them.
 - Commit per task or tight group; keep `master` releasable (work on `008-…`).
+
+## Implementation deviations (2026-09-11)
+
+- **Toolchain surprises (Spring Boot 4.1):** autoconfig is modularised —
+  Flyway needed `org.springframework.boot:spring-boot-flyway` (not pulled by
+  `flyway-core`). Jackson is **3.x** (`tools.jackson.databind`), java-time
+  auto-registered. Testcontainers is **2.x** — modules renamed
+  (`testcontainers-mysql`, `testcontainers-junit-jupiter`) and `MySQLContainer`
+  is no longer generic. Added `maven-failsafe-plugin` so `*IT` runs in `verify`,
+  not the fast `test` loop.
+- **`computed_json` stores the raw engine outputs** (`EphemerisResult` +
+  `HouseResult`) rather than the whole `NatalChart` object graph — far simpler
+  to serialise, no `BigFraction`; `NatalChart` is rebuilt with the pure
+  `NatalChartFactory.assemble` on read. A cache hit re-derives
+  `SignificatorTable` / `DashaTimeline` (pure CPU, no ephemeris) — SC-002's
+  "zero engine computations" = zero `PositionProvider` / `HouseProvider` calls,
+  verified with `@MockitoSpyBean`.
+- **`ChartCacheService.horaryChart` deferred to SPEC-015.** A horary chart needs
+  a judgment moment + place, a concept SPEC-008 has no input for. The `chart`
+  table's `HORARY` kind and the `horary_query` table are created and ready.
+  `NatalChartBundle` carries `NatalChart` + `SignificatorTable` +
+  `DashaTimeline` (dropped `RulingPlanets` — an RP is a "now"/horary timing
+  concept, not a natal-chart property).
+- **`app_user` schema:** `phone_e164` is nullable (still `UNIQUE`) and a
+  `phone_hash CHAR(64)` column was added — a 64-char SHA-256 hex does not fit
+  the E.164 column, and NULL-on-forget + hash-retained is cleaner than a marker
+  string. Re-contact from the same number → a fresh user (many NULLs allowed
+  under a MySQL UNIQUE key).
+- **`birth_data`** gained `offset_applied`, `stated_zone_id`, `tzdb_version`,
+  `tz_boundary_version` columns (every place-and-time-derived `ResolvedBirth`
+  field, FR-003 + FR-016). **`inbound_event`** gained `error VARCHAR(500)`.
+- **CI:** `verify -DskipITs=${{ runner.os == 'macOS' }}` — the macOS GitHub
+  runner has no Docker; the persistence layer is not OS-sensitive and the
+  ubuntu leg + the golden cross-OS step cover correctness.
+- Verified locally against **Podman** (`mysql:8.4`): 18 unit + 25 IT green;
+  full `./mvnw verify` BUILD SUCCESS.
