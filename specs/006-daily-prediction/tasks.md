@@ -25,7 +25,7 @@ module, no new dependency, no new ADR.
 
 ## Phase 1: Setup
 
-- [ ] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with the
+- [x] T001 Extend `tools/ephe-crosscheck/compute_golden.py` with the
   daily-prediction case (research.md §1–§5): `date = birthDate + 40 Julian years`
   at `longitude = the chart's birth longitude` (research.md §4) →
   `expected.daily` — the reference instant, `dasha` (per-lord significations, the
@@ -35,7 +35,7 @@ module, no new dependency, no new ADR.
   `favourable_hit` / `obstructive_hit` / `lords` / `transits`. Replicate the
   house-group table, the running-lord ∩ significators step, the sub-lord transit
   rule, and the 4-row verdict function. Emit into one golden file (`obama-1961`).
-- [ ] T002 Regenerate the golden files (`--write`); verify determinism (re-run,
+- [x] T002 Regenerate the golden files (`--write`); verify determinism (re-run,
   diff `expected`). Update `core/src/test/resources/golden/README.md` with the
   `expected.daily` shape, the `birth + 40 years` date + birth-longitude
   convention, and the `daily_human_check` protocol.
@@ -44,7 +44,7 @@ module, no new dependency, no new ADR.
   house-group table against K. S. Krishnamurti's *KP Readers* house-signification
   tables; record in `verification.daily_human_check` and note any single-source
   house set.
-- [ ] T004 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java`
+- [x] T004 [P] Extend `core/src/test/java/com/celestia/core/golden/GoldenChart.java`
   to parse `expected.daily` (reference instant, activated houses, transit
   supports, per-matter verdicts).
 
