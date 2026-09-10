@@ -78,3 +78,14 @@
   `results_json` byte-stability is SPEC-008). D1 (perf guard 60 ms vs 20 ms
   target), E1 (US4 = tests + docs over US3 code), E2 (timeshape-offline
   assertion) accepted LOW. SC-006 / T005 open.
+- `/speckit-analyze` (2026-09-10, post-implementation): `./mvnw verify` green,
+  91 geo tests + 14-birth corpus + new `net.iakovlev` ArchUnit rule. No
+  CRITICAL/HIGH. Applied G2 (research.md §2 — `ZONE_APPROXIMATED` fires on an
+  `Etc/*` result, since `timeshape` carries ocean tiles and never returns
+  empty), G3 (SC-001 — "historical standard-offset change" → "a pre-1970 offset
+  that differs from the zone's modern one", since modern IANA data drops
+  India's pre-1941 LMT), G5 (quickstart scenario map aligned to shipped test
+  names + the no-`expected.tzdb_version` reality). G1 (corpus omits the two
+  version fields — FR-016 met Java-side), G4 (no end-to-end coord-string test —
+  covered piecewise), G6 (SC-006/T005 open) accepted. The perf test actually
+  asserts &lt; 20 ms (stricter than D1's note).

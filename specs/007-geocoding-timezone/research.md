@@ -63,11 +63,17 @@ GeoJSON timezone polygons, a pure offline lookup.
   it bundles (e.g. `2025x.NN`). Pin an exact version in the parent
   `dependencyManagement`; `/speckit-tasks` records the confirmed version from
   Maven Central. `ZoneResolution.datasetVersion` carries it (FR-016).
-- **No polygon** (mid-ocean, Antarctic gaps): fall back to
-  `ZoneId.ofOffset("Etc/GMT", ZoneOffset.ofHours(-round(lon / 15)))` — note the
-  `Etc/GMT` sign convention is inverted — and set `ZONE_APPROXIMATED`. This is a
+- **Not a civil zone** → `ZONE_APPROXIMATED`. Two cases, one flag:
+  - **Ocean tile**: `timeshape` 2025b.26 (and `timezonefinder.timezone_at`)
+    carry fixed-offset `Etc/GMT±h` tiles for open water — `query` never returns
+    empty within valid lat/lon. When the resolved zone id starts with `Etc/` it
+    is not a civil zone, so flag it (`TimeshapeTimeZoneResolver`).
+  - **No polygon at all** (a future dataset, or an exact pole): fall back to
+    `Etc/GMT±h` from `round(longitude / 15)` — note the `Etc/GMT` sign is
+    inverted — and flag it (`etcGmtFor`, defensive; unreachable with the current
+    dataset).
   **v1 choice**: a fixed-offset zone with no DST is the safest guess when there
-  is genuinely no civil zone; the flag tells the caller to confirm.
+  is genuinely no civil zone; the flag tells the caller to confirm the place.
 - **ArchUnit**: a new rule keeps `net.iakovlev..` types out of every public
   member of `com.celestia.geo` (mirrors the Swiss Ephemeris rule) — `timeshape`
   stays behind `TimeZoneResolver`, which returns only `java.time.ZoneId`.
@@ -188,8 +194,9 @@ timezone_boundary_version } }`.
 Coverage: pre-1970 births in ≥ 3 zones; the India 1955 standard-offset change; a
 one-off war-time change (1944 `Europe/London` Double Summer Time, or 1943 US War
 Time); a US spring-forward gap; a EU fall-back fold; a southern-hemisphere DST
-birth (Australia / Chile); an unknown-time birth; a no-polygon (ocean)
-coordinate; a polar-latitude birth; a stated-vs-geocoded zone conflict.
+birth (Australia / Chile); an unknown-time birth; an ocean coordinate (an
+`Etc/GMT` tile → `ZONE_APPROXIMATED`); a polar-latitude birth; a
+stated-vs-geocoded zone conflict.
 
 **Tooling** — extend `tools/ephe-crosscheck/compute_golden.py`:
 
@@ -216,7 +223,7 @@ is the only fully independent verification.
 | # | Topic | Decision |
 |---|---|---|
 | 1 | Geocoder scope | port + value objects + normalisation + ranking + in-memory cache + `FixtureGeocoder` now; OpenCage HTTP adapter deferred to SPEC-009/010; ADR-0013 → accepted |
-| 2 | lat/lon → zone | `timeshape`, lazy singleton engine, exact version pin; no-polygon → `Etc/GMT` from longitude + `ZONE_APPROXIMATED` |
+| 2 | lat/lon → zone | `timeshape`, lazy singleton engine, exact version pin; an `Etc/GMT±h` result (ocean tile, or the longitude fallback) → `ZONE_APPROXIMATED` |
 | 3 | local → UTC | `java.time` historical rules; `getValidOffsets` size 0 → `DST_GAP` (shift forward), 2 → `DST_FOLD` (earlier offset); `offsetApplied` + `tzdb` version returned |
 | 4 | Unknown time | 12:00 local + `TIME_NOT_KNOWN` |
 | 5 | Normalisation | strip / collapse / case-fold + a curated exonym→endonym map; coordinate queries bypass everything |

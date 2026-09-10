@@ -257,12 +257,12 @@ versions.
 ### Measurable Outcomes
 
 - **SC-001**: For a corpus of ≥ 12 births spanning pre-1970 offsets, at least one
-  historical standard-offset change, at least one one-off war-time change, DST gap
-  and fold cases, and both hemispheres, every computed UTC instant matches an
-  **independent reference** — Python `zoneinfo` + `timezonefinder`, a separate
-  implementation *and* a separate copy of the IANA data from the JRE's bundled
-  `tzdb` — **to the second**. (≥ 3 of these are additionally checked by hand,
-  SC-006.)
+  pre-1970 offset that differs from the zone's modern one (e.g. India's wartime
+  +06:30, or British Double Summer Time), DST gap and fold cases, and both
+  hemispheres, every computed UTC instant matches an **independent reference** —
+  Python `zoneinfo` + `timezonefinder`, a separate implementation *and* a
+  separate copy of the IANA data from the JRE's bundled `tzdb` — **to the
+  second**. (≥ 3 of these are additionally checked by hand, SC-006.)
 - **SC-002**: For a sample of ≥ 15 cities worldwide, `lat/lon → zone` matches the
   reference tz database's assignment.
 - **SC-003**: A cached query returns an **equal** candidate list (value equality
