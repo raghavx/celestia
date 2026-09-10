@@ -49,8 +49,9 @@ Given a `NatalChart` and the reference instant `t` (§4):
 - For each running lord `L`: `table.grahaSignificators(L).houses()` — the natal
   houses `L` signifies, with steps.
 - **Activated house set**: `{ h : some running lord signifies h }`. Each `h`
-  carries its **strength** = the number of the five running lords that signify it
-  (1–5), and the set of those lords.
+  carries its **strength** = the number of **distinct** running lords that signify
+  it (1–5 — a lord occupying more than one level counts once), and the set of
+  those lords.
 
 **`lordChangesWithinDay`**: `dasha.running(t − 12h, 5)` and `dasha.running(t + 12h,
 5)` — flag true if any level's lord differs from `running`.
@@ -154,7 +155,7 @@ Extend `tools/ephe-crosscheck/compute_golden.py`:
 | # | Topic | Decision |
 |---|-------|----------|
 | 1 | House groups | closed enum, favourable + obstructive (12th-from) sets, cited to KSK; v1 |
-| 2 | Dasha significators | running lords ∩ `grahaSignificators`; activated set with strength = count of the 5 levels |
+| 2 | Dasha significators | running lords ∩ `grahaSignificators`; activated set with strength = count of **distinct** running lords signifying the house |
 | 3 | Transit rule | v1: sub lord of the transiting Moon / Sun is a natal significator; star-lord / slow planets / aspects are v2 |
 | 4 | Reference instant | local noon (`date 12:00 − longitude/15 h`); ±12 h change flags; no integration |
 | 5 | Verdict rule | 4-row total function over favourable/obstructive activation + transit trigger; strict `>` for UNFAVOURABLE; FAVOURABLE needs a trigger |

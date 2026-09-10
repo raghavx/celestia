@@ -50,6 +50,7 @@ public final class DailyPredictionFactory {
 
 | Item | Rule |
 |------|------|
+| `longitude` | east-positive longitude of the place the reading is for on that date — where the querent is, not necessarily the birth place; used only for the reference instant |
 | reference instant | `date` at `12:00` local mean time = `date.atTime(12,0)` UTC `−` `round(longitude/15 · 3600)` s (`research.md` §4) |
 | `date` before the birth date | `IllegalArgumentException` |
 | transit positions | `positions.positions(referenceInstant)` and at `± 12 h` |

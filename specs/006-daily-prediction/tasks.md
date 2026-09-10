@@ -121,7 +121,8 @@ significations, and the activated house set with strengths.
   SignificatorTable table, DashaTimeline timeline, Instant referenceInstant)` in
   `core/src/main/java/com/celestia/core/prediction/DashaSignificators.java` —
   `running(t, 5)`; per-lord `grahaSignificators`; activated set (union) with
-  `ActivatedHouse` strength = count of running levels; `lordChangesWithinDay` from
+  `ActivatedHouse` strength = the count of **distinct** running lords that signify
+  the house (a lord repeated across levels counts once); `lordChangesWithinDay` from
   `running(t ± 12 h, 5)`
 
 **Checkpoint**: the dasha side is computable and golden-verified.

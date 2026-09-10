@@ -31,6 +31,9 @@ public final class DailyPredictionFactory {
      * The daily reading for {@code chart} on {@code date}, evaluated at local noon
      * ({@code date 12:00} minus {@code longitude/15 h}, {@code research.md} §4).
      *
+     * @param longitude the east-positive longitude of the place the reading is for
+     *     on that date — where the querent is, not necessarily the birth place;
+     *     used only to place the local-noon reference instant
      * @throws IllegalArgumentException if {@code date} is before the birth date
      */
     public DailyPrediction predict(NatalChart chart, LocalDate date, double longitude) {

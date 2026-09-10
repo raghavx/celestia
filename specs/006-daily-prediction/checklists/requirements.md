@@ -67,3 +67,10 @@
   `SyntheticChart` helper (SPEC-003/004's are package-private). D4 (SC-005 50 ms
   vs the 150 ms guard) and D5 (no automated engine-version check) accepted LOW;
   SC-006 / T003 still open.
+- `/speckit-analyze` (2026-09-10, post-implementation): D1-D3 confirmed resolved.
+  E1 remediated — "strength = count of running levels" corrected to "distinct
+  running lords" in research.md §2 and T013 (data-model / impl / tests already
+  agreed). E3 — `predict`'s `longitude` Javadoc + the contract clarify it is the
+  place the reading is for, not necessarily the birth place. E2 (the golden
+  reading covers only FAVOURABLE/UNFAVOURABLE — the property + unit tests cover
+  all four) and E4/E5 accepted LOW. SC-006 / T003 still open.
