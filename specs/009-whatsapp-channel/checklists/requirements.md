@@ -61,3 +61,13 @@
   (restart reliability) are P2.
 - Ready for `/speckit-clarify` (optional) / `/speckit-plan` / `/speckit-tasks` /
   `/speckit-implement`.
+- `/speckit-analyze` (2026-09-15, post-tasks): no CRITICAL, coverage 100%.
+  Applied H1 (`inbound_event.raw_ref` widened `VARCHAR(255) → TEXT` in `V7` —
+  SPEC-009 stores the message JSON directly and a WhatsApp body runs to 4096
+  chars; `long-text.json` fixture + T017/T018/T027 assertions added), M1
+  (`OutboxStore.markSent` is a new **overload**, not a signature change — the
+  SPEC-008 1-arg form is kept), M2 (T041 gets a full-stack replay case for
+  SC-004/FR-017), M3 (a `batch-ten.json` fixture + a timing assertion added to
+  T018 for SC-003), L1 (quickstart.md test names synced to tasks.md's
+  Get/Post split), L2 (T018 also asserts a status-callback payload records
+  nothing yet returns `200`, FR-015).

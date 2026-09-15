@@ -43,8 +43,11 @@ manage it) in `channel-whatsapp` (Graph API client) and `agent` (the
 webhook→worker→sender E2E test).
 
 **Storage**: MySQL via SPEC-008. `V7__whatsapp_channel.sql` adds three nullable
-columns to existing tables — no new table (the spec's Assumption that
-`conversation`/FSM schema is out of scope holds).
+columns to existing tables and **widens `inbound_event.raw_ref` from
+`VARCHAR(255)` to `TEXT`** — SPEC-008 sized it for "a pointer to a raw
+payload"; SPEC-009 stores the message's JSON directly (research.md §4), and a
+WhatsApp text body can run to 4096 characters, well past 255. No new table —
+the spec's Assumption that `conversation`/FSM schema is out of scope holds.
 
 **Testing**: `./mvnw verify`. Pure logic (signature check, handshake,
 payload parsing, window policy, template lookup) — plain unit tests, no

@@ -31,12 +31,19 @@ loops, storage glue). Builds on SPEC-008 (`InboxStore`, `OutboxStore`,
 - [ ] T002 `agent/src/main/resources/db/migration/V7__whatsapp_channel.sql` —
   additive: `app_user.window_expires_at DATETIME(0) NULL`,
   `outbox_message.provider_message_id VARCHAR(64) NULL`,
-  `outbox_message.next_attempt_at DATETIME(0) NULL`.
+  `outbox_message.next_attempt_at DATETIME(0) NULL`; **and widen**
+  `inbound_event.raw_ref` from `VARCHAR(255)` to `TEXT` (`ALTER TABLE
+  inbound_event MODIFY raw_ref TEXT NOT NULL`) — SPEC-009 stores the
+  message's JSON directly (T020), and a WhatsApp text body runs to 4096
+  characters.
 - [ ] T003 [P] `channel-whatsapp/src/test/resources/whatsapp/payloads/` —
   fixture JSON: `single-text.json` (one message), `batch-three.json` (three
-  messages in one delivery), `status-callback.json` (a `statuses[]` payload,
-  no `messages[]`), `unsupported-type.json` (e.g. `type: "image"`), matching
-  Meta's `entry[].changes[].value.messages[]` shape (research.md §4).
+  messages in one delivery), `batch-ten.json` (ten messages, for the SC-003
+  latency check), `long-text.json` (a message body near WhatsApp's 4096-char
+  limit — proves `raw_ref TEXT` round-trips, H1), `status-callback.json` (a
+  `statuses[]` payload, no `messages[]`), `unsupported-type.json` (e.g.
+  `type: "image"`), matching Meta's `entry[].changes[].value.messages[]`
+  shape (research.md §4).
 - [ ] T004 [P] `channel-whatsapp/src/main/resources/whatsapp-templates/generic-reply.yml`
   — the v1 stub/fixture template entry (contracts/whatsapp-channel-api.md).
 - [ ] T005 `agent/src/main/resources/application.yml` — `whatsapp.*` properties
@@ -116,12 +123,16 @@ every message exactly once, and responds fast.
 - [ ] T017 [P] [US2] `InboundPayloadParserTest` in `channel-whatsapp` — the
   T003 fixtures: `single-text.json` → 1 `InboundMessage`; `batch-three.json`
   → 3, each independently re-parseable via `parseOne` from its own JSON;
-  `status-callback.json` → `[]`; `unsupported-type.json` → 1 message with
-  `UnsupportedContent`.
+  `long-text.json` → the full ~4096-char body preserved exactly (no
+  truncation — H1); `status-callback.json` → `[]`; `unsupported-type.json` →
+  1 message with `UnsupportedContent`.
 - [ ] T018 [P] [US2] `WhatsAppWebhookControllerPostTest` (MockMvc, `InboxStore`
   mocked) in `agent` — a tampered signature → rejected, `InboxStore` never
   called; a valid signature → `InboxStore.recordInbound` called once per
-  message in the payload, response `200`.
+  message in the payload (incl. `status-callback.json` → zero calls, still
+  `200` — FR-015), response `200`; posting `batch-ten.json` responds in
+  under 1 second (SC-003), asserted with a wall-clock timing check around the
+  `MockMvc` call.
 
 ### Implementation
 
@@ -167,7 +178,9 @@ per message, without erroring on unsupported types.
   `outboxStore.enqueue(...)` → `inboxStore.markProcessed(id)`; any exception →
   `inboxStore.markFailed(id, error)`.
 - [ ] T027 [US3] `WhatsAppInboundWorkerIT` (extends `PersistenceIT`) in `agent`
-  — a recorded text message is claimed, resolved, replied to, and queued; an
+  — a recorded text message is claimed, resolved, replied to, and queued; a
+  recorded `long-text.json` message round-trips through the real `TEXT`
+  `raw_ref` column and is claimed/parsed intact (H1, against real MySQL); an
   `unsupported-type.json` message still produces a queued reply (no error, no
   silent skip); two concurrent `claimNext()` callers never claim the same row.
 
@@ -204,10 +217,13 @@ window, delivers via the Graph API, retries transient failures with backoff.
   `channel/whatsapp/WhatsAppMessagingChannel.java` (implements
   `MessagingChannel`, maps each `OutboundMessage` shape to a Graph API
   request and the response/HTTP status to a `SendResult`).
-- [ ] T034 [US4] `OutboxStore` additive — `markSent(long id, String
-  providerMessageId)`, `markRetry(long id, String error, Instant
-  nextAttemptAt)` (`backoff(attempts) = min(2^attempts s, 5 min)`); the
-  `claimNextPending()` query gated on `next_attempt_at IS NULL OR <= NOW()`.
+- [ ] T034 [US4] `OutboxStore` additive — a new **overload**
+  `markSent(long id, String providerMessageId)` alongside SPEC-008's existing
+  `markSent(long id)` (not a replacement — keeps the SPEC-008 contract
+  unchanged), plus `markRetry(long id, String error, Instant nextAttemptAt)`
+  (`backoff(attempts) = min(2^attempts s, 5 min)`); the `claimNextPending()`
+  query gated on `next_attempt_at IS NULL OR <= NOW()` (a `NULL` value — every
+  existing row — still claims immediately).
 - [ ] T035 [US4] `agent/channel/WhatsAppOutboundSender.java` (`@Scheduled`) —
   loop `outboxStore.claimNextPending()`; per claim: deserialise the queued
   `OutboundMessage`; `windowStore.windowExpiresAt(userId)` +
@@ -259,7 +275,12 @@ their own.
 - [ ] T041 [P] `WhatsAppChannelEndToEndIT` (`PersistenceIT` + WireMock) in
   `agent` — `POST /webhooks/whatsapp` with a real signed fixture payload →
   the worker → the outbox → a WireMock-stubbed Graph API receives **exactly
-  one** send. This is the Phase 4 exit criterion, end to end.
+  one** send. This is the Phase 4 exit criterion, end to end. **Plus a
+  replay case (SC-004/FR-017)**: POST the identical signed payload a second
+  time before the worker runs — still one recorded `inbound_event` row; run
+  the worker to completion, then re-run the webhook POST and the worker
+  again — the Graph API still receives **exactly one** send in total, never
+  a second reply for the same message.
 - [ ] T042 [P] `docs/whatsapp-channel.md` (or `channel-whatsapp/README.md`) —
   the module split, the message shapes, running the WireMock/Testcontainers
   suite, the template-catalog format, the secrets required at runtime.

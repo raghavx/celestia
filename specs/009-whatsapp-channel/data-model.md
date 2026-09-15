@@ -99,13 +99,14 @@ providerMessageId)`; `Failed(retryable=true)` → `outboxStore.markRetry(id,
 error, nextAttemptAt)`; `Failed(retryable=false)` or attempts exhausted →
 `outboxStore.markFailed(id, error)`.
 
-## `V7__whatsapp_channel.sql` (additive)
+## `V7__whatsapp_channel.sql` (additive + one widen)
 
-| Table | New column | Notes |
+| Table | Column | Notes |
 |---|---|---|
-| `app_user` | `window_expires_at DATETIME(0) NULL` | the 24h customer-service window |
-| `outbox_message` | `provider_message_id VARCHAR(64) NULL` | set on a successful send (FR-013) |
-| `outbox_message` | `next_attempt_at DATETIME(0) NULL` | the retry-backoff gate |
+| `app_user` | `window_expires_at DATETIME(0) NULL` | new — the 24h customer-service window |
+| `outbox_message` | `provider_message_id VARCHAR(64) NULL` | new — set on a successful send (FR-013) |
+| `outbox_message` | `next_attempt_at DATETIME(0) NULL` | new — the retry-backoff gate |
+| `inbound_event` | `raw_ref` **`VARCHAR(255)` → `TEXT`** | widened — SPEC-009 stores the message's JSON directly (research.md §4), not a pointer as SPEC-008 originally sized it for; a WhatsApp text body runs to 4096 characters |
 
 No new table. `dasha_period`, `conversation` remain out of scope (SPEC-013 /
 SPEC-010 respectively).
@@ -117,9 +118,10 @@ SPEC-010 respectively).
 Optional<ClaimedEvent> claimNext();                                  // unchanged
 int reclaimStale(Duration olderThan, int maxAttempts);                // new: NEW <- CLAIMED, else markFailed over cap
 
-// OutboxStore — additive
-Optional<ClaimedMessage> claimNextPending();                          // now also gates on next_attempt_at
-void markSent(long id, String providerMessageId);                     // was markSent(id); now records the id
+// OutboxStore — additive (markSent(id) from SPEC-008 is kept, not replaced)
+Optional<ClaimedMessage> claimNextPending();                          // unchanged signature; now also gates on next_attempt_at (NULL still claims)
+void markSent(long id);                                               // SPEC-008, unchanged
+void markSent(long id, String providerMessageId);                     // new overload: also records the provider id (FR-013)
 void markRetry(long id, String error, Instant nextAttemptAt);         // new: PENDING again, gated
 int reclaimStale(Duration olderThan, int maxAttempts);                // new
 

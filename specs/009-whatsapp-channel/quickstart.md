@@ -38,10 +38,11 @@ New coverage:
 
 | Spec scenario | Test |
 |---------------|------|
-| US1 GET handshake (SC-001) | `WebhookVerificationHandshakeTest`, `WhatsAppWebhookControllerTest` |
-| US2 signature reject (SC-002) | `WebhookSignatureVerifierTest`, `WhatsAppWebhookControllerTest` |
-| US2 idempotent record + batch (SC-002, SC-004) | `InboundPayloadParserTest`, `WhatsAppWebhookControllerTest`, `WhatsAppChannelEndToEndIT` |
-| US2 fast response (SC-003) | `WhatsAppWebhookControllerTest` (timing assertion) |
+| US1 GET handshake (SC-001) | `WebhookVerificationHandshakeTest`, `WhatsAppWebhookControllerGetTest` |
+| US2 signature reject (SC-002) | `WebhookSignatureVerifierTest`, `WhatsAppWebhookControllerPostTest` |
+| US2 idempotent record + batch, incl. a long body (SC-002, H1) | `InboundPayloadParserTest`, `WhatsAppWebhookControllerPostTest` |
+| US2 full-stack replay — one record, zero extra replies (SC-004, FR-017) | `WhatsAppChannelEndToEndIT` |
+| US2 fast response on a 10-message batch (SC-003) | `WhatsAppWebhookControllerPostTest` (timing assertion) |
 | US3 worker claim + echo + unsupported-type fallback | `WhatsAppInboundWorkerIT` |
 | US3 no double-claim under concurrency | `WhatsAppInboundWorkerIT` (two claimers) |
 | US4 window decision (SC-006) | `WindowPolicyTest`, `WhatsAppOutboundSenderIT` |
