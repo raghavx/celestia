@@ -52,6 +52,15 @@ class AsyncIoStoreIT extends PersistenceIT {
 
     @Test
     void outboxTracksAttemptsAndError() {
+        // SPEC-009: WhatsAppInboundWorkerIT is deliberately not @Transactional and
+        // can leave real, committed PENDING rows from earlier in the suite; drain
+        // them first (within this test's own transaction) so claimNextPending()
+        // below is guaranteed to return the row this test just created.
+        Optional<OutboxStore.ClaimedMessage> stale;
+        while ((stale = outbox.claimNextPending()).isPresent()) {
+            outbox.markSent(stale.get().id());
+        }
+
         long id = outbox.enqueue(null, "+919000000000", "{\"text\":\"hi\"}");
         OutboxStore.ClaimedMessage claimed = outbox.claimNextPending().orElseThrow();
         assertThat(claimed.id()).isEqualTo(id);

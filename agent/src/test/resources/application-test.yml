@@ -1,0 +1,9 @@
+# SPEC-009: the `test` profile, active on every full-context IT (PersistenceIT,
+# CelestiaApplicationTests). Every IT drives WhatsAppInboundWorker/
+# WhatsAppOutboundSender explicitly via tick() — a live ~2s @Scheduled poller
+# only races those explicit calls against the DB and outlives Testcontainers
+# during JVM shutdown, so it is stretched out here to effectively never
+# auto-fire during a test run.
+whatsapp:
+  channel:
+    poll-interval: PT1H

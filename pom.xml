@@ -54,6 +54,9 @@
           fallback (docs/ephemeris-vendoring.md, T059) if JitPack drops the build.
         -->
         <swisseph.version>master-6000e46cf8-1</swisseph.version>
+        <!-- SPEC-009: stubs the WhatsApp Graph API in tests. Not managed by
+             the Spring Boot BOM. -->
+        <wiremock.version>3.13.1</wiremock.version>
     </properties>
 
     <repositories>
@@ -149,6 +152,15 @@
                 <groupId>net.iakovlev</groupId>
                 <artifactId>timeshape</artifactId>
                 <version>${timeshape.version}</version>
+            </dependency>
+
+            <!-- SPEC-009: the standalone (shaded) artifact avoids the jetty11/jetty12
+                 version skew present in plain org.wiremock:wiremock's transitive deps. -->
+            <dependency>
+                <groupId>org.wiremock</groupId>
+                <artifactId>wiremock-standalone</artifactId>
+                <version>${wiremock.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

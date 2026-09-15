@@ -1,0 +1,69 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "waba-1",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "15550001111",
+              "phone_number_id": "1234567890"
+            },
+            "contacts": [
+              {
+                "profile": {
+                  "name": "User"
+                },
+                "wa_id": "919876543201"
+              },
+              {
+                "profile": {
+                  "name": "User"
+                },
+                "wa_id": "919876543202"
+              },
+              {
+                "profile": {
+                  "name": "User"
+                },
+                "wa_id": "919876543203"
+              }
+            ],
+            "messages": [
+              {
+                "from": "919876543201",
+                "id": "wamid.batch-0001",
+                "timestamp": "1717000001",
+                "type": "text",
+                "text": {
+                  "body": "hello"
+                }
+              },
+              {
+                "from": "919876543202",
+                "id": "wamid.batch-0002",
+                "timestamp": "1717000002",
+                "type": "text",
+                "text": {
+                  "body": "hello"
+                }
+              },
+              {
+                "from": "919876543203",
+                "id": "wamid.batch-0003",
+                "timestamp": "1717000003",
+                "type": "text",
+                "text": {
+                  "body": "hello"
+                }
+              }
+            ]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}
