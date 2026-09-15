@@ -16,4 +16,9 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
     @Modifying(clearAutomatically = true)
     @Query("update AppUserEntity u set u.consentAt = :ts where u.id = :id and u.consentAt is null")
     int recordConsentIfAbsent(@Param("id") long id, @Param("ts") Instant ts);
+
+    /** SPEC-009: refreshes the WhatsApp 24h customer-service window. */
+    @Modifying(clearAutomatically = true)
+    @Query("update AppUserEntity u set u.windowExpiresAt = :expiresAt where u.id = :id")
+    int updateWindowExpiresAt(@Param("id") long id, @Param("expiresAt") Instant expiresAt);
 }

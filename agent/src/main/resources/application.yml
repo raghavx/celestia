@@ -35,5 +35,19 @@ management:
       probes:
         enabled: true
 
-# Phase-specific config (Spring AI / Ollama, WhatsApp, Razorpay) is added in the
-# spec that introduces it. See PROJECT_PLAN.md.
+# SPEC-009: WhatsApp Business Cloud API. All values from the environment —
+# never literal (FR-012). graph-api-version pins the Graph API URL version.
+whatsapp:
+  phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:}
+  graph-api-base-url: ${WHATSAPP_GRAPH_API_BASE_URL:https://graph.facebook.com}
+  graph-api-version: ${WHATSAPP_GRAPH_API_VERSION:v21.0}
+  access-token: ${WHATSAPP_ACCESS_TOKEN:}
+  app-secret: ${WHATSAPP_APP_SECRET:}
+  verify-token: ${WHATSAPP_VERIFY_TOKEN:}
+  channel:
+    poll-interval: ${WHATSAPP_POLL_INTERVAL:PT2S}
+    max-attempts: ${WHATSAPP_MAX_ATTEMPTS:5}
+    reclaim-after: ${WHATSAPP_RECLAIM_AFTER:PT2M}
+
+# Phase-specific config (Spring AI / Ollama, Razorpay) is added in the spec
+# that introduces it. See PROJECT_PLAN.md.

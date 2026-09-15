@@ -2,6 +2,7 @@ package com.celestia.agent.persistence.store;
 
 import com.celestia.agent.persistence.entity.InboundEventEntity;
 import com.celestia.agent.persistence.repository.InboundEventRepository;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -69,5 +70,32 @@ public class InboxStore {
         e.setStatus("FAILED");
         e.setError(error == null ? null : error.substring(0, Math.min(error.length(), 500)));
         repo.save(e);
+    }
+
+    /**
+     * SPEC-009 US6: a {@code CLAIMED} row older than {@code olderThan} means the
+     * worker that claimed it crashed before marking it done — reset it to
+     * {@code NEW} so it is claimable again; past {@code maxAttempts}, mark it
+     * {@code FAILED} instead (never retried forever). Uses {@code received_at}
+     * as the staleness clock (an approximation — v1's echo handling is cheap;
+     * a real {@code claimed_at} column is a later refinement, research.md §7).
+     *
+     * @return the number of rows reset to {@code NEW}
+     */
+    @Transactional
+    public int reclaimStale(Duration olderThan, int maxAttempts) {
+        Instant threshold = Instant.now().minus(olderThan);
+        int reclaimed = 0;
+        for (InboundEventEntity e : repo.findStaleClaimed(threshold)) {
+            if (e.getAttempts() >= maxAttempts) {
+                e.setStatus("FAILED");
+                e.setError("reclaim sweep: exceeded max attempts (" + maxAttempts + ")");
+            } else {
+                e.setStatus("NEW");
+                reclaimed++;
+            }
+            repo.save(e);
+        }
+        return reclaimed;
     }
 }

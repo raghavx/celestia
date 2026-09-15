@@ -44,6 +44,10 @@ public class AppUserEntity {
     @Column(name = "cooldown_until")
     private Instant cooldownUntil;
 
+    /** SPEC-009: the WhatsApp 24h customer-service window's expiry. */
+    @Column(name = "window_expires_at")
+    private Instant windowExpiresAt;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 
@@ -122,6 +126,14 @@ public class AppUserEntity {
 
     public Instant getCooldownUntil() {
         return cooldownUntil;
+    }
+
+    public Instant getWindowExpiresAt() {
+        return windowExpiresAt;
+    }
+
+    public void setWindowExpiresAt(Instant windowExpiresAt) {
+        this.windowExpiresAt = windowExpiresAt;
     }
 
     public Instant getCreatedAt() {
