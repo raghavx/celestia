@@ -1,7 +1,8 @@
 # ADR 0011: WhatsApp provider
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-09-02
+- **Accepted:** 2026-09-15 (SPEC-009 `/speckit-plan`)
 - **Decision ref:** D11 (PROJECT_PLAN.md §2)
 
 ## Context
@@ -20,8 +21,8 @@ Provider (BSP) such as Twilio, 360dialog, or Gupshup.
 
 ## Decision
 
-_Proposed:_ Option 1, behind the `MessagingChannel` port so that switching to a
-BSP later is a new adapter module, not a rewrite. Reconsider if Meta Business
+Option 1, behind the `MessagingChannel` port so that switching to a BSP later
+is a new adapter module, not a rewrite. Reconsider if Meta Business
 verification or number provisioning proves painful in practice.
 
 ## Consequences
@@ -30,3 +31,9 @@ verification or number provisioning proves painful in practice.
   `X-Hub-Signature-256` verification, template-message format.
 - A Meta Business Manager account and a verified business are required before
   go-live — external, long lead time, so start the verification early.
+- **Port placement (SPEC-009 `/speckit-plan`, 2026-09-15):** `MessagingChannel`
+  and its `WhatsAppMessagingChannel` implementation both live in
+  `channel-whatsapp` — `agent` depends on `channel-whatsapp`, not the reverse,
+  so the port cannot live in `agent` without a dependency cycle. Promoting the
+  interface + shared value types to a dedicated module is a mechanical,
+  behaviour-free move if a second channel (SMS, a BSP) is ever added.
