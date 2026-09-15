@@ -156,9 +156,14 @@ improvement rather than leave it silently unaddressed:
   `InboundPayloadParserTest` (fixture JSON files: one message, a batch, a
   status callback, an unsupported type), `WindowPolicyTest`,
   `WhatsAppTemplateCatalogTest`. No network, no container.
-- **`WhatsAppMessagingChannel`** — `org.wiremock:wiremock` `3.13.1` (pinned;
-  Boot's BOM does not manage it) stubs the Graph API `/messages` endpoint for
-  each `OutboundMessage` shape and for 4xx/5xx responses.
+- **`WhatsAppMessagingChannel`** — `org.wiremock:wiremock-standalone` `3.13.1`
+  (pinned; Boot's BOM does not manage it) stubs the Graph API `/messages`
+  endpoint for each `OutboundMessage` shape and for 4xx/5xx responses. The
+  `-standalone` (shaded) artifact, not plain `org.wiremock:wiremock` — the
+  latter's own POM pulls a broken mix of Jetty 11 and Jetty 12 transitive
+  artifacts that fails at `WireMockServer` startup (`NoClassDefFoundError` on
+  `org.eclipse.jetty.io.WriteFlusher$Listener`) when consumed as a plain
+  dependency rather than through WireMock's own packaging tooling.
 - **Webhook controller** — `MockMvc`, asserting the signature/handshake rules
   end-to-end at the HTTP layer (no container needed if the store is mocked;
   an `*IT` variant runs the real thing against Testcontainers `mysql:8.4`,

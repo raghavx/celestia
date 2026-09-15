@@ -17,7 +17,7 @@ Split across two modules (no new module): `channel-whatsapp` (protocol +
 computation, no DB) and `agent.channel` (the HTTP endpoint, the two scheduled
 loops, storage glue). Builds on SPEC-008 (`InboxStore`, `OutboxStore`,
 `UserAccountService`, `PersistenceIT`). No new main-scope dependency; test-only
-`org.wiremock:wiremock:3.13.1`. ADR-0011/0012 accepted by the plan.
+`org.wiremock:wiremock-standalone:3.13.1`. ADR-0011/0012 accepted by the plan.
 
 ## Format: `[ID] [P?] [Story] Description with file path`
 
@@ -26,8 +26,11 @@ loops, storage glue). Builds on SPEC-008 (`InboxStore`, `OutboxStore`,
 ## Phase 1: Setup
 
 - [ ] T001 Parent `pom.xml` — add `wiremock.version=3.13.1` property +
-  `dependencyManagement` entry for `org.wiremock:wiremock`. `channel-whatsapp/pom.xml`
-  and `agent/pom.xml` — add it as a **test**-scope dependency.
+  `dependencyManagement` entry for `org.wiremock:wiremock-standalone` (the
+  shaded artifact — plain `org.wiremock:wiremock`'s own POM pulls a broken
+  Jetty 11/12 transitive mix that fails `WireMockServer` startup outside
+  WireMock's own packaging tooling). `channel-whatsapp/pom.xml` and
+  `agent/pom.xml` — add it as a **test**-scope dependency.
 - [ ] T002 `agent/src/main/resources/db/migration/V7__whatsapp_channel.sql` —
   additive: `app_user.window_expires_at DATETIME(0) NULL`,
   `outbox_message.provider_message_id VARCHAR(64) NULL`,
@@ -42,10 +45,15 @@ loops, storage glue). Builds on SPEC-008 (`InboxStore`, `OutboxStore`,
   latency check), `long-text.json` (a message body near WhatsApp's 4096-char
   limit — proves `raw_ref TEXT` round-trips, H1), `status-callback.json` (a
   `statuses[]` payload, no `messages[]`), `unsupported-type.json` (e.g.
-  `type: "image"`), matching Meta's `entry[].changes[].value.messages[]`
+  `type: "image"`), `batch-with-malformed.json` (a well-formed message, a
+  message missing `id`/`from`, then another well-formed message — proves the
+  malformed entry is skipped without sinking its siblings, post-implementation
+  analyze finding H1), matching Meta's `entry[].changes[].value.messages[]`
   shape (research.md §4).
-- [ ] T004 [P] `channel-whatsapp/src/main/resources/whatsapp-templates/generic-reply.yml`
-  — the v1 stub/fixture template entry (contracts/whatsapp-channel-api.md).
+- [ ] T004 [P] `channel-whatsapp/src/main/resources/whatsapp-templates/generic-reply.properties`
+  — the v1 stub/fixture template entry (contracts/whatsapp-channel-api.md;
+  `.properties`, not `.yml` — `channel-whatsapp` has no YAML parser on its
+  classpath).
 - [ ] T005 `agent/src/main/resources/application.yml` — `whatsapp.*` properties
   (`phone-number-id`, `graph-api-base-url`, `graph-api-version`,
   `access-token`, `app-secret`, `verify-token`, all `${ENV_VAR}` — never
@@ -145,8 +153,12 @@ every message exactly once, and responds fast.
 - [ ] T021 [US2] `agent/channel/WhatsAppWebhookController.java` (POST) —
   `@RequestBody byte[] rawBody` + `X-Hub-Signature-256` header; verify →
   reject on mismatch (nothing recorded); else `parseAll`, then
-  `inboxStore.recordInbound(providerId, messageJson)` per message; `200`
-  returned once recording completes, no reply-generation on this thread.
+  `inboxStore.recordInbound(providerId, messageJson)` per message, **each
+  iteration in its own try/catch** — a malformed message (fails
+  `InboundMessage`'s validation) is logged and skipped, never sinks its
+  well-formed siblings or turns the response into a non-200 Meta would retry
+  forever (post-implementation analyze finding H1); `200` returned once
+  recording completes, no reply-generation on this thread.
 
 **Checkpoint**: SC-002/SC-003/SC-004 — security + idempotency + speed.
 
@@ -211,7 +223,7 @@ window, delivers via the Graph API, retries transient failures with backoff.
 
 - [ ] T031 [US4] `channel/whatsapp/WindowPolicy.java` (pure).
 - [ ] T032 [US4] `channel/whatsapp/WhatsAppTemplateCatalog.java` — loads
-  `resources/whatsapp-templates/*.yml`.
+  `resources/whatsapp-templates/*.properties`.
 - [ ] T033 [US4] `channel/whatsapp/graphapi/GraphApiClient.java` (internal —
   `RestClient`, POST `/{phoneNumberId}/messages`) + request/response DTOs, and
   `channel/whatsapp/WhatsAppMessagingChannel.java` (implements
@@ -220,7 +232,8 @@ window, delivers via the Graph API, retries transient failures with backoff.
 - [ ] T034 [US4] `OutboxStore` additive — a new **overload**
   `markSent(long id, String providerMessageId)` alongside SPEC-008's existing
   `markSent(long id)` (not a replacement — keeps the SPEC-008 contract
-  unchanged), plus `markRetry(long id, String error, Instant nextAttemptAt)`
+  unchanged), plus `markRetry(long id, String error)` — the store computes
+  `nextAttemptAt = now + backoff(attempts)` itself
   (`backoff(attempts) = min(2^attempts s, 5 min)`); the `claimNextPending()`
   query gated on `next_attempt_at IS NULL OR <= NOW()` (a `NULL` value — every
   existing row — still claims immediately).

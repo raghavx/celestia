@@ -59,14 +59,21 @@ public interface ReplyHandler {
 
 ## `WhatsAppTemplateCatalog` (`channel-whatsapp`)
 
-`resources/whatsapp-templates/*.yml`, one file per logical template:
+`resources/whatsapp-templates/*.properties`, one file per logical template
+(plain `java.util.Properties`, not YAML — `channel-whatsapp` has no YAML
+parser on its classpath and adding one purely for this wasn't worth it):
 
-```yaml
-key: generic-reply
-metaTemplateName: celestia_generic_reply   # placeholder — the real, approved name (ADR-0012) is an ops task
-languageCode: en
-params: []
+```properties
+key=generic-reply
+metaTemplateName=celestia_generic_reply
+languageCode=en
 ```
+
+The catalog resolves a logical `key` to `{metaTemplateName, languageCode}`
+only — it declares no parameter slots. `TemplateMessage.params()` is supplied
+by the caller at send time and is not validated against anything the catalog
+declares; a caller that sends the wrong number/order of params for a given
+Meta template gets whatever error the Graph API returns for that mismatch.
 
 v1 ships exactly one entry (`generic-reply`), used only when the outbound
 sender must reply outside the 24h window — which the echo path's own tests

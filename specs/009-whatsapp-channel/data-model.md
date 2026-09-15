@@ -96,7 +96,8 @@ any exception → `inboxStore.markFailed(id, error)`.
 free-form vs. wrapping as a `TemplateMessage` (the catalog's generic-reply
 template) → `messagingChannel.send(...)` → `Sent` → `outboxStore.markSent(id,
 providerMessageId)`; `Failed(retryable=true)` → `outboxStore.markRetry(id,
-error, nextAttemptAt)`; `Failed(retryable=false)` or attempts exhausted →
+error)` (the store computes `nextAttemptAt` itself via a capped-exponential
+`backoff(attempts)`); `Failed(retryable=false)` or attempts exhausted →
 `outboxStore.markFailed(id, error)`.
 
 ## `V7__whatsapp_channel.sql` (additive + one widen)
@@ -122,7 +123,9 @@ int reclaimStale(Duration olderThan, int maxAttempts);                // new: NE
 Optional<ClaimedMessage> claimNextPending();                          // unchanged signature; now also gates on next_attempt_at (NULL still claims)
 void markSent(long id);                                               // SPEC-008, unchanged
 void markSent(long id, String providerMessageId);                     // new overload: also records the provider id (FR-013)
-void markRetry(long id, String error, Instant nextAttemptAt);         // new: PENDING again, gated
+void markRetry(long id, String error);                                // new: PENDING again; the store itself
+                                                                       // computes nextAttemptAt = now + backoff(attempts)
+                                                                       // (backoff centralized in OutboxStore, not the caller)
 int reclaimStale(Duration olderThan, int maxAttempts);                // new
 
 // new

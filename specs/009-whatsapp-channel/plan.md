@@ -38,9 +38,11 @@ worker's `ReplyHandler` seam is what SPEC-010/014/015 replace.
 (`@EnableScheduling`, no new dependency).
 
 **Primary Dependencies**: no new **main**-scope dependency in either module.
-**Test**: `org.wiremock:wiremock` `3.13.1` (current stable; Boot's BOM does not
-manage it) in `channel-whatsapp` (Graph API client) and `agent` (the
-webhook→worker→sender E2E test).
+**Test**: `org.wiremock:wiremock-standalone` `3.13.1` (current stable; Boot's
+BOM does not manage it) in `channel-whatsapp` (Graph API client) and `agent`
+(the webhook→worker→sender E2E test) — the shaded standalone artifact, not
+plain `org.wiremock:wiremock`, which pulls a broken Jetty 11/12 transitive mix
+that fails at server startup outside WireMock's own packaging (research.md §8).
 
 **Storage**: MySQL via SPEC-008. `V7__whatsapp_channel.sql` adds three nullable
 columns to existing tables and **widens `inbound_event.raw_ref` from
@@ -138,7 +140,7 @@ specs/009-whatsapp-channel/
 ### Source code (repository root)
 
 ```text
-channel-whatsapp/pom.xml                     # + test: org.wiremock:wiremock 3.13.1
+channel-whatsapp/pom.xml                     # + test: org.wiremock:wiremock-standalone 3.13.1
 channel-whatsapp/src/main/java/com/celestia/channel/whatsapp/
 ├── MessagingChannel.java              # port: SendResult send(OutboundMessage)
 ├── OutboundMessage.java               # sealed: TextMessage, InteractiveListMessage, TemplateMessage
@@ -149,12 +151,15 @@ channel-whatsapp/src/main/java/com/celestia/channel/whatsapp/
 ├── InboundPayloadParser.java          # Meta webhook JSON -> List<InboundMessage>; a single message JSON -> InboundMessage
 ├── WindowPolicy.java                  # pure: windowExpiresAt(lastInboundAt); isWithinWindow(now, expiresAt)
 ├── WhatsAppConfig.java                # @ConfigurationProperties("whatsapp"): phoneNumberId, graphApiBaseUrl/Version, accessToken, appSecret, verifyToken
-├── WhatsAppTemplateCatalog.java       # logical key -> {template name, language, param slots}
+├── WhatsAppTemplateCatalog.java       # logical key -> {metaTemplateName, languageCode}; no param-slot validation
 ├── WhatsAppMessagingChannel.java      # implements MessagingChannel via GraphApiClient
+├── WhatsAppMessagingChannelConfig.java # @Bean MessagingChannel — keeps GraphApiClient construction inside this
+│                                       #   module so agent.channel.ChannelConfig never references `graphapi` (FR-011);
+│                                       #   imported explicitly by agent's ChannelConfig (not component-scanned)
 └── graphapi/                          # INTERNAL — never referenced outside this package
     ├── GraphApiClient.java            # RestClient wrapper; POST /{phoneNumberId}/messages
     └── … request/response DTOs
-channel-whatsapp/src/main/resources/whatsapp-templates/generic-reply.yml   # v1 stub/fixture template
+channel-whatsapp/src/main/resources/whatsapp-templates/generic-reply.properties  # v1 stub/fixture template (.properties — no YAML parser on this module's classpath)
 channel-whatsapp/src/test/java/…                                          # unit tests + WireMock-backed client test
 
 agent/src/main/resources/db/migration/V7__whatsapp_channel.sql
@@ -164,7 +169,8 @@ agent/src/main/java/com/celestia/agent/channel/
 ├── WhatsAppOutboundSender.java        # @Scheduled: claim -> window decision -> MessagingChannel.send -> markSent/markRetry/markFailed
 ├── ReplyHandler.java                  # interface: OutboundMessage reply(AppUserRef, InboundMessage) — SPEC-010 provides the next implementation
 ├── EchoReplyHandler.java              # v1 @Component
-└── ChannelConfig.java                 # @Configuration: MessagingChannel bean, @EnableScheduling, poll-interval props
+└── ChannelConfig.java                 # @Configuration: @Import(WhatsAppMessagingChannelConfig) + @EnableScheduling
+                                        #   (the MessagingChannel bean itself lives in channel-whatsapp, not here — FR-011)
 agent/src/main/java/com/celestia/agent/persistence/store/WhatsAppWindowStore.java  # recordInbound(userId, when) / windowExpiresAt(userId)
 agent/src/main/java/com/celestia/agent/persistence/entity/AppUserEntity.java       # + windowExpiresAt field
 agent/src/main/java/com/celestia/agent/persistence/entity/OutboxMessageEntity.java # + providerMessageId, nextAttemptAt
