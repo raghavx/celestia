@@ -58,7 +58,7 @@ existing caches pick up the new engine version (research §7).
 
 ## Constitution Check
 
-*GATE: checked before Phase 0 and re-checked after Phase 1 (v2.0.0).*
+*GATE: checked before Phase 0 and re-checked after Phase 1 (v2.1.0).*
 
 | Principle | How this plan complies | Status |
 |-----------|------------------------|--------|
@@ -71,7 +71,7 @@ existing caches pick up the new engine version (research §7).
 | VII Data protection | Toolkit data holds no personal data; a second person's chart is evaluated in memory only (the evaluator takes a `NatalChart`, stores nothing) | ✅ |
 | VIII Payments | Not touched | n/a |
 | IX Adapters at the edge | No provider types; pure `core` | ✅ |
-| X Toolkit is the judgement | Every rule and look-up carries its source sheet + row; text verbatim; one documented fix-up; housekeeping / "ignore" sheets flagged not answerable (FR-014); methods kept in row order (FR-007) | ✅ |
+| X Toolkit is the judgement | Every rule and look-up carries its source sheet + row (traced internally, never named to the user — ADR-0025); text verbatim; one documented fix-up; housekeeping / "ignore" sheets flagged not answerable (FR-014); methods kept in row order (FR-007) | ✅ |
 
 No violations, so no Complexity Tracking entries.
 
@@ -154,12 +154,17 @@ non-answerable sheets (§9), source fix-ups (§10), and why Python for import (�
 
 ### Post-design Constitution re-check
 
-Re-checked against v2.0.0. All gates still pass:
+Re-checked against v2.1.0 (ADR-0025 amended Principle X after this plan was first
+drafted — the toolkit is internal-only, never named to the user). All gates still
+pass:
 
 - **III:** `CurrentEngineVersion` composes `kp-N+toolkit-<version>`, so a toolkit
   release invalidates cached charts and readings.
-- **X:** `PromiseHit` and every look-up return `source` (sheet id + row). The agent
-  contract makes the citation mandatory in the answer.
+- **X:** `PromiseHit` and every look-up return `source` (sheet id + row) so every
+  interpretation is traceable — but that tracing is internal (logging, the SPEC-012
+  eval harness, human review). The answer never names the toolkit, a sheet's
+  id/title, or a row number (contracts/agent-tools.md obligation 6); it explains
+  judgement the way an astrologer would.
 - **V:** sensitivity sentences are constants in `core`, not prompts.
 
 ## Complexity Tracking

@@ -105,8 +105,8 @@ Its findings are used below.
 - **Decision**: keep every version (for example "foreign travel for job" appears in
   1500+Rules `12 = 3,9,12 + 6`, ReadyReckoner `12 = 3,9,11,12 + 6` and JobRules).
   Each `PromiseHit` carries a `matterKey` (lower-case, punctuation-stripped matter).
-  The agent contract groups hits by `matterKey` and cites all their sources once, so
-  the reply never counts them as independent confirmations.
+  The agent contract groups hits by `matterKey` and attributes all their sources once
+  internally, so the reply never counts them as independent confirmations.
 
 ## §9 Non-answerable sheets (FR-014)
 
