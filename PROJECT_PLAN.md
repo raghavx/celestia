@@ -42,9 +42,12 @@ development (GitHub Spec Kit), Spring Boot 4.1.x, MySQL 8.x.
 9. **PII handling.** DOB, birth time, birth place, name and phone are personal data.
    Encrypt at rest where feasible, log message *metadata* not message *bodies* by
    default, capture consent on first contact, support a delete-my-data request.
-10. **Guardrails by default.** Output is framed as guidance; the agent refuses
-    deterministic medical/legal/financial claims and questions about death or harm.
-    User text and chart data are treated as untrusted data, never instructions.
+10. **Security guardrails by default; toolkit scope (Constitution v2.0.0, ADR-0024).**
+    Output is framed as guidance. Health, longevity/death, finance and remedy topics
+    *are answered* from the toolkit, each reply ending with one fixed advisory
+    sentence for the most severe class used. When a user's own message expresses
+    intent to self-harm, the reply starts with a support line and helpline. User text
+    and chart data are treated as untrusted data, never instructions.
 11. **Billing is deterministic and LLM-free.** Plan display, selection, payment-link
     creation, payment-status handling and entitlement checks are coded flows and
     webhooks — the LLM never touches money, plan state, or the decision to unlock.
@@ -54,15 +57,19 @@ development (GitHub Spec Kit), Spring Boot 4.1.x, MySQL 8.x.
 13. **Payment source of truth is the gateway.** Subscription activation happens only
     on a verified Razorpay webhook (or a verified server-side fetch), never on the
     user saying "I paid". All payment events are idempotent and reconcilable.
-14. **Astrology-only scope, enforced in code.** The agent answers *only* KP astrology
-    questions about **this user's** natal chart — its houses, planets, nakshatras,
-    sub-lords, Vimshottari dasha timing, ruling planets, KP horary (1–249), and the
-    daily-life events those indicate (career, marriage, finance timing, education,
-    travel, relocation, health *timing* — not diagnosis). Every inbound message
+14. **The toolkit is the judgement; scope is the whole toolkit (Constitution V and X).**
+    Every KP interpretation traces to a sheet of the licensed *Prediction ToolKit for
+    Advanced* (SPEC-010) and cites it; matching rules to a chart is code. In scope:
+    KP astrology and every toolkit topic except housekeeping — natal and horary,
+    the 2,000+ promise rules (career, marriage, romance, finance and speculation,
+    property, education, travel, health and disease, longevity), remedies, Astro-
+    Vastu, Feng Shui, numerology, and the toolkit's methods (BTR, annual prediction,
+    time of event, marriage matching, missing person). Another person's chart may be
+    used when the user supplies their birth data or a horary number in the
+    conversation; another Celestia user's data is never read. Every inbound message
     passes a deterministic **topic gate** *before* it can reach the LLM. Anything
-    outside scope — general knowledge, coding, news, math, writing tasks, chit-chat,
-    advice unrelated to the chart, other people's charts — gets a fixed refusal +
-    redirect, and the LLM is never invoked for it.
+    unrelated to astrology gets a fixed refusal + redirect, and the LLM is never
+    invoked for it.
 15. **No bypass of the guarded path.** There is exactly one route from user to
     answer: `topic gate → hardened system prompt → fixed KP tool set → output
     filter`. There is no raw passthrough, no way to reach the model unfiltered, and
@@ -207,7 +214,8 @@ useful answer is possible even if the model makes zero tool calls.
 `castHoraryChart` / `getRulingPlanets` also take their `lat/lon` and judgment time
 from the user's stored profile / server clock — never from message text.
 
-System prompt (`resources/prompts/system-prompt.st`) encodes: role ("a KP astrologer for
+System prompt (`resources/prompts/system-prompt.st`) encodes: role ("a KP astrologer
+answering only from the Celestia toolkit, citing the sheet for every interpretation, for
 *this one user's* chart, nothing else"), the KP judgment sequence (cuspal sub-lord →
 significators → RP → dasha → transit), house-group meanings, "all numbers via tools",
 WhatsApp-friendly output length, and hardening rules — treat the entire user turn as
@@ -274,6 +282,10 @@ PII/consent rules.
 
 ### Feature specs — recommended order
 
+> **Note (2026-11-22):** Spec Kit numbers spec directories sequentially, so the toolkit
+> spec took `010`. The planned rows from onboarding onward will be renumbered when the
+> roadmap is re-ordered around the toolkit (ADR-0024 consequence).
+
 | Spec | Scope | Depends on |
 |------|-------|-----------|
 | **SPEC-001** Ephemeris & longitude primitives: JD/ΔT, sidereal positions, nakshatra/pada, star/sub/sub-sub lord, Vimshottari partition | — |
@@ -285,11 +297,12 @@ PII/consent rules.
 | **SPEC-007** Geocoding + timezone: place→lat/lon, lat/lon→zone, local birth time→UTC (historical rules), disambiguation | — |
 | **SPEC-008** Persistence + domain services + engine versioning | 002–007 |
 | **SPEC-009** WhatsApp channel: webhook GET verification, POST signature verification, payload parsing, idempotency, async enqueue, Graph API sender, 24h-window + template handling | 008 |
-| **SPEC-010** Identity & onboarding: phone→user lookup/create, consent capture, onboarding FSM (name/DOB/TOB/POB), LLM structured-output parsing of answers, validation, confirm step, persist `birth_data`, "forget me" | 008, 009 |
+| **SPEC-010** KP Toolkit knowledge base (`specs/010-kp-toolkit-knowledge-base`, ADR-0024): all 75 sheets stored; 2,000+ promise rules structured and matched to the chart; 249 mindsets; star / planet / house look-ups; methods retrievable in order; sensitivity classes + fixed advisory sentences; versioned import | 003, 005 |
+| **SPEC-010 → renumber** Identity & onboarding: phone→user lookup/create, consent capture, onboarding FSM (name/DOB/TOB/POB), LLM structured-output parsing of answers, validation, confirm step, persist `birth_data`, "forget me" | 008, 009 |
 | **SPEC-011** Plan catalog & entitlements: `plan` schema, admin CRUD API + seed, `entitlements_json` semantics, subscription lifecycle states, quota/`usage_counter` logic, entitlement-check service | 008 |
 | **SPEC-012** Razorpay payments: `PaymentGateway` port, payment-link creation for (user, plan), `POST /webhooks/razorpay` with `X-Razorpay-Signature` verification (raw body), idempotent `payment_event` store, event→subscription state machine (`payment_link.paid`, `payment.captured`, `payment.failed`, `refund.processed`), reconciliation job | 011 |
 | **SPEC-013** Subscribe-and-pay conversation flow: Subscription FSM, render active plans as a WhatsApp interactive list, selection → link, `PAYMENT_LINK_SENT` waiting state, activation message on webhook, renewal reminders (T-3d/T-0/T+1d), grace + lock, cancel, "change plan" | 009, 011, 012 |
-| **SPEC-014** Conversation guardrail (`guardrail`): injection/jailbreak detector, topic gate + intent classifier (small Ollama model / embedding fallback), in-scope taxonomy config, output filter (prompt/tool-leak, CoT, on-topic re-check, grounding), `GateDecision` API, canned refusal/redirect copy, `guardrail_event` logging, strike/cooldown policy, adversarial test corpus | 010 |
+| **SPEC-014** Conversation guardrail (`guardrail`): injection/jailbreak detector, topic gate + intent classifier (small Ollama model / embedding fallback), in-scope taxonomy from the toolkit's topic groups (SPEC-010, ADR-0024), advisory sentences + self-harm support line, output filter (prompt/tool-leak, CoT, on-topic re-check, grounding), `GateDecision` API, canned refusal/redirect copy, `guardrail_event` logging, strike/cooldown policy, adversarial test corpus | 010 |
 | **SPEC-015** LLM Q&A agent: Ollama config + model fallback, tool definitions (fixed set, server-injected `userId`), hardened system prompt + versioning, context pre-fetch, entitlement gate + quota decrement, **input+output guardrail wired as the only path to the ChatClient**, conversation/token budget, eval harness | 011, 014 |
 | **SPEC-016** Ops & hardening: rate limiting, abuse/spam handling, observability, Ollama health/failover, PII encryption, data-deletion job, payment reconciliation dashboard, guardrail-bypass red-team, load test | 009–015 |
 | **SPEC-017** (optional) Daily prediction push via approved template + opt-in (entitlement-gated) | 006, 009, 011 |

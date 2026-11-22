@@ -1,6 +1,6 @@
 # ADR 0023: Topic-gate mechanism
 
-- **Status:** accepted
+- **Status:** accepted — in-scope taxonomy superseded by [ADR-0024](0024-toolkit-centred-constitution.md)
 - **Date:** 2026-09-02 (accepted 2026-09-08)
 - **Decision ref:** D23 (PROJECT_PLAN.md §2)
 
