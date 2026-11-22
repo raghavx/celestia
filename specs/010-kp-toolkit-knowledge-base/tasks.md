@@ -209,8 +209,9 @@ connected, each names its source rule (spec.md Independent Test, US1).
       `agent/src/test/java/com/celestia/agent/persistence/CurrentEngineVersionTest.java`
       to assert the `rules` tag ends with `+toolkit-<version>` (depends on T011)
 
-**Checkpoint**: a 12-house promise reading is available for any chart, cited and
-version-stamped. User Story 1 is independently functional.
+**Checkpoint**: a 12-house promise reading is available for any chart, each hit
+traceable to its source sheet and version-stamped. User Story 1 is independently
+functional.
 
 ---
 
@@ -535,7 +536,8 @@ Task: "HoraryMindset record + reader in core/.../toolkit/HoraryMindset.java"    
 ### Incremental Delivery
 
 1. Setup + Foundational → the loader works.
-2. US1 + US2 → the MVP: chart-grounded promises and horary mindsets, both cited.
+2. US1 + US2 → the MVP: chart-grounded promises and horary mindsets, both traceable
+   to their source sheet.
 3. US3 → star/planet/house look-ups.
 4. US4 → procedure/template retrieval for the agent to follow.
 5. US5 → completeness guarantee (nothing silently dropped).

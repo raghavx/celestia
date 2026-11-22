@@ -11,6 +11,7 @@ Open `index.html` in a browser to see every snapshot, newest first.
 
 | Date | Built | In progress | Not started | Summary |
 |------|------:|------------:|------------:|---------|
+| [2026-11-23](2026-11-23.html) | 4 | 1 | 4 | SPEC-010 fully planned: research, data model, contracts, 48-task breakdown. Four analyze passes and two clarification rounds closed every gap. Constitution v2.0.0 → v2.1.0 (ADR-0025): toolkit is internal-only, agent is the astrologer. Still no code. |
 | [2026-11-22b](2026-11-22b.html) | 4 | 1 | 4 | Evening, after the re-order: constitution v2.0.0 (toolkit is the source of KP judgement), ADR-0024, SPEC-010 spec written, roadmap in stages A–C with specs 010–023. The earlier toolkit code was discarded; SPEC-010 is spec-only. |
 | [2026-11-22](2026-11-22.html) | 4 | 1 | 4 | Engine (SPEC-001–006), geo (007), persistence (008) and WhatsApp in/out (009) built. Toolkit (018) added but not wired. Agent (015), onboarding (010), payments (011–013) and topic gate (014) not started. Replies are still an echo. |
 

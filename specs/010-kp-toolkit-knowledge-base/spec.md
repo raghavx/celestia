@@ -14,8 +14,9 @@ product lacks is the **astrologer's judgement**: the rules that turn "the 7th
 cuspal sub lord is Rahu, in Jupiter's star, connecting houses 1, 3, 4, 7, 9" into
 "an affectionate spouse; gains through business". The toolkit is that judgement,
 written down. This feature makes it the product's single source of KP
-interpretation, applied to the user's chart by deterministic logic and cited in
-every answer._
+interpretation, applied to the user's chart by deterministic logic, traceable
+internally to the sheet it came from, and explained the way an astrologer would —
+never by naming the toolkit to the user (FR-008, ADR-0025)._
 
 ### What the toolkit contains (analysis of the 75 sheets)
 
@@ -114,8 +115,8 @@ to exactly one characteristics row. *(Clarified 2026-11-23.)*
 
 For procedure questions (birth-time rectification, annual prediction, timing of
 an event, missing person, marriage matching, gemstone selection), the agent follows
-the toolkit's own steps in order, using engine values at each step, and cites the
-procedure.
+the toolkit's own steps in order, using engine values at each step, without naming
+the procedure's source to the user.
 
 **Why this priority**: Procedures hold the toolkit's "how a KP astrologer actually
 works". Without them the agent improvises method, which the constitution forbids
@@ -138,7 +139,8 @@ the agent-tool wiring of SPEC-012, which this feature's retrieval makes possible
 ### User Story 5 - Every sheet retrievable, nothing lost (Priority: P2)
 
 Every sheet of the workbook, including the ones not turned into structured rules,
-is stored complete and can be found by topic, so the agent can quote and cite it.
+is stored complete and can be found by topic, so the agent can draw on it when
+answering.
 
 **Why this priority**: "The toolkit as the base" means nothing is silently dropped.
 The owner can trust that a question covered by the toolkit can be answered from it.
