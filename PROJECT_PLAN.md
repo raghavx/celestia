@@ -59,7 +59,9 @@ development (GitHub Spec Kit), Spring Boot 4.1.x, MySQL 8.x.
     user saying "I paid". All payment events are idempotent and reconcilable.
 14. **The toolkit is the judgement; scope is the whole toolkit (Constitution V and X).**
     Every KP interpretation traces to a sheet of the licensed *Prediction ToolKit for
-    Advanced* (SPEC-010) and cites it; matching rules to a chart is code. In scope:
+    Advanced* (SPEC-010), internally only — the toolkit is never named to the user; the
+    agent speaks as the KP astrologer, not as a system quoting a document. Matching
+    rules to a chart is code. In scope:
     KP astrology and every toolkit topic except housekeeping — natal and horary,
     the 2,000+ promise rules (career, marriage, romance, finance and speculation,
     property, education, travel, health and disease, longevity), remedies, Astro-
@@ -457,8 +459,9 @@ Per spec: `/speckit.specify` → `/speckit.clarify` → `/speckit.plan` →
 ### Phase 10 — Guardrail hardening (SPEC-021)
 - Intent classifier (small Ollama model → strict JSON `{in_scope, category,
   is_injection, reason}`) with embedding fallback; labelled precision/recall set.
-- Grounding check: every number matches a tool result, every interpretation cites a
-  toolkit sheet. `guardrail_event` logging; strike counter → `cooldown_until`.
+- Grounding check: every number matches a tool result, every interpretation is
+  traceable to a toolkit sheet (checked internally; the toolkit is never named in a
+  reply). `guardrail_event` logging; strike counter → `cooldown_until`.
 - Corpus extended with attempts to read *another Celestia user's* data.
 - **Exit:** every adversarial case is blocked at the input gate; every in-scope
   toolkit topic passes; classifier precision/recall meets the threshold.

@@ -1,38 +1,43 @@
 <!--
-Sync Impact Report — 2026-11-22
-Version change: 1.0.0 → 2.0.0 (MAJOR: Principle V, a NON-NEGOTIABLE principle, is redefined;
-the answer scope widens from "this user's own chart" to the whole licensed toolkit)
+Sync Impact Report — 2026-11-22 (second amendment this date)
+Version change: 2.0.0 → 2.1.0 (MINOR: new, previously-unstated guidance added to a
+NON-NEGOTIABLE principle and the preamble; no existing requirement removed or weakened)
 Modified principles:
-  - Preamble: Celestia answers from the licensed KP toolkit, computed by the engine
-  - III. Calculation Correctness Is Gated → III. Calculation and Toolkit Correctness Are Gated
-    (adds toolkit import cross-checks and toolkit version in engine_version)
-  - IV. The LLM Interprets — It Never Calculates or Transacts (adds: never matches toolkit rules itself)
-  - V. Astrology-Only, Guarded Single Path → V. Toolkit-Scoped, Guarded Single Path
-    (scope = every toolkit topic except housekeeping; second-person charts supplied in
-    conversation allowed; fixed advisory sentences; self-harm support line)
-Added sections:
-  - Principle X. The Toolkit Is the Source of KP Judgement (NON-NEGOTIABLE)
-  - Technology Constraints: toolkit data bullet
+  - Preamble: reworded so the agent is described as the KP astrologer the user talks to
+    (explains judgement in an astrologer's own language), with toolkit traceability named
+    as internal, not user-facing
+  - X. The Toolkit Is the Source of KP Judgement (NON-NEGOTIABLE): added that the toolkit is
+    an internal asset (calculation + knowledge base) that must never be named, disclosed, or
+    cited to the user (no toolkit name, sheet id/title, or row number in any reply);
+    reworded the "cites that sheet" / "toolkit is silent" bullets so traceability is
+    explicitly internal (logging, eval, human review) while the substantive requirement —
+    every interpretation traces to a toolkit sheet, nothing fabricated — is unchanged
+Added sections: none
 Removed sections: none
-Numbering: I–IX kept unchanged on purpose (≈80 references in specs and code); the new
-principle is X.
+Rationale: discovered and resolved first at the SPEC-010 level (specs/010-kp-toolkit-
+  knowledge-base/spec.md FR-008, contracts/agent-tools.md) while planning the toolkit
+  knowledge base — the original wording was ambiguous about whether "cites that sheet"
+  meant the user-facing reply must name the sheet. This amendment settles that reading at
+  the constitution level so no future spec repeats the ambiguity.
 Templates: .specify/templates/plan-template.md — its "Constitution Check" reads this file at
   run time; no edit needed ✅. spec-template.md / tasks-template.md — no principle-specific
   content ✅.
 Follow-up TODOs (governance, outside this command):
   - TODO(ADR): dated ADR recording this amendment (Governance requires it)
-  - TODO(PROJECT_PLAN): principles 10 and 14, system-prompt paragraph, spec list re-ordered
-    around the toolkit
 -->
 
 # Celestia Constitution
 
 Celestia is a WhatsApp-based Krishnamurti Paddhati (KP) astrology agent built around the
 licensed *Prediction ToolKit for Advanced*. A deterministic KP engine computes the chart.
-The toolkit's rules and methods, applied to that chart by code, supply the judgement. A
-self-hosted LLM (Llama 4 via Ollama) explains the result and cites it. Answering is gated
-by a paid subscription. This constitution governs how the system is built. It supersedes
-convenience, habit, and individual preference.
+The toolkit's rules and methods, applied to that chart by code, supply the judgement — but
+the toolkit itself is an internal asset, used to build the agent's calculations and
+knowledge, never disclosed to the user. To the user, Celestia **is** the KP astrologer: a
+self-hosted LLM (Llama 4 via Ollama) explains that judgement the way an astrologer would —
+in houses, lords, stars, and timing — never as a system quoting a document. Every
+explanation stays internally traceable to its toolkit source, but that tracing is for the
+system, not the user. Answering is gated by a paid subscription. This constitution governs
+how the system is built. It supersedes convenience, habit, and individual preference.
 
 ## Core Principles
 
@@ -137,14 +142,22 @@ credentials are separated per environment and never committed.
 
 - Every KP interpretation in an answer — what a house promises, what a star means for
   profession, how to time an event, which remedy suits — MUST trace to a sheet of the
-  licensed toolkit. Each such statement cites that sheet.
+  licensed toolkit. Each such statement is internally traceable to that sheet.
+- The toolkit is an internal asset: it powers the agent's calculations and is its
+  knowledge base, built into the product. It is never disclosed to the user. No reply
+  may name the toolkit, a sheet's id or title, or a row number. The agent **is** the
+  KP astrologer from the user's point of view; it explains judgement in ordinary KP
+  language — house, sub lord, star lord, timing — never as a system quoting a
+  document. Traceability (the `source` every tool result carries) is for the system —
+  logging, evaluation, human review — not for the user.
 - The model MUST NOT state KP interpretation that no toolkit sheet supports. Where the
-  toolkit is silent, the answer says so.
+  toolkit has no basis for a question, the agent says so in its own voice, without
+  naming the toolkit.
 - The toolkit's methods (time of event, BTR, annual prediction, marriage matching,
   missing person, gem selection, …) are followed in their written order. Each numeric
   step is filled by the engine.
-- Toolkit content is kept word for word. Rules are never paraphrased into new
-  conditions, and known source errors are corrected only by a documented fix-up.
+- Toolkit content is kept word for word internally. Rules are never paraphrased into
+  new conditions, and known source errors are corrected only by a documented fix-up.
 - New product capabilities are specified as toolkit topics. A capability the toolkit
   does not cover needs an ADR naming its source.
 
@@ -193,4 +206,4 @@ compliance with these principles; deviations must be justified in writing in the
 PR description and approved by a maintainer, or the PR is not merged. Added
 complexity carries the burden of proof.
 
-**Version**: 2.0.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-11-22
+**Version**: 2.1.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-11-22

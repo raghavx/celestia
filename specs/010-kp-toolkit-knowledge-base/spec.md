@@ -222,9 +222,15 @@ classified.
   step's numeric values from the engine (dasha lords, ruling planets, …) is the
   agent-tool wiring delivered by SPEC-012, which consumes this retrieval (see
   Assumptions).
-- **FR-008**: Every statement in a reply that rests on the toolkit MUST cite its
-  source sheet. The agent MUST NOT state KP interpretation that is not traceable to
-  the toolkit or to an already-cited KP source.
+- **FR-008**: Every statement in a reply that rests on the toolkit MUST carry a
+  traceable source sheet (the `source` field this feature returns on every result,
+  per contracts/agent-tools.md). The agent MUST NOT state KP interpretation that is
+  not traceable to the toolkit or to an already-cited KP source. **This tracing is
+  internal**: the toolkit is a licensed asset used to build Celestia, not something
+  the user has any relationship to. The reply to the user MUST NEVER name the
+  toolkit itself, a sheet's id/title, or a row number — it explains the
+  astrological basis in ordinary KP language (the house, the sub lord, the star
+  lord, the matter) without naming its source artifact.
 - **FR-009**: Matching MUST be deterministic: the same chart and toolkit version
   always yield the same rules, and every stored reading records the toolkit
   version.

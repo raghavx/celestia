@@ -5,8 +5,11 @@ Shared rules for all five tools:
 
 - **Read-only.** `userId`, coordinates and clock are injected server-side (Constitution V).
 - **Every result item carries `source`** (`{sheetId, sheetTitle, row}`) and
-  `sensitivity`. The answer MUST cite the source of every interpretation it uses
-  (Constitution X, FR-008).
+  `sensitivity`, so every interpretation the answer uses is traceable (Constitution
+  X, FR-008). **This is internal only** — the toolkit is a licensed asset used to
+  build Celestia, not something the user has a relationship to. `source` is for
+  the eval harness, logging and human review; the reply to the user MUST NEVER
+  name the toolkit, a sheet's id/title, or a row number.
 - **Advisory sentence.** The output stage (SPEC-011) appends `sensitivity.note()` for
   the most severe class used, once per reply. The model never writes it.
 - **Bounded size.** Results are capped (≤ 40 hits, ≤ 4,000 characters of sheet text)
@@ -26,5 +29,8 @@ Shared rules for all five tools:
 2. PARTLY_INDICATED is said as "partly indicated" or not mentioned.
 3. Hits sharing a `matterKey` are reported once, with all their sources.
 4. A retrograde CSL or star lord is mentioned as weakening or delaying the result.
-5. If no toolkit rule or look-up covers the question, the answer says the toolkit does
-   not cover it. It never improvises KP judgement.
+5. If no toolkit rule or look-up covers the question, the answer says it doesn't
+   have a KP basis for that (without naming "the toolkit"). It never improvises
+   KP judgement.
+6. The reply never mentions the toolkit, a sheet id or title, or a row number —
+   only the astrological basis (house, sub lord, star lord, matter).
