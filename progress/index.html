@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celestia progress</title>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* Index of dated project-map snapshots. Newest first. Add a row to SNAPSHOTS when you add a map. */
+:root{color-scheme:light dark;--bg:light-dark(#fbfaf7,#121218);--ink:light-dark(#1b1b22,#ecebf2);--mute:light-dark(#5d5d6b,#a3a2b3);
+  --rule:light-dark(#e3e1da,#2a2a35);--card:light-dark(#fff,#1a1a22);--done:light-dark(#16795f,#3fbf98);--wired:light-dark(#2f5bd3,#7c9cff);--todo:light-dark(#a7a6b2,#5b5a6a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Overpass,system-ui,sans-serif}
+main{max-width:900px;margin:0 auto;padding:clamp(28px,5vw,64px) max(5vw,16px)}
+h1{font-size:clamp(30px,4.4vw,44px);line-height:1.05;margin:0 0 8px;font-weight:800}
+p{color:var(--mute);margin:0 0 28px;max-width:62ch}
+ol{list-style:none;margin:0;padding:0;border-left:6px solid var(--rule)}
+li{position:relative;padding:0 0 26px 26px}
+li::before{content:"";position:absolute;left:-15px;top:4px;width:24px;height:24px;border-radius:50%;background:var(--card);border:5px solid var(--done)}
+a.date{font-size:22px;font-weight:800;color:var(--ink);text-decoration:none}
+a.date:hover,a.date:focus-visible{text-decoration:underline}
+.sum{display:block;color:var(--mute);margin-top:2px}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:10px;max-width:360px;background:var(--rule)}
+.bar i{display:block}
+.counts{font-size:14px;color:var(--mute);margin-top:6px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Celestia progress</h1>
+  <p>One map per date. Each shows a WhatsApp message travelling through the nine stops of the system, coloured by what was built on that day. Newest first.</p>
+  <ol id="list"></ol>
+</main>
+<script>
+{
+// date, headline, stops done / built-not-wired / not started (of 9)
+const SNAPSHOTS=[
+  ["2026-11-22","Engine, geo, persistence and WhatsApp plumbing built; toolkit added but not wired; agent, onboarding, payments, topic gate not started.",4,1,4]
+];
+document.getElementById('list').innerHTML=SNAPSHOTS.map(([d,s,a,b,c])=>{
+  const t=a+b+c;
+  return `<li><a class="date" href="${d}.html">${new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</a>
+  <span class="sum">${s}</span>
+  <div class="bar" aria-hidden="true"><i style="width:${a/t*100}%;background:var(--done)"></i><i style="width:${b/t*100}%;background:var(--wired)"></i></div>
+  <div class="counts">${a} built · ${b} not wired · ${c} not started</div></li>`}).join('');
+}
+</script>
+</body>
+</html>
