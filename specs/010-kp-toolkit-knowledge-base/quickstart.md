@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - JDK 25, the Maven Wrapper, `scripts/fetch-ephe.sh` run once (for the golden charts).
-- Python 3.11+ with `tools/toolkit-import/requirements.txt` installed.
+- Python 3.7+ with `tools/toolkit-import/requirements.txt` installed.
 - The licensed workbook somewhere **outside** the repo,
   e.g. `~/Documents/Prediction_ToolKit_for_Advanced_2026-Sep-12.xlsx`.
 

@@ -41,12 +41,12 @@ the real file.
 **Purpose**: scaffold the import tool and the resource layout before any sheet group
 is parsed.
 
-- [ ] T001 Create the import tool scaffold: `tools/toolkit-import/requirements.txt`
+- [X] T001 Create the import tool scaffold: `tools/toolkit-import/requirements.txt`
       (pin `openpyxl`), `tools/toolkit-import/import_toolkit.py` with its CLI contract
       (`<workbook.xlsx> [out_dir]`; exit 0 on success printing
       `toolkit <version>: <n> sheets, <m> rules -> <out_dir>`; exit 2 with usage when
       the workbook argument is missing) per [contracts/import-tool.md](contracts/import-tool.md)
-- [ ] T002 Generic sheet + properties writer: for every workbook sheet (all 75),
+- [X] T002 Generic sheet + properties writer: for every workbook sheet (all 75),
       normalise (NFC, CRLF→LF, trim trailing spaces per line) and write
       `sheets/<id>.tsv` verbatim — one file per sheet, every non-empty row,
       `#` comment + header + records (research.md §1, FR-001), where `<id>` is
@@ -59,13 +59,13 @@ is parsed.
       `tools/toolkit-import/import_toolkit.py` (depends on T001 and T004's id
       mapping; the two can be authored in either order within Setup since T004
       is static data, but T002's logic needs it wired in before it can run)
-- [ ] T003 [P] Create the resource directories: `core/src/main/resources/com/celestia/core/toolkit/{sheets,rules,tables}/`
+- [X] T003 [P] Create the resource directories: `core/src/main/resources/com/celestia/core/toolkit/{sheets,rules,tables}/`
       (the production root `KpToolkit.bundled()` reads — generated, committed by
       T047) and, under `core/src/test/resources/com/celestia/core/toolkit/`, the
       sibling fixture roots `fixture/`, `promise-fixture/`, `horary-fixture/` and
       `star-fixture/` (each a distinct `KpToolkit.load(...)` root, so none shadows
       the production path or each other — see T011)
-- [ ] T004 [P] Author the initial sheet-classification manifest (title → stable
+- [X] T004 [P] Author the initial sheet-classification manifest (title → stable
       `id` slug, `TopicGroup`, `SheetKind`, sensitivity default, `answerable`)
       for every sheet named in spec.md's "What the toolkit contains" table, in
       `tools/toolkit-import/manifest.py` (research.md §5, §9). The `id` is a
@@ -86,20 +86,20 @@ small fixture without the real workbook.
 
 **⚠️ CRITICAL**: no user story task may start until this phase is complete.
 
-- [ ] T005 [P] `Tsv` reader/writer (escapes `\\`, `\t`, `\n`; `#` comment line + header
+- [X] T005 [P] `Tsv` reader/writer (escapes `\\`, `\t`, `\n`; `#` comment line + header
       line + records, per data-model.md) in `core/src/main/java/com/celestia/core/toolkit/Tsv.java`
-- [ ] T006 [P] `TopicGroup` enum (`KP_FOUNDATIONS` … `HOUSEKEEPING`, data-model.md Sheet
+- [X] T006 [P] `TopicGroup` enum (`KP_FOUNDATIONS` … `HOUSEKEEPING`, data-model.md Sheet
       table) in `core/src/main/java/com/celestia/core/toolkit/TopicGroup.java`
-- [ ] T007 [P] `SheetKind` enum (`RULES, TABLE, PROCEDURE, TEMPLATE, REMEDY, HOUSEKEEPING`)
+- [X] T007 [P] `SheetKind` enum (`RULES, TABLE, PROCEDURE, TEMPLATE, REMEDY, HOUSEKEEPING`)
       in `core/src/main/java/com/celestia/core/toolkit/SheetKind.java`
-- [ ] T008 [P] `Sensitivity` enum (`NONE < REMEDY < FINANCE < HEALTH < LONGEVITY`,
+- [X] T008 [P] `Sensitivity` enum (`NONE < REMEDY < FINANCE < HEALTH < LONGEVITY`,
       `note()` returning the fixed FR-010a sentence, `max(other)`) in
       `core/src/main/java/com/celestia/core/toolkit/Sensitivity.java`
-- [ ] T009 [P] `ToolkitVersion` record (`title, version, sheets, rules, sourceSha256,
+- [X] T009 [P] `ToolkitVersion` record (`title, version, sheets, rules, sourceSha256,
       id()`) in `core/src/main/java/com/celestia/core/toolkit/ToolkitVersion.java`
-- [ ] T010 [P] `ToolkitSheet` record (`order, id, title, group, kind, sensitivity,
+- [X] T010 [P] `ToolkitSheet` record (`order, id, title, group, kind, sensitivity,
       answerable, rows`) in `core/src/main/java/com/celestia/core/toolkit/ToolkitSheet.java`
-- [ ] T011 `KpToolkit` loader — `bundled()` (cached singleton, reads the fixed
+- [X] T011 `KpToolkit` loader — `bundled()` (cached singleton, reads the fixed
       production classpath root `com/celestia/core/toolkit/`) delegates to a
       package-private `static KpToolkit load(String classpathRoot)`; `version()`,
       `sheets()`, `sheet(String id)`, `sheets(TopicGroup)`; fail-fast validation that
@@ -114,7 +114,7 @@ small fixture without the real workbook.
       cases meaningful in
       `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java` (depends on
       T005–T010)
-- [ ] T012 [P] Minimal fixture toolkit at the non-shadowing test root
+- [X] T012 [P] Minimal fixture toolkit at the non-shadowing test root
       `com/celestia/core/toolkit/fixture/` (loaded via `KpToolkit.load(
       "com/celestia/core/toolkit/fixture")`, never `bundled()`) — `toolkit.properties`,
       `manifest.tsv`, and one `sheets/<id>.tsv` per: RULES, TABLE, PROCEDURE/TEMPLATE,
@@ -122,7 +122,7 @@ small fixture without the real workbook.
       each in `HEALTH_MEDICAL`, `LONGEVITY`, `FINANCE_SPECULATION`,
       `VASTU_FENG_SHUI` and `NUMEROLOGY` (`answerable=true`, for T040's FR-010 group
       check) — in `core/src/test/resources/com/celestia/core/toolkit/fixture/`
-- [ ] T013 `KpToolkitLoadTest`: `KpToolkit.load("com/celestia/core/toolkit/fixture")`
+- [X] T013 `KpToolkitLoadTest`: `KpToolkit.load("com/celestia/core/toolkit/fixture")`
       loads correctly; a second, deliberately broken fixture root (manifest/
       properties mismatch) fails fast per "Validation at load" in
       `core/src/test/java/com/celestia/core/toolkit/KpToolkitLoadTest.java`
@@ -145,29 +145,29 @@ connected, each names its source rule (spec.md Independent Test, US1).
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Rule-cell grammar parser (the 7 cell forms of research.md §2:
+- [X] T014 [P] [US1] Rule-cell grammar parser (the 7 cell forms of research.md §2:
       single, list, list+condition, list+prose, formula, formula+leading-condition,
       no-houses) in `tools/toolkit-import/import_toolkit.py`
-- [ ] T015 [US1] Rule-sheet import: apply the grammar parser to 1500+Rules,
+- [X] T015 [US1] Rule-sheet import: apply the grammar parser to 1500+Rules,
       ReadyReckoner, JobRules, Difficulty, Luck, Romance, Stock Market, Medical,
       Finance, Inheritance and Property, writing `rules/promise-rules.tsv` with id
       `<sheet-id>:<row-ref>`, `category`, `matter`, `matterKey` (research.md §8,
       lower-case + punctuation-stripped), `judgedHouse`, `houses`, `condition` in
       `tools/toolkit-import/import_toolkit.py` (depends on T014)
-- [ ] T016 [US1] Rule-level sensitivity classifier: raise each rule above its sheet's
+- [X] T016 [US1] Rule-level sensitivity classifier: raise each rule above its sheet's
       default sensitivity by the LONGEVITY / HEALTH / FINANCE keyword lists
       (research.md §5) in `tools/toolkit-import/import_toolkit.py` (depends on T015)
-- [ ] T017 [P] [US1] `PromiseRule` record + reader for `rules/promise-rules.tsv` in
+- [X] T017 [P] [US1] `PromiseRule` record + reader for `rules/promise-rules.tsv` in
       `core/src/main/java/com/celestia/core/toolkit/PromiseRule.java`
-- [ ] T018 [US1] `KpToolkit.promiseRules()`, `rulesFor(int judgedHouse)` (throws
+- [X] T018 [US1] `KpToolkit.promiseRules()`, `rulesFor(int judgedHouse)` (throws
       `IllegalArgumentException` outside 1..12), `findRules(String query)` in
       `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java` (depends on T011,
       T017)
-- [ ] T019 [P] [US1] `HousePromise` and `PromiseHit` records (status
+- [X] T019 [P] [US1] `HousePromise` and `PromiseHit` records (status
       `PROMISED` / `CONDITION_TO_CHECK` / `PARTLY_INDICATED`, data-model.md) in
       `core/src/main/java/com/celestia/core/toolkit/HousePromise.java` and
       `core/src/main/java/com/celestia/core/toolkit/PromiseHit.java`
-- [ ] T020 [US1] `PromiseEvaluator`: connected houses = the CSL's star lord's
+- [X] T020 [US1] `PromiseEvaluator`: connected houses = the CSL's star lord's
       `GrahaSignificators` houses at step `STAR_OF_OCCUPANT` ∪ `STAR_OF_OWNER`
       (research.md §3); classify promised / condition-to-check / partly-indicated
       (research.md §4); retrograde flags on the CSL and its star lord (FR-004);
@@ -175,9 +175,9 @@ connected, each names its source rule (spec.md Independent Test, US1).
       includePartial)`, `evaluateHouse(...)` (contracts/core-api.md) in
       `core/src/main/java/com/celestia/core/toolkit/PromiseEvaluator.java` (depends
       on T018, T019)
-- [ ] T021 [P] [US1] `SyntheticChart` test helper (a copy of `judgement`'s) in
+- [X] T021 [P] [US1] `SyntheticChart` test helper (a copy of `judgement`'s) in
       `core/src/test/java/com/celestia/core/toolkit/SyntheticChart.java`
-- [ ] T022 [US1] `PromiseEvaluatorTest`, against a small hand-built promise-rule
+- [X] T022 [US1] `PromiseEvaluatorTest`, against a small hand-built promise-rule
       fixture loaded via its own `KpToolkit.load("com/celestia/core/toolkit/
       promise-fixture")` root (distinct from T012's, so neither shadows the other
       or production) — include a trivial `toolkit.properties` (`sheets=0`) and an
@@ -194,14 +194,14 @@ connected, each names its source rule (spec.md Independent Test, US1).
       the small fixture, so it must run against real data in
       `core/src/test/java/com/celestia/core/toolkit/PromiseEvaluatorTest.java`
       (depends on T020, T021; the timing case additionally depends on T047)
-- [ ] T023 [P] [US1] `SensitivityTest`: the four fixed advisory sentences (FR-010a)
+- [X] T023 [P] [US1] `SensitivityTest`: the four fixed advisory sentences (FR-010a)
       and `max()` ordering; rule-level keyword escalation on the fixture toolkit in
       `core/src/test/java/com/celestia/core/toolkit/SensitivityTest.java`
-- [ ] T024 [US1] `PromiseGoldenTest`: a 12-house promise-reading snapshot for each
+- [X] T024 [US1] `PromiseGoldenTest`: a 12-house promise-reading snapshot for each
       existing golden chart (SPEC-001/002) in
       `core/src/test/java/com/celestia/core/toolkit/PromiseGoldenTest.java` (depends
       on T020)
-- [ ] T025 [US1] Compose the toolkit version into the engine version so a toolkit
+- [X] T025 [US1] Compose the toolkit version into the engine version so a toolkit
       release invalidates cached readings: `rules = EngineVersion.RULES + "+" +
       KpToolkit.bundled().version().id()` (research.md §7, FR-009) in
       `agent/src/main/java/com/celestia/agent/persistence/CurrentEngineVersion.java`;
@@ -225,16 +225,16 @@ mindset reading, agreeing with the engine's own table.
 
 ### Implementation for User Story 2
 
-- [ ] T026 [P] [US2] Horary importer: merge the 249SubDivisionsHoraryNumbers and
+- [X] T026 [P] [US2] Horary importer: merge the 249SubDivisionsHoraryNumbers and
       249Mindsets sheets into `tables/horary-249.tsv`, applying the one documented
       fix-up (row "L07" → horary number 107, research.md §10) in
       `tools/toolkit-import/import_toolkit.py`
-- [ ] T027 [P] [US2] `HoraryMindset` record + reader for `tables/horary-249.tsv` in
+- [X] T027 [P] [US2] `HoraryMindset` record + reader for `tables/horary-249.tsv` in
       `core/src/main/java/com/celestia/core/toolkit/HoraryMindset.java`
-- [ ] T028 [US2] `KpToolkit.horary(int n)` (1..249; `IllegalArgumentException`
+- [X] T028 [US2] `KpToolkit.horary(int n)` (1..249; `IllegalArgumentException`
       outside range) in `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java`
       (depends on T011, T027)
-- [ ] T029 [US2] A Java test-fixture generator (`HoraryFixtureSupport`, in
+- [X] T029 [US2] A Java test-fixture generator (`HoraryFixtureSupport`, in
       `core/src/test/java/com/celestia/core/toolkit/HoraryFixtureSupport.java`) that
       calls `Horary249.arc(n)` for n in 1..249 to build a 249-row fixture under
       `com/celestia/core/toolkit/horary-fixture/tables/horary-249.tsv` with
@@ -269,7 +269,7 @@ Independent Test, US3; extended 2026-11-23).
 
 ### Implementation for User Story 3
 
-- [ ] T030 [P] [US3] Star-name normalisation alias table (Aswini/Ashvini,
+- [X] T030 [P] [US3] Star-name normalisation alias table (Aswini/Ashvini,
       Karthikai/Krittika, …) and the quarter-format parser ("1Q", "2-3-4Q",
       "First/Second Half", "I-Quarter", …; research.md §6), plus a planet-name
       alias table (9 planets; English/Sanskrit — Shukra/Venus, Guru/Jupiter, …)
@@ -277,10 +277,10 @@ Independent Test, US3; extended 2026-11-23).
       Vrishabha/Taurus, …) for the Planet Characteristics, Planet Direction and
       Zodiac Signs sheets (research.md §12, 2026-11-23 clarification) in
       `tools/toolkit-import/import_toolkit.py`
-- [ ] T031 [US3] Star-wise Professions / Star-wise Diseases importers →
+- [X] T031 [US3] Star-wise Professions / Star-wise Diseases importers →
       `tables/star-professions.tsv`, `tables/star-diseases.tsv`, keyed by nakshatra +
       quarter set, in `tools/toolkit-import/import_toolkit.py` (depends on T030)
-- [ ] T032 [US3] Planet Position Signification, Higher Education Streams, Planet
+- [X] T032 [US3] Planet Position Signification, Higher Education Streams, Planet
       Friendship (all 72 ordered pairs), Houses Meaning and Relationship importers →
       `tables/planet-house-signification.tsv`, `tables/higher-education-streams.tsv`,
       `tables/planet-friendship.tsv`, `tables/house-meanings.tsv`,
@@ -290,10 +290,10 @@ Independent Test, US3; extended 2026-11-23).
       `tables/zodiac-characteristics.tsv`, each keyed by planet or sign alone
       (2026-11-23 clarification) in `tools/toolkit-import/import_toolkit.py`
       (the three new tables depend on T030's planet/sign alias tables)
-- [ ] T033 [P] [US3] `StarEntry` and `Friendship` records + readers in
+- [X] T033 [P] [US3] `StarEntry` and `Friendship` records + readers in
       `core/src/main/java/com/celestia/core/toolkit/StarEntry.java` and
       `core/src/main/java/com/celestia/core/toolkit/Friendship.java`
-- [ ] T034 [US3] `KpToolkit` look-up methods — `starProfession`, `starDisease`,
+- [X] T034 [US3] `KpToolkit` look-up methods — `starProfession`, `starDisease`,
       `planetInHouse`, `higherEducation`, `friendship` (`IllegalArgumentException` if
       the two grahas are equal), `houseMeaning`, `relationship`, plus
       `planetCharacteristics(Graha)`, `planetDirection(Graha)` and
@@ -301,7 +301,7 @@ Independent Test, US3; extended 2026-11-23).
       `houseMeaning`/`relationship` — no new record type needed, 2026-11-23
       clarification) — in `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java`
       (depends on T011, T033)
-- [ ] T035 [US3] A Java test-fixture generator
+- [X] T035 [US3] A Java test-fixture generator
       (`core/src/test/java/com/celestia/core/toolkit/StarLookupFixtureSupport.java`)
       producing a synthetic fixture under
       `com/celestia/core/toolkit/star-fixture/tables/` covering all 27×4
@@ -338,12 +338,12 @@ in order (spec.md Independent Test, US4).
 
 ### Implementation for User Story 4
 
-- [ ] T036 [US4] `KpToolkit.search(String query, int limit)`: answerable sheets only,
+- [X] T036 [US4] `KpToolkit.search(String query, int limit)`: answerable sheets only,
       ranked by title-term matches ×100 + matching rows, ties broken by workbook
       order; terms under 3 letters ignored; empty query → empty list
       (contracts/core-api.md) in
       `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java` (depends on T011)
-- [ ] T037 [US4] `ToolkitProcedureTest`: PROCEDURE/TEMPLATE sheets (Time of Event, BTR,
+- [X] T037 [US4] `ToolkitProcedureTest`: PROCEDURE/TEMPLATE sheets (Time of Event, BTR,
       Annual Prediction, Marriage Matching, Missing Person, Twin Birth, Ruling Planets
       Logic, Prediction Algorithm, Prediction Template) are retrievable via
       `sheet(id)` with rows in exact workbook order (FR-007); `search("time of
@@ -368,16 +368,16 @@ that sheet first (spec.md Independent Test, US5).
 
 ### Implementation for User Story 5
 
-- [ ] T038 [US5] Apply the manifest (T004) when writing `manifest.tsv`: every sheet
+- [X] T038 [US5] Apply the manifest (T004) when writing `manifest.tsv`: every sheet
       gets its `TopicGroup`/`SheetKind`/sensitivity default/`answerable` flag; FR-014
       sets `answerable=false` for INDEX, Version Control, Software List KP Astrology
       and PlanetsStockSectors (marked "Under research – Ignore" by its author) in
       `tools/toolkit-import/import_toolkit.py` (depends on T002, T004)
-- [ ] T039 [US5] Exclude non-answerable sheets from `KpToolkit.search()` results —
+- [X] T039 [US5] Exclude non-answerable sheets from `KpToolkit.search()` results —
       still browsable by `sheet(id)` — in
       `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java` (depends on T036,
       T038)
-- [ ] T040 [US5] `ToolkitCompletenessTest`, against T012's fixture loaded via
+- [X] T040 [US5] `ToolkitCompletenessTest`, against T012's fixture loaded via
       `KpToolkit.load("com/celestia/core/toolkit/fixture")`: manifest row count ==
       `toolkit.properties` sheet count == `sheets().size()`; every `PromiseRule.
       source` resolves to a manifest sheet id; non-answerable sheets absent from
@@ -406,14 +406,14 @@ workbook with a new or renamed sheet stops and asks for that sheet to be classif
 
 ### Implementation for User Story 6
 
-- [ ] T041 [US6] Drift guard: compare the workbook's sheet names against the manifest
+- [X] T041 [US6] Drift guard: compare the workbook's sheet names against the manifest
       at import time; exit non-zero with `manifest out of date: unmapped sheets […],
       absent sheets […]` on any mismatch (FR-013) in
       `tools/toolkit-import/import_toolkit.py` (depends on T038)
-- [ ] T042 [US6] Determinism: the same workbook gives byte-identical output across two
+- [X] T042 [US6] Determinism: the same workbook gives byte-identical output across two
       runs (SC-006); record the workbook SHA-256 in `toolkit.properties` in
       `tools/toolkit-import/import_toolkit.py` (depends on T041)
-- [ ] T043 [P] [US6] `tools/toolkit-import/README.md`: the command, the exit codes,
+- [X] T043 [P] [US6] `tools/toolkit-import/README.md`: the command, the exit codes,
       the resource formats, and the operational rule (the workbook is never
       committed; after a re-import that changes anything, review the diff rule by
       rule, then commit) per [contracts/import-tool.md](contracts/import-tool.md)
@@ -426,22 +426,22 @@ workbook with a new or renamed sheet stops and asks for that sheet to be classif
 
 **Purpose**: documentation and final verification across all stories.
 
-- [ ] T044 [P] Add rows to `core/src/main/java/com/celestia/core/REFERENCES.md` for:
+- [X] T044 [P] Add rows to `core/src/main/java/com/celestia/core/REFERENCES.md` for:
       the connecting-houses definition (research.md §3), sensitivity ordering and the
       four fixed advisory sentences (research.md §5), the horary fix-up
       (research.md §10) and the engine-version composition (research.md §7); extend
       the "Engine version bump procedure" paragraph to name `core.toolkit` and
       `KpToolkit`
-- [ ] T045 [P] Javadoc the API-stability note on `com.celestia.core.toolkit`: a
+- [X] T045 [P] Javadoc the API-stability note on `com.celestia.core.toolkit`: a
       toolkit release changes data, not the API; renaming a sheet id is a breaking
       change and needs an ADR (contracts/core-api.md "Stability") in
       `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java` and
       `core/src/main/java/com/celestia/core/toolkit/ToolkitSheet.java`
-- [ ] T046 Run quickstart.md steps 3, 4 and 6 — `./mvnw -pl core -am test
+- [X] T046 Run quickstart.md steps 3, 4 and 6 — `./mvnw -pl core -am test
       -Dtest='com.celestia.core.toolkit.*Test'`, `./mvnw -pl agent -am test
       -Dtest=CurrentEngineVersionTest`, `./mvnw verify` — and confirm all green,
       including the ArchUnit determinism/layering tests and Spotless
-- [ ] T047 **MANUAL — owner only**: run `python3 tools/toolkit-import/import_toolkit.py
+- [X] T047 **MANUAL — owner only**: run `python3 tools/toolkit-import/import_toolkit.py
       <licensed-workbook.xlsx>` against the real *Prediction ToolKit for Advanced*
       workbook (quickstart.md step 1), review the generated diff rule by rule, and
       commit the real resources under

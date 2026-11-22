@@ -26,8 +26,10 @@ judgement (Constitution X).
 
 ## Technical Context
 
-**Language/Version**: Java 25 (ADR-0007) for runtime code. Python 3.11+ for the
-offline import tool, following the `tools/ephe-crosscheck` precedent.
+**Language/Version**: Java 25 (ADR-0007) for runtime code. Python 3.7+ for the
+offline import tool, following the `tools/ephe-crosscheck` precedent. (Corrected
+2026-11-23 from "3.11+": the tool uses no 3.8+ feature, and the floor matters
+because the developer machine that ran the first real import had only 3.7.)
 
 **Primary Dependencies**: none new at runtime. The import tool uses `openpyxl`
 (dev-only, pinned in `tools/toolkit-import/requirements.txt`).

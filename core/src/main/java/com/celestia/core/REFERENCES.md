@@ -39,6 +39,14 @@ references are acceptable where an ADR settled the choice.
 | **Reference instant** for a daily reading = **local noon** of the date (`date 12:00 − longitude/15 h`); the reading flags any within-day change of a running lord or the Moon's sub lord | `core.prediction.DailyPredictionFactory` | **v1 design choice** — the true civil timezone is SPEC-007 |
 | **v1 verdict rule**: `QUIET` if neither the matter's favourable nor obstructive houses are dasha-activated; `UNFAVOURABLE` if `Σ obstructive-strength > Σ favourable-strength` (strict); `FAVOURABLE` if a favourable house is activated **and** transit-triggered and not outweighed; `MIXED` otherwise | `core.prediction.VerdictRule` | **v1 design choice** — see `specs/006-daily-prediction/research.md` §5 |
 
+| **Toolkit promise rule**: the cuspal sub lord of house H, *through its star lord*, connects to houses X, Y &rArr; the promised matter | `core.toolkit.PromiseRule` | Licensed *Prediction ToolKit for Advanced* (1500+Rules and the rest of its rule book) — the column header is read literally; see `specs/010-kp-toolkit-knowledge-base/research.md` §2 |
+| **"Connected through the star lord"**: the CSL is connected to house *h* iff the CSL signifies *h* at step `STAR_OF_OCCUPANT` (its star lord occupies *h*) or `STAR_OF_OWNER` (its star lord owns *h*) — the toolkit's ABCD "A + C" for the CSL. Not all four steps: crediting the CSL's own occupancy/ownership contradicts the rule book's own header | `core.toolkit.PromiseEvaluator` | Licensed toolkit (1500+Rules column header; ABCD Significance sheet); `specs/010-kp-toolkit-knowledge-base/research.md` §3 |
+| **All-or-nothing matching**: a multi-house rule needs **every** house connected — *promised* with no extra condition, *condition to check* when the author added one, *partly indicated* when only some connect (returned on request only, never as a promise) | `core.toolkit.PromiseEvaluator`, `PromiseHit.Status` | The toolkit writes a combination as one condition; `specs/010-kp-toolkit-knowledge-base/research.md` §4 |
+| **Sensitivity classes** `NONE < REMEDY < FINANCE < HEALTH < LONGEVITY`, each with one fixed advisory sentence; a sheet's default is raised (never lowered) by keywords in a rule's own wording. Self-harm rules fall in HEALTH like any other — no separate class | `core.toolkit.Sensitivity` | Product policy, not KP: Constitution V and X, ADR-0024; `specs/010-kp-toolkit-knowledge-base/research.md` §5, FR-010a / FR-011 |
+| **Toolkit horary 249 table** is cross-checked against the engine's `Horary249` lord for lord (249/249); the one documented source fix-up is the 249Mindsets row mis-numbered "L07", which is horary 107 | `core.toolkit.HoraryMindset`, `ToolkitHoraryCrossCheckTest` | Licensed toolkit (249SubDivisionsHoraryNumbers, 249Mindsets); `specs/010-kp-toolkit-knowledge-base/research.md` §10 |
+| **Toolkit look-up keys**: nakshatra + quarter (professions, diseases), planet &times; house (signification, education stream), ordered planet pair (friendship), house (meaning, relationship), and planet or sign alone (characteristics, direction) | `core.toolkit.KpToolkit` | Licensed toolkit's look-up sheets; `specs/010-kp-toolkit-knowledge-base/research.md` §6 and §12 |
+| **Toolkit version joins the engine version**: `rules = EngineVersion.RULES + "+" + toolkit-<release>`, composed in `agent` because `ephemeris` cannot depend on `core`. A toolkit release therefore invalidates every cached chart and reading | `agent.persistence.CurrentEngineVersion`, `core.toolkit.ToolkitVersion` | `specs/010-kp-toolkit-knowledge-base/research.md` §7; Constitution III |
+
 ## Engine version bump procedure
 
 `EngineVersion.rules` (currently `"kp-1"`, in `ephemeris`) is bumped **by hand**
@@ -49,7 +57,14 @@ whenever any rule above changes -- including rules that live in `core`
 the 365.25-day year — `horary.Horary249` / `horary.HoraryChartFactory`, plus
 `ephemeris.swisseph.SwissEphemerisHoraryHouseProvider`'s RAMC inversion, and the
 whole `prediction.*` v1 ruleset — `Matter`, `VerdictRule`,
-`DailyPredictionFactory`). `core`
+`DailyPredictionFactory`).
+
+The `core.toolkit` package is the exception that needs **no** hand bump: a
+toolkit release changes `KpToolkit.bundled().version()`, which `agent`'s
+`CurrentEngineVersion` already appends to `rules` (`kp-1+toolkit-2026-09-12`).
+A change to the toolkit *matching rules* in code — `PromiseEvaluator`'s
+connected-house definition, `PromiseHit.Status`, `Sensitivity` — is a rule
+change like any other and does need the hand bump. `core`
 cannot reference `EngineVersion` (no dependency back to nothing -- `ephemeris` is
 the lower layer), so the coupling is a documented manual step. A change without a
 bump is caught by the golden-chart snapshot suite drifting with no version change.

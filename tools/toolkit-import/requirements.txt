@@ -1,0 +1,7 @@
+# Reads the licensed "Prediction ToolKit for Advanced" workbook (.xlsx) and
+# writes the committed TSV resources under core/src/main/resources.
+#
+# Dev-only: not part of `./mvnw verify`, not shipped. openpyxl keeps Apache POI
+# out of the Maven build for what is a one-off-per-release step (research.md §11),
+# and reads the workbook's merged cells, mixed types and dates reliably.
+openpyxl>=3.1,<4
