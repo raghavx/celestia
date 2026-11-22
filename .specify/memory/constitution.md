@@ -22,8 +22,7 @@ Rationale: discovered and resolved first at the SPEC-010 level (specs/010-kp-too
 Templates: .specify/templates/plan-template.md — its "Constitution Check" reads this file at
   run time; no edit needed ✅. spec-template.md / tasks-template.md — no principle-specific
   content ✅.
-Follow-up TODOs (governance, outside this command):
-  - TODO(ADR): dated ADR recording this amendment (Governance requires it)
+Decision ref: ADR-0025 (docs/adr/0025-toolkit-is-internal-only.md)
 -->
 
 # Celestia Constitution
