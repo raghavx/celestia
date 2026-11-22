@@ -304,6 +304,6 @@ classified.
   (injection gate, identity isolation, PII, payment gate) are not changed.
 - This feature delivers the knowledge base and its chart matching. Wiring it into
   the conversation is done by the topic-gate and agent features (PROJECT_PLAN
-  SPEC-014 / SPEC-015), which consume FR-008, FR-010 and FR-011.
+  SPEC-011 / SPEC-012, re-ordered 2026-11-22), which consume FR-008, FR-010 and FR-011.
 - Depends on the existing chart, significator and horary features (SPEC-002,
   003, 005).

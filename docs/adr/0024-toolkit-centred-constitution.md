@@ -48,7 +48,7 @@ Option 3, as recorded in Constitution v2.0.0:
 ## Consequences
 
 - MAJOR version bump (Principle V redefined). Principle numbers I–IX are unchanged.
-- SPEC-014's in-scope taxonomy comes from the toolkit's topic groups (SPEC-010), not
+- SPEC-011's in-scope taxonomy comes from the toolkit's topic groups (SPEC-010), not
   the seven-item list in ADR-0023.
 - Health, longevity, death and finance answers carry reputational and legal exposure.
   Mitigations: the fixed advisory sentences, the Terms page (ADR-0022), and a legal

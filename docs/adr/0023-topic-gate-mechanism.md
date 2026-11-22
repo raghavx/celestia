@@ -36,7 +36,7 @@ Layered —
 
 The in-scope taxonomy (`natal-house`, `planet-nakshatra-sublord`, `dasha-timing`,
 `ruling-planets`, `horary`, `life-event-prediction`, `kp-remedy`) is a config
-file. A checked-in adversarial corpus is a CI gate (SPEC-014).
+file. A checked-in adversarial corpus is a CI gate (SPEC-014 in the 2026-09 numbering; now SPEC-011 core + SPEC-021 hardening).
 
 ## Consequences
 
