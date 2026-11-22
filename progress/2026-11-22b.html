@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celestia map 2026-11-22b</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: plain, orienting, honest — a map for someone who lost the thread.
+   IDEA: a metro line map — one WhatsApp message riding from "in" to "reply", stopping at each part of the system.
+   PICTURE: the line itself; stations filled (done), ringed (built, not wired), hollow-dashed (not started).
+   COLOUR and TYPE: white paper / night ground; line ink; one saffron accent for "the gap"; Overpass (signage face).
+   LAYOUT: title + line in the first screen; then the gap, modules, decisions, reading order. Line turns vertical on phones. */
+:root{color-scheme:light dark;
+  --bg:light-dark(#fbfaf7,#121218);--ink:light-dark(#1b1b22,#ecebf2);--mute:light-dark(#5d5d6b,#a3a2b3);
+  --rule:light-dark(#e3e1da,#2a2a35);--card:light-dark(#ffffff,#1a1a22);
+  --done:light-dark(#16795f,#3fbf98);--wired:light-dark(#2f5bd3,#7c9cff);--todo:light-dark(#a7a6b2,#5b5a6a);
+  --gap:#e8a317}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Overpass,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px);max-width:1240px;margin:0 auto}
+h1{font-size:clamp(30px,4.4vw,48px);line-height:1.05;font-weight:800;margin:0 0 12px;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:26px;line-height:1.15;margin:0 0 14px;font-weight:800;text-wrap:balance}
+p{max-width:68ch;margin:0 0 12px}
+.lede{font-size:18px;color:var(--mute);max-width:62ch}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin:22px 0 6px;font-size:14px;color:var(--mute)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.dot{width:16px;height:16px;border-radius:50%;display:inline-block;flex:none}
+.d-done{background:var(--done)}.d-wired{background:var(--card);border:4px solid var(--wired)}
+.d-todo{background:var(--card);border:3px dashed var(--todo)}.d-gap{background:var(--gap)}
+
+/* the line */
+.line{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:0}
+.st{position:relative;padding:0 6px;text-align:center}
+.st::before{content:"";position:absolute;top:15px;left:0;right:0;height:8px;background:var(--seg,var(--todo))}
+.st:first-child::before{left:50%}.st:last-child::before{right:50%}
+.st.done{--seg:var(--done)}.st.wired{--seg:var(--wired)}.st.todo{--seg:repeating-linear-gradient(90deg,var(--todo) 0 10px,transparent 10px 18px)}
+.st .o{position:relative;z-index:1;width:38px;height:38px;margin:0 auto 12px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:800;font-size:14px}
+.st.done .o{background:var(--done);color:#fff}
+.st.wired .o{border:6px solid var(--wired);color:var(--wired)}
+.st.todo .o{border:3px dashed var(--todo);color:var(--mute)}
+.st.gap .o{box-shadow:0 0 0 6px var(--bg),0 0 0 10px var(--gap)}
+.st b{display:block;font-size:15px;line-height:1.2;margin-bottom:4px}
+.st small{display:block;font-size:13px;line-height:1.35;color:var(--mute)}
+.st .spec{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--ink);background:var(--rule);border-radius:4px;padding:1px 6px}
+.under{margin-top:26px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:16px 18px}
+.box h3{margin:0 0 6px;font-size:17px}
+.box p{font-size:15px;margin:0;color:var(--mute)}
+@media(max-width:860px){
+  .line{grid-template-columns:1fr}
+  .st{display:grid;grid-template-columns:52px minmax(0,1fr);text-align:left;padding:0 0 22px;column-gap:12px}
+  .st::before{top:0;bottom:0;left:21px;right:auto;width:8px;height:auto;background:var(--seg,var(--todo))}
+  .st.todo{--seg:repeating-linear-gradient(180deg,var(--todo) 0 10px,transparent 10px 18px)}
+  .st:first-child::before{top:19px;left:21px}.st:last-child::before{bottom:auto;height:19px;right:auto}
+  .st .o{margin:0 0 0 2px;grid-row:span 3}
+  .under{grid-template-columns:1fr}
+}
+
+/* gap band */
+.gapband{background:light-dark(#fff6e2,#241d10);border-block:1px solid light-dark(#f1dca8,#3b2e14)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0 18px;font-weight:600}
+.flow span{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:8px 12px}
+.flow .hot{border:2px solid var(--gap)}
+.flow i{font-style:normal;color:var(--mute)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:var(--rule);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-size:13px;color:var(--mute);font-weight:600}
+td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:14px}
+.tag .dot{width:11px;height:11px}.tag .d-wired{border-width:3px}.tag .d-todo{border-width:2px}
+.cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(20px,4vw,48px)}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+ol.read{padding-left:22px;margin:0}ol.read li{margin-bottom:10px}
+.foot{font-size:13px;color:var(--mute);border-top:1px solid var(--rule)}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--rule)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7em;margin-inline-start:-7.5em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}td.n{text-align:start}}
+@media(prefers-reduced-motion:no-preference){.st.gap .o{animation:pulse 2.4s ease-in-out infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px var(--bg),0 0 0 14px color-mix(in srgb,var(--gap) 35%,transparent)}}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+
+<section class="band">
+  <p style="margin:0 0 10px;font-size:14px;color:var(--mute)"><a href="index.html" style="color:inherit">All snapshots</a> · Snapshot of 22 Nov 2026, evening — after the toolkit re-order</p>
+  <h1>The toolkit is now the plan. Next: build it, then the first real answer.</h1>
+  <p class="lede">Same message journey, new order. The constitution (v2.0.0) makes the licensed KP toolkit the only source of interpretation, and the roadmap is rebuilt around it. The toolkit spec is written; its code is not. State as of the evening of 22 Nov 2026.</p>
+  <div class="legend">
+    <span><i class="dot d-done"></i>Built and tested</span>
+    <span><i class="dot d-wired"></i>Spec written, not built</span>
+    <span><i class="dot d-todo"></i>Not started</span>
+    <span><i class="dot d-gap"></i>The gap to close first</span>
+  </div>
+  <ol class="line" id="line"></ol>
+  <div class="under">
+    <div class="box"><h3>Today, end to end</h3><p>A message arrives, is verified and queued, and the reply that goes back is the same text — <code>EchoReplyHandler</code>. No chart is cast for the user in that path.</p></div>
+    <div class="box"><h3>What changed since this morning</h3><p>Constitution 1.0.0 → 2.0.0 (new Principle X: the toolkit is the source of KP judgement; full-toolkit scope) with ADR-0024. SPEC-010 spec written and clarified. Roadmap re-ordered into stages A–C, specs renumbered 010–023. The earlier toolkit code was discarded.</p></div>
+  </div>
+</section>
+
+<section class="gapband"><div class="band">
+  <h2>Next to build: the toolkit knowledge base (SPEC-010)</h2>
+  <p>Stage A ends with one real answer to the owner on WhatsApp, citing its toolkit sheets. Three specs get there: the toolkit itself, a deterministic guardrail core (the constitution forbids reaching the model without it), and an owner-preview agent that replaces the echo in <code>ReplyHandler</code>.</p>
+  <div class="flow">
+    <span class="hot">010 Toolkit knowledge base</span><i>→</i><span>011 Guardrail core</span><i>→</i><span>012 Owner-preview agent</span><i>→</i><span>first cited answer</span>
+  </div>
+  <p>SPEC-012 is blocked on one decision: where the LLM runs (ADR-0009 / 0010 — Llama 4 on Ollama is planned; hardware isn't bought). SPEC-010 and 011 need no LLM and can start now.</p>
+  <h2 style="margin-top:30px">The re-ordered roadmap</h2>
+  <table class="stack"><thead><tr><th>Stage</th><th>Specs</th><th>Outcome</th></tr></thead><tbody id="stages"></tbody></table>
+</div></section>
+
+<section class="band cols">
+  <div>
+    <h2>Code by module</h2>
+    <table class="stack">
+      <thead><tr><th>Module</th><th>What it does</th><th>Status</th><th class="n">Main / test lines</th></tr></thead>
+      <tbody id="mods"></tbody>
+    </table>
+  </div>
+  <div>
+    <h2>Read these four, in order</h2>
+    <ol class="read">
+      <li><b>.specify/memory/constitution.md</b> — v2.0.0; read Principles V and X first.</li>
+      <li><b>core/README.md</b> — one table listing every engine call. This is the part that works.</li>
+      <li><b>agent/…/channel/ReplyHandler.java</b> — the seam where the agent plugs in.</li>
+      <li><b>specs/010-kp-toolkit-knowledge-base/spec.md</b> — what the toolkit must do, with your three clarifications.</li>
+    </ol>
+    <h2 style="margin-top:28px">Decisions waiting on you</h2>
+    <table class="stack">
+      <thead><tr><th>ADR</th><th>Question</th><th>Blocks</th></tr></thead>
+      <tbody id="adrs"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="band foot">
+  <p>Sources: the repo at <code>~/celestia</code> — commit <code>8711b2c</code> (constitution v2.0.0 + ADR-0024 + SPEC-010 spec), the re-ordered PROJECT_PLAN.md §5–6 (uncommitted at snapshot time), <code>docs/adr/README.md</code>, module source counts.</p>
+</section>
+
+<script>
+{
+const st=[
+ ["1","WhatsApp in","Webhook, signature check, de-dup, inbox queue, worker","done","009"],
+ ["2","Who is this?","Phone → user record exists; consent + birth-detail questions don't","todo","017"],
+ ["3","Place & time","Birth place → lat/lon, historical time zone → UTC","done","007"],
+ ["4","Allowed?","Owner allow-list first (012), paid plans later","todo","012 · 018–020"],
+ ["5","On topic?","Injection check, toolkit topic gate, advisory sentences","todo","011"],
+ ["6","Agent (LLM)","Reads the question, calls engine + toolkit tools, cites sheets","todo","012"],
+ ["7","KP engine","Chart, cusps, sub lords, significators, RPs, dasha, horary, daily","done","001–006"],
+ ["8","Toolkit","75 sheets, 2,000+ rules matched to the chart, methods, look-ups","wired gap","010"],
+ ["9","Reply out","Outbox, Graph API sender, 24-h window templates","done","009"]];
+document.getElementById('line').innerHTML=st.map(([n,t,d,c,s])=>`<li class="st ${c}"><span class="o">${n}</span><b>${t}</b><small>${d}</small><span class="spec">SPEC-${s}</span></li>`).join('');
+
+const tag={done:['d-done','Done'],wired:['d-wired','Spec only'],todo:['d-todo','Empty']};
+const stages=[
+ ["Done","001–009","Engine, geo, database, WhatsApp plumbing (echo reply)"],
+ ["A — the toolkit answers the owner","010 toolkit · 011 guardrail core · 012 owner-preview agent","The owner gets a toolkit-cited answer on WhatsApp"],
+ ["B — grow the agent","013 natal · 014 timing &amp; methods · 015 horary &amp; others' charts · 016 remedies, Vastu, numerology","Each topic group passes a practitioner review (≥ 9/10)"],
+ ["C — open to the public","017 onboarding · 018–020 plans &amp; payments · 021 guardrail hardening · 022 ops · 023 daily push","Sign-up, payment, safe public launch"]];
+document.getElementById('stages').innerHTML=stages.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join('');
+const mods=[
+ ["ephemeris","Swiss Ephemeris wrapper: planet positions, houses, sunrise","done",1061,603],
+ ["core","KP rules: lords, chart, significators, dasha, horary, prediction, toolkit","done",2541,4750],
+ ["geo","Geocoding + time-zone resolution","done",937,1021],
+ ["agent","Spring Boot app: persistence + WhatsApp worker (echo reply)","done",2536,2233],
+ ["channel-whatsapp","WhatsApp payload types","done",659,463],
+ ["guardrail","Topic gate (placeholder)","todo",8,0],
+ ["billing","Plans & entitlements (placeholder)","todo",7,0],
+ ["payments-razorpay","Payment links & webhook (placeholder)","todo",7,0]];
+document.getElementById('mods').innerHTML=mods.map(([m,d,s,a,b])=>`<tr><td><code>${m}</code></td><td>${d}</td><td><span class="tag"><i class="dot ${tag[s][0]}"></i>${tag[s][1]}</span></td><td class="n">${a.toLocaleString()} / ${b.toLocaleString()}</td></tr>`).join('');
+
+const adrs=[
+ ["0009 · 0010","Which machine runs the LLM (Llama 4 on Ollama)?","SPEC-012 — the first answer"],
+ ["0024","Revisit: suicide-related rules shown like other rules (your Q2: B)","Public launch"],
+ ["0011 · 0012","Meta Business account, WhatsApp number, templates","Going live on WhatsApp"],
+ ["0013","Geocoder API key (OpenCage)","Real birth places"],
+ ["0017 · 0020","Billing model, grace period","Payments"],
+ ["0022","Terms / privacy / refund pages","Razorpay live, launch"],
+ ["0001","Swiss Ephemeris licence (buy at go-live)","Launch"]];
+document.getElementById('adrs').innerHTML=adrs.map(([a,q,b])=>`<tr><td style="white-space:nowrap">${a}</td><td>${q}</td><td>${b}</td></tr>`).join('');
+}
+</script>
+</body>
+</html>

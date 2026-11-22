@@ -34,16 +34,17 @@ a.date:hover,a.date:focus-visible{text-decoration:underline}
 </main>
 <script>
 {
-// date, headline, stops done / built-not-wired / not started (of 9)
+// file stem, headline, stops done / in progress (built-not-wired or spec-only) / not started (of 9), optional label
 const SNAPSHOTS=[
+  ["2026-11-22b","Evening: constitution v2.0.0 makes the toolkit the source of KP judgement; SPEC-010 spec written; roadmap re-ordered into stages A–C (specs 010–023). Toolkit code discarded — not built yet.",4,1,4,"22 Nov 2026 · evening"],
   ["2026-11-22","Engine, geo, persistence and WhatsApp plumbing built; toolkit added but not wired; agent, onboarding, payments, topic gate not started.",4,1,4]
 ];
-document.getElementById('list').innerHTML=SNAPSHOTS.map(([d,s,a,b,c])=>{
+document.getElementById('list').innerHTML=SNAPSHOTS.map(([d,s,a,b,c,label])=>{
   const t=a+b+c;
-  return `<li><a class="date" href="${d}.html">${new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</a>
+  return `<li><a class="date" href="${d}.html">${label||new Date(d.slice(0,10)+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</a>
   <span class="sum">${s}</span>
   <div class="bar" aria-hidden="true"><i style="width:${a/t*100}%;background:var(--done)"></i><i style="width:${b/t*100}%;background:var(--wired)"></i></div>
-  <div class="counts">${a} built · ${b} not wired · ${c} not started</div></li>`}).join('');
+  <div class="counts">${a} built · ${b} in progress · ${c} not started</div></li>`}).join('');
 }
 </script>
 </body>
