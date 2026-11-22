@@ -238,18 +238,25 @@ mindset reading, agreeing with the engine's own table.
 ## Phase 5: User Story 3 - Star, planet and house look-ups (Priority: P2)
 
 **Goal**: resolve profession, disease, education, planet-in-house, friendship, house
-meaning and relationship look-ups by their precise keys (nakshatra + quarter,
-planet + house, house).
+meaning, relationship, planet-characteristics, planet-direction and zodiac-sign
+look-ups by their precise keys (nakshatra + quarter, planet + house, house, planet
+alone, zodiac sign alone).
 
 **Independent Test**: all 108 nakshatra-quarters resolve to exactly one profession row
 and one body-part row; every planet × house combination the sheets cover resolves to
-its text (spec.md Independent Test, US3).
+its text; all 9 planets resolve to exactly one characteristics row and one direction
+row; all 12 zodiac signs resolve to exactly one characteristics row (spec.md
+Independent Test, US3; extended 2026-11-23).
 
 ### Implementation for User Story 3
 
 - [ ] T029 [P] [US3] Star-name normalisation alias table (Aswini/Ashvini,
       Karthikai/Krittika, …) and the quarter-format parser ("1Q", "2-3-4Q",
-      "First/Second Half", "I-Quarter", …; research.md §6) in
+      "First/Second Half", "I-Quarter", …; research.md §6), plus a planet-name
+      alias table (9 planets; English/Sanskrit — Shukra/Venus, Guru/Jupiter, …)
+      and a sign-name alias table (12 signs; English/Sanskrit — Mesha/Aries,
+      Vrishabha/Taurus, …) for the Planet Characteristics, Planet Direction and
+      Zodiac Signs sheets (research.md §12, 2026-11-23 clarification) in
       `tools/toolkit-import/import_toolkit.py`
 - [ ] T030 [US3] Star-wise Professions / Star-wise Diseases importers →
       `tables/star-professions.tsv`, `tables/star-diseases.tsv`, keyed by nakshatra +
@@ -258,32 +265,44 @@ its text (spec.md Independent Test, US3).
       Friendship (all 72 ordered pairs), Houses Meaning and Relationship importers →
       `tables/planet-house-signification.tsv`, `tables/higher-education-streams.tsv`,
       `tables/planet-friendship.tsv`, `tables/house-meanings.tsv`,
-      `tables/relationship-rotation.tsv` in `tools/toolkit-import/import_toolkit.py`
+      `tables/relationship-rotation.tsv`, plus Planet Characteristics, Planet
+      Direction and Zodiac Signs and Characteristics importers →
+      `tables/planet-characteristics.tsv`, `tables/planet-direction.tsv`,
+      `tables/zodiac-characteristics.tsv`, each keyed by planet or sign alone
+      (2026-11-23 clarification) in `tools/toolkit-import/import_toolkit.py`
+      (the three new tables depend on T029's planet/sign alias tables)
 - [ ] T032 [P] [US3] `StarEntry` and `Friendship` records + readers in
       `core/src/main/java/com/celestia/core/toolkit/StarEntry.java` and
       `core/src/main/java/com/celestia/core/toolkit/Friendship.java`
 - [ ] T033 [US3] `KpToolkit` look-up methods — `starProfession`, `starDisease`,
       `planetInHouse`, `higherEducation`, `friendship` (`IllegalArgumentException` if
-      the two grahas are equal), `houseMeaning`, `relationship` — in
-      `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java` (depends on T010,
-      T032)
+      the two grahas are equal), `houseMeaning`, `relationship`, plus
+      `planetCharacteristics(Graha)`, `planetDirection(Graha)` and
+      `zodiacCharacteristics(Sign)` (bare `String` returns, same pattern as
+      `houseMeaning`/`relationship` — no new record type needed, 2026-11-23
+      clarification) — in `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java`
+      (depends on T010, T032)
 - [ ] T034 [US3] A Java test-fixture generator
       (`core/src/test/java/com/celestia/core/toolkit/StarLookupFixtureSupport.java`)
       producing a synthetic fixture under
       `com/celestia/core/toolkit/star-fixture/tables/` covering all 27×4
-      nakshatra-quarters and all 72 friendship pairs with placeholder text — built
-      in Java by iterating `Nakshatra.values()` × 1..4 and `Graha.values()` ×
-      `Graha.values()`, not hand-authored. Also write a trivial `toolkit.properties`
-      (`sheets=0`) and empty `manifest.tsv` alongside it, since `load()` checks
-      those two files against each other on every call, not just the real one.
-      `ToolkitLookupTest` loads it via
-      `KpToolkit.load("com/celestia/core/toolkit/star-fixture")` and asserts
-      108/108 resolve in both star tables (SC-004 structural check) and 72/72
-      friendship pairs present. Add a T046-gated case asserting the real
-      "Krittika 2-3-4Q" professions (acceptance scenario 1) and the real education
-      stream for a 9th CSL's star lord by house (acceptance scenario 2) against
-      `KpToolkit.bundled()` in
-      `core/src/test/java/com/celestia/core/toolkit/ToolkitLookupTest.java`
+      nakshatra-quarters, all 72 friendship pairs, all 9 planets (characteristics
+      and direction) and all 12 zodiac signs (characteristics) with placeholder
+      text — built in Java by iterating `Nakshatra.values()` × 1..4,
+      `Graha.values()` × `Graha.values()`, `Graha.values()` alone, and `Sign.values()`
+      alone, not hand-authored (2026-11-23 clarification extends this fixture's
+      scope). Also write a trivial `toolkit.properties` (`sheets=0`) and empty
+      `manifest.tsv` alongside it, since `load()` checks those two files against
+      each other on every call, not just the real one. `ToolkitLookupTest` loads
+      it via `KpToolkit.load("com/celestia/core/toolkit/star-fixture")` and
+      asserts 108/108 resolve in both star tables, 72/72 friendship pairs present,
+      9/9 planets resolve in both the characteristics and direction look-ups, and
+      12/12 signs resolve in the zodiac-characteristics look-up (SC-004 structural
+      check, all four). Add a T046-gated case asserting the real "Krittika 2-3-4Q"
+      professions (acceptance scenario 1), the real education stream for a 9th
+      CSL's star lord by house (acceptance scenario 2), and non-empty real text
+      for one sampled planet and one sampled sign, against `KpToolkit.bundled()`
+      in `core/src/test/java/com/celestia/core/toolkit/ToolkitLookupTest.java`
       (depends on T033; the real-content cases additionally depend on T046)
 
 **Checkpoint**: User Stories 1–3 all work independently.

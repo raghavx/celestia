@@ -11,9 +11,10 @@ judgement (Constitution X).
 
 - **Import tool.** A dev-only Python tool reads the workbook, which is never committed,
   and writes deterministic, reviewable UTF-8 TSV resources into `core`. It produces
-  every sheet verbatim, about 2,000 structured promise rules, and 8 typed look-up
-  tables. It writes a manifest that classifies each sheet by topic group, kind,
-  sensitivity class and answerability.
+  every sheet verbatim, about 2,000 structured promise rules, and 11 typed look-up
+  tables (8 original plus Planet Characteristics, Planet Direction and Zodiac Signs
+  and Characteristics, added by the 2026-11-23 clarification). It writes a manifest
+  that classifies each sheet by topic group, kind, sensitivity class and answerability.
 - **Knowledge base.** A new pure package, `com.celestia.core.toolkit`, loads the
   resources once into an immutable `KpToolkit`.
 - **Matching.** A `PromiseEvaluator` matches the rule book to any `NatalChart` through
@@ -53,7 +54,7 @@ existing caches pick up the new engine version (research §7).
 - Constitution III: import checks are a CI gate.
 - No JSON library added to `core`'s runtime (Jackson is test-scope there).
 
-**Scale/Scope**: 75 sheets, about 2,000 rules, 8 typed tables, 5 sensitivity classes,
+**Scale/Scope**: 75 sheets, about 2,000 rules, 11 typed tables, 5 sensitivity classes,
 17 topic groups. One toolkit release at a time.
 
 ## Constitution Check
@@ -64,7 +65,7 @@ existing caches pick up the new engine version (research §7).
 |-----------|------------------------|--------|
 | I Spec-driven | spec → this plan → tasks; clarifications recorded in spec; ADR-0024 | ✅ |
 | II Deterministic core | `core.toolkit` reads bundled resources only; immutable; no clock/network; same input → same output (FR-009) | ✅ |
-| III Correctness gated | CI tests: 75/75 sheets, 249 cross-check vs `Horary249`, 108/108 nakshatra-quarters, re-import zero-diff, golden 12-house readings; toolkit version in `engine_version` (research §7) | ✅ |
+| III Correctness gated | CI tests: 75/75 sheets, 249 cross-check vs `Horary249`, 108/108 nakshatra-quarters, 9/9 planets, 12/12 signs, re-import zero-diff, golden 12-house readings; toolkit version in `engine_version` (research §7) | ✅ |
 | IV LLM never matches | `PromiseEvaluator` does all matching; the agent receives results, not raw rules to judge | ✅ |
 | V Toolkit-scoped single path | Supplies the topic-group taxonomy and fixed advisory sentences the guardrail (SPEC-011) uses; no route to the model is added here | ✅ |
 | VI Deterministic flows | Not touched | n/a |
@@ -108,7 +109,8 @@ core/src/main/resources/com/celestia/core/toolkit/      # generated, committed
 ├── rules/promise-rules.tsv
 └── tables/{horary-249, star-professions, star-diseases, planet-house-signification,
             higher-education-streams, planet-friendship, house-meanings,
-            relationship-rotation}.tsv
+            relationship-rotation, planet-characteristics, planet-direction,
+            zodiac-characteristics}.tsv
 
 core/src/main/java/com/celestia/core/toolkit/
 ├── KpToolkit.java             # loader + queries (sheets, search, rules, look-ups)
@@ -144,7 +146,8 @@ All unknowns are resolved in [research.md](research.md): resource format (§1), 
 rule-cell grammar (§2), the "connected through the star lord" definition (§3), the
 all-vs-partial rule (§4), sensitivity classification (§5), star-name normalisation
 (§6), engine-version composition (§7), duplicate matters across sheets (§8),
-non-answerable sheets (§9), source fix-ups (§10), and why Python for import (§11).
+non-answerable sheets (§9), source fix-ups (§10), why Python for import (§11), and
+planet/sign-name normalisation for the three new look-ups (§12, 2026-11-23).
 
 ## Phase 1 — Design & Contracts
 

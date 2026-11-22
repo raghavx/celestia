@@ -15,7 +15,9 @@ python3 -I tools/toolkit-import/import_toolkit.py <workbook.xlsx> [out_dir]
 | 2 | no workbook argument (prints usage) |
 | non-zero + `manifest out of date: unmapped sheets […], absent sheets […]` | the workbook's sheet names differ from the tool's manifest. Classify the new sheet (group, kind, sensitivity, answerable) in the manifest, then re-run |
 | non-zero + `unknown nakshatra label: '…'` | a star-sheet label has no alias. Add it to the alias table |
+| non-zero + `unknown planet label: '…'` / `unknown sign label: '…'` | a Planet Characteristics / Planet Direction / Zodiac Signs sheet label has no alias. Add it to the planet/sign alias table (research §12) |
 | non-zero + `249 … incomplete` | the horary sheets don't number 1..249 exactly once |
+| non-zero + `9 planets … incomplete` / `12 signs … incomplete` | the planet or sign look-up sheets don't cover all 9 grahas / 12 signs exactly once (research §12) |
 
 ## Guarantees
 

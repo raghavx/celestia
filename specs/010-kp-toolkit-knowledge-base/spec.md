@@ -97,7 +97,9 @@ text search.
 
 **Independent Test**: Every nakshatra-quarter (27 × 4 = 108) resolves to exactly
 one profession row and one body-part row; every planet × house combination the
-sheets cover resolves to its text.
+sheets cover resolves to its text; every planet (9 of 9) resolves to exactly one
+characteristics row and one direction row; every zodiac sign (12 of 12) resolves
+to exactly one characteristics row. *(Clarified 2026-11-23.)*
 
 **Acceptance Scenarios**:
 
@@ -193,6 +195,17 @@ classified.
 - Q: Can a user supply another person's chart? → A: Yes, birth data or a horary
   number given in the conversation; never another user's stored data (FR-012).
 
+### Session 2026-11-23
+
+- Q: Should "Planet Characteristics," "Planet Direction," and "Zodiac Signs and
+  Characteristics" be precise keyed look-ups or generic searchable sheets? → A:
+  Precise keyed look-ups, matching the other star/planet tables — "Planet
+  Characteristics" and "Planet Direction" keyed by planet alone (9 rows each),
+  "Zodiac Signs and Characteristics" keyed by zodiac sign alone (12 rows) (FR-006).
+- Q: Who carries out the SC-005 KP-practitioner review? → A: The owner themselves,
+  as the licence holder; no external reviewer or confidentiality/NDA step is
+  needed (SC-005).
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -216,7 +229,9 @@ classified.
   (some connected). Partly indicated rules are reported only when asked for.
 - **FR-006**: The system MUST provide the horary 1–249 table with mindsets, verified
   against the engine's own table, and the star, planet and house look-ups in
-  User Story 3, keyed precisely (nakshatra + quarter, planet + house, house).
+  User Story 3, keyed precisely (nakshatra + quarter, planet + house, house, planet
+  alone for Planet Characteristics and Planet Direction, zodiac sign alone for
+  Zodiac Signs and Characteristics). *(Clarified 2026-11-23.)*
 - **FR-007**: The agent MUST be able to retrieve any method or template sheet's
   steps in order, verbatim, as this feature's knowledge-base query. Filling each
   step's numeric values from the engine (dasha lords, ruling planets, …) is the
@@ -277,7 +292,9 @@ classified.
   retrograde flags, connected houses, matched rules with their status.
 - **Look-up entry**: horary number row + mindset; nakshatra-quarter row
   (professions / body parts and diseases); planet × house row (signification /
-  education stream); house meaning; relationship by cusp; planet friendship.
+  education stream); house meaning; relationship by cusp; planet friendship;
+  planet row (characteristics; direction); zodiac sign row (characteristics).
+  *(Clarified 2026-11-23.)*
 
 ## Success Criteria *(mandatory)*
 
@@ -289,10 +306,14 @@ classified.
   each traceable to its sheet and row.
 - **SC-003**: 249 of 249 horary rows agree with the engine on sign, star and sub
   lord.
-- **SC-004**: 108 of 108 nakshatra-quarters resolve in both star look-ups.
-- **SC-005**: On 3 documented test charts, a KP practitioner reviewing 10 promise
-  readings per chart agrees that each cited rule is correctly applied in at
-  least 9 of 10 cases.
+- **SC-004**: 108 of 108 nakshatra-quarters resolve in both star look-ups; 9 of 9
+  planets resolve in both the Planet Characteristics and Planet Direction
+  look-ups; 12 of 12 zodiac signs resolve in the Zodiac Signs and Characteristics
+  look-up. *(Clarified 2026-11-23.)*
+- **SC-005**: On 3 documented test charts, the owner — as the reviewing KP
+  practitioner — reviewing 10 promise readings per chart agrees that each cited
+  rule is correctly applied in at least 9 of 10 cases. No external reviewer or
+  confidentiality step is needed. *(Clarified 2026-11-23.)*
 - **SC-006**: Re-importing an unchanged workbook produces zero differences.
 - **SC-007**: A full 12-house promise reading for one chart is available to the
   agent fast enough that the user's reply is not noticeably delayed (well under one

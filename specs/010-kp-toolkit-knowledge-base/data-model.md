@@ -71,6 +71,9 @@
 | Friendship | Graha × Graha (distinct) | FRIENDLY / NEUTRAL / ENEMY | PlanetFriendship |
 | House meaning | house 1..12 | text | Houses Meaning |
 | Relationship | cusp 1..12 | relationship for chart rotation | Relationship |
+| Planet characteristics | Graha | text | Planet Characteristics *(2026-11-23 clarification, FR-006)* |
+| Planet direction | Graha | text | Planet Direction *(2026-11-23 clarification, FR-006)* |
+| Zodiac characteristics | Sign | text | Zodiac Signs and Characteristics *(2026-11-23 clarification, FR-006)* |
 
 ### Sensitivity
 
@@ -89,6 +92,10 @@
 - 249 horary rows numbered 1..249 exactly once.
 - star tables: every (nakshatra, quarter) covered exactly once.
 - friendship: all 72 ordered pairs present.
+- planet characteristics / planet direction: all 9 grahas present, each exactly
+  once *(2026-11-23 clarification)*.
+- zodiac characteristics: all 12 signs present, each exactly once
+  *(2026-11-23 clarification)*.
 
 ## Relationships
 

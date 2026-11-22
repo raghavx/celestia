@@ -22,6 +22,8 @@ deterministic.
 | `Optional<String> higherEducation(Graha ninthCslStarLord, int house)` | look-up | |
 | `Friendship friendship(Graha of, Graha towards)` | relation | `IllegalArgumentException` if equal |
 | `String houseMeaning(int house)` / `relationship(int cusp)` | text | 1..12 |
+| `String planetCharacteristics(Graha)` / `planetDirection(Graha)` | text | total over the 9 grahas *(2026-11-23 clarification, FR-006)* |
+| `String zodiacCharacteristics(Sign)` | text | total over the 12 signs *(2026-11-23 clarification, FR-006)* |
 
 `SheetHit(ToolkitSheet sheet, int score, List<List<String>> matchingRows)`.
 

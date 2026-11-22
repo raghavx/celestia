@@ -35,5 +35,7 @@
 - Iteration 2 (2026-11-22): clarifications resolved (FR-010/010a, FR-011, FR-012);
   all items pass.
 - FR-011a confirmed by the owner (2026-11-22).
+- Iteration 3 (2026-11-23, post-plan/-tasks): two further clarifications resolved
+  (FR-006's new keyed look-ups, SC-005's reviewer identity); all items still pass.
 - Constitution amended to v2.0.0 (ADR-0024); the spec now complies. Ready for `/speckit-plan`.
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.

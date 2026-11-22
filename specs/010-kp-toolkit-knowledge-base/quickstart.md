@@ -27,8 +27,9 @@ Expected: nothing changed.
 ```
 
 Expected: all pass. That covers 75/75 sheets, ≥ 2,000 rules, 249/249 horary rows equal
-to the engine, 108/108 nakshatra-quarters, synthetic-chart evaluator invariants, golden
-12-house snapshots, and the sensitivity sentences.
+to the engine, 108/108 nakshatra-quarters, 9/9 planets and 12/12 signs in the planet/
+zodiac-characteristics and planet-direction look-ups, synthetic-chart evaluator
+invariants, golden 12-house snapshots, and the sensitivity sentences.
 
 ## 4. Engine version (FR-009)
 

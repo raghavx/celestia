@@ -20,7 +20,7 @@ Shared rules for all five tools:
 | `getChartPromises` | `house?` (1..12, default all), `includePartial?` (default false), `chart` = the user's natal chart, or a chart cast from birth data the user supplied this turn | per house: `cuspSubLord`, `starLord`, retrograde flags, `connectedHouses`, hits grouped by `matterKey` → `{matter, status, formula, condition, sources[]}`, `sensitivity` |
 | `findToolkitRules` | `matter` text | rules `{judgedHouse, houses, condition, matter, source}`. The agent then calls `getChartPromises(house)` to judge them |
 | `lookupToolkit` | `topic` text | up to 5 answerable sheets `{id, title, group, kind, matchingRows}`; methods return all rows in order |
-| `getToolkitLookup` | `point` (planet name or `cusp:N`), `table` ∈ {profession, disease, signification, education} | the row keyed by that point's nakshatra-quarter (profession, disease) or bhava (signification), or by the 9th CSL's star lord and its house (education) |
+| `getToolkitLookup` | `point` (planet name, `cusp:N`, or a zodiac sign name), `table` ∈ {profession, disease, signification, education, characteristics, direction, zodiac-characteristics} | the row keyed by that point's nakshatra-quarter (profession, disease) or bhava (signification), or by the 9th CSL's star lord and its house (education), or by the planet alone (characteristics, direction) or sign alone (zodiac-characteristics) *(2026-11-23 clarification, FR-006)* |
 | `getHoraryMindset` | `number` 1..249 | `{sign, star, signLord, starLord, subLord, mindset, source}` |
 
 ## Answer obligations (checked by the SPEC-012 eval harness)

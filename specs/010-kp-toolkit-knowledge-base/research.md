@@ -131,3 +131,20 @@ Its findings are used below.
 - **Determinism**: the same workbook gives byte-identical output (verified in the
   prototype by diffing two runs). The tool records the workbook SHA-256 and refuses a
   workbook whose sheet names differ from its manifest.
+
+## §12 Planet- and sign-name normalisation (2026-11-23 clarification, FR-006)
+
+- **Decision**: the same alias-table approach as §6, applied to the two new
+  single-key sheets. A fixed alias table maps every planet spelling used in
+  Planet Characteristics and Planet Direction (English, Sanskrit — e.g. Shukra /
+  Venus, Guru / Jupiter) to a `Graha` constant, and every sign spelling used in
+  Zodiac Signs and Characteristics (English, Sanskrit — e.g. Mesha / Aries,
+  Vrishabha / Taurus) to a `Sign` constant. An unrecognised spelling fails the
+  import, same as §6.
+- **Rationale**: these are the same class of problem §6 already solved (the
+  workbook mixes naming traditions across sheets); reusing the pattern needs no
+  new design, just two more small tables — 9 planet aliases, 12 sign aliases,
+  both far smaller than §6's 36-row nakshatra table.
+- **Validation**: all 9 grahas and all 12 signs must be covered exactly once in
+  their respective sheets (data-model.md "Validation at load"), the same shape as
+  §6's 108/108 nakshatra-quarter check and the friendship table's 72/72 check.
