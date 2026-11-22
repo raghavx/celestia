@@ -49,23 +49,31 @@ is parsed.
 - [ ] T002 Generic sheet + properties writer: for every workbook sheet (all 75),
       normalise (NFC, CRLF→LF, trim trailing spaces per line) and write
       `sheets/<id>.tsv` verbatim — one file per sheet, every non-empty row,
-      `#` comment + header + records (research.md §1, FR-001). Compute and write
-      `toolkit.properties`: title, version (the latest date in the Version
-      Control sheet), sheet count, workbook SHA-256 (the rule count field is
-      filled in later by T015). This is the foundational output every other
-      import-tool and `core` task assumes already exists — found missing by
-      `/speckit-analyze` on 2026-11-23 — in
-      `tools/toolkit-import/import_toolkit.py` (depends on T001)
+      `#` comment + header + records (research.md §1, FR-001), where `<id>` is
+      looked up by title in T004's manifest (never computed as an auto-slug — see
+      T004). Compute and write `toolkit.properties`: title, version (the latest
+      date in the Version Control sheet), sheet count, workbook SHA-256 (the rule
+      count field is filled in later by T015). This is the foundational output
+      every other import-tool and `core` task assumes already exists — found
+      missing by `/speckit-analyze` on 2026-11-23 — in
+      `tools/toolkit-import/import_toolkit.py` (depends on T001 and T004's id
+      mapping; the two can be authored in either order within Setup since T004
+      is static data, but T002's logic needs it wired in before it can run)
 - [ ] T003 [P] Create the resource directories: `core/src/main/resources/com/celestia/core/toolkit/{sheets,rules,tables}/`
       (the production root `KpToolkit.bundled()` reads — generated, committed by
       T047) and, under `core/src/test/resources/com/celestia/core/toolkit/`, the
       sibling fixture roots `fixture/`, `promise-fixture/`, `horary-fixture/` and
       `star-fixture/` (each a distinct `KpToolkit.load(...)` root, so none shadows
       the production path or each other — see T011)
-- [ ] T004 [P] Author the initial sheet-classification manifest (title → `TopicGroup`,
-      `SheetKind`, sensitivity default, `answerable`) for every sheet named in
-      spec.md's "What the toolkit contains" table, in
-      `tools/toolkit-import/manifest.py` (research.md §5, §9) — refined when the
+- [ ] T004 [P] Author the initial sheet-classification manifest (title → stable
+      `id` slug, `TopicGroup`, `SheetKind`, sensitivity default, `answerable`)
+      for every sheet named in spec.md's "What the toolkit contains" table, in
+      `tools/toolkit-import/manifest.py` (research.md §5, §9). The `id` is a
+      hand-assigned slug (e.g. "Medical Astrology" → `medical-astrology`,
+      "1500+Rules" → `1500-rules`), not computed by an automatic title→slug
+      algorithm — this sidesteps special-character/collision edge cases (digits,
+      `+`, mixed scripts) entirely, and keeps ids stable across releases by
+      construction, matching data-model.md's own requirement — refined when the
       real workbook's exact sheet names are first seen (T041's drift guard)
 
 ---

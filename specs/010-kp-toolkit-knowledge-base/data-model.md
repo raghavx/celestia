@@ -18,7 +18,7 @@
 | Field | Type | Rule |
 |-------|------|------|
 | order | int ≥ 1 | position in the workbook |
-| id | slug, unique | stable across releases (e.g. `medical-astrology`) |
+| id | slug, unique | hand-assigned in the import manifest, not auto-computed from the title (sidesteps special-character/collision edge cases); stable across releases (e.g. `medical-astrology`) *(2026-11-23 clarification)* |
 | title | text | the workbook's sheet title |
 | group | `TopicGroup` | KP_FOUNDATIONS, HORARY, PREDICTION_METHOD, LIFE_MATTERS, MARRIAGE_RELATIONSHIPS, CAREER_EDUCATION, FINANCE_SPECULATION, PROPERTY, HEALTH_MEDICAL, LONGEVITY, TRAVEL, CHILDBIRTH, REMEDIES, VASTU_FENG_SHUI, NUMEROLOGY, REFERENCE, HOUSEKEEPING |
 | kind | `SheetKind` | RULES, TABLE, PROCEDURE, TEMPLATE, REMEDY, HOUSEKEEPING |
