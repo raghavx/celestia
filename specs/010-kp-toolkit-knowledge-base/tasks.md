@@ -47,8 +47,11 @@ is parsed.
       `toolkit <version>: <n> sheets, <m> rules -> <out_dir>`; exit 2 with usage when
       the workbook argument is missing) per [contracts/import-tool.md](contracts/import-tool.md)
 - [ ] T002 [P] Create the resource directories: `core/src/main/resources/com/celestia/core/toolkit/{sheets,rules,tables}/`
-      (generated, committed later) and `core/src/test/resources/com/celestia/core/toolkit/`
-      (the fixture toolkit used by unit tests)
+      (the production root `KpToolkit.bundled()` reads — generated, committed by
+      T046) and, under `core/src/test/resources/com/celestia/core/toolkit/`, the
+      sibling fixture roots `fixture/`, `promise-fixture/`, `horary-fixture/` and
+      `star-fixture/` (each a distinct `KpToolkit.load(...)` root, so none shadows
+      the production path or each other — see T010)
 - [ ] T003 [P] Author the initial sheet-classification manifest (title → `TopicGroup`,
       `SheetKind`, sensitivity default, `answerable`) for every sheet named in
       spec.md's "What the toolkit contains" table, in
@@ -78,19 +81,34 @@ small fixture without the real workbook.
       id()`) in `core/src/main/java/com/celestia/core/toolkit/ToolkitVersion.java`
 - [ ] T009 [P] `ToolkitSheet` record (`order, id, title, group, kind, sensitivity,
       answerable, rows`) in `core/src/main/java/com/celestia/core/toolkit/ToolkitSheet.java`
-- [ ] T010 `KpToolkit` loader skeleton — `bundled()` (cached singleton),
-      `version()`, `sheets()`, `sheet(String id)`, `sheets(TopicGroup)`; fail-fast
-      validation that manifest row count equals `toolkit.properties`' sheet count
-      (data-model.md "Validation at load") in
+- [ ] T010 `KpToolkit` loader — `bundled()` (cached singleton, reads the fixed
+      production classpath root `com/celestia/core/toolkit/`) delegates to a
+      package-private `static KpToolkit load(String classpathRoot)`; `version()`,
+      `sheets()`, `sheet(String id)`, `sheets(TopicGroup)`; fail-fast validation that
+      manifest row count equals `toolkit.properties`' sheet count (data-model.md
+      "Validation at load"). The package-private `load(root)` exists so same-package
+      tests can point at a fixture root *other than* the production one — `src/test/
+      resources` shadows `src/main/resources` at the same path on the test
+      classpath, so any fixture placed at `com/celestia/core/toolkit/` would make
+      `bundled()` never see the real data, even after T046. Every fixture-based test
+      below therefore uses `load(testRoot)`, never `bundled()`; `bundled()` is
+      reserved for the T046-gated real-data cases, which is exactly what makes those
+      cases meaningful in
       `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java` (depends on
       T004–T009)
-- [ ] T011 [P] Minimal fixture toolkit — `toolkit.properties`, `manifest.tsv`, and 3–4
-      `sheets/<id>.tsv` spanning the RULES/TABLE/PROCEDURE kinds — in
-      `core/src/test/resources/com/celestia/core/toolkit/`
-- [ ] T012 `KpToolkitLoadTest`: the fixture loads correctly; a manifest/properties
-      mismatch fails fast in
-      `core/src/test/java/com/celestia/core/toolkit/KpToolkitLoadTest.java` (depends
-      on T010, T011)
+- [ ] T011 [P] Minimal fixture toolkit at the non-shadowing test root
+      `com/celestia/core/toolkit/fixture/` (loaded via `KpToolkit.load(
+      "com/celestia/core/toolkit/fixture")`, never `bundled()`) — `toolkit.properties`,
+      `manifest.tsv`, and one `sheets/<id>.tsv` per: RULES, TABLE, PROCEDURE/TEMPLATE,
+      a HOUSEKEEPING sheet (`answerable=false`, for T039's exclusion check), and one
+      each in `HEALTH_MEDICAL`, `LONGEVITY`, `FINANCE_SPECULATION`,
+      `VASTU_FENG_SHUI` and `NUMEROLOGY` (`answerable=true`, for T039's FR-010 group
+      check) — in `core/src/test/resources/com/celestia/core/toolkit/fixture/`
+- [ ] T012 `KpToolkitLoadTest`: `KpToolkit.load("com/celestia/core/toolkit/fixture")`
+      loads correctly; a second, deliberately broken fixture root (manifest/
+      properties mismatch) fails fast per "Validation at load" in
+      `core/src/test/java/com/celestia/core/toolkit/KpToolkitLoadTest.java`
+      (depends on T010, T011)
 
 **Checkpoint**: `KpToolkit` loads a toolkit (fixture today, the real one after T046)
 and can list/find sheets. User story work can now begin.
@@ -141,13 +159,23 @@ connected, each names its source rule (spec.md Independent Test, US1).
       on T017, T018)
 - [ ] T020 [P] [US1] `SyntheticChart` test helper (a copy of `judgement`'s) in
       `core/src/test/java/com/celestia/core/toolkit/SyntheticChart.java`
-- [ ] T021 [US1] `PromiseEvaluatorTest`: the research.md §3 prototype check (1st CSL
-      Venus in Pushya, star lord Saturn occupying 7 and owning 10/11 ⇒ exactly
-      `{7, 10, 11}`); promised / condition-to-check / partly-indicated classification
-      (FR-005); retrograde flagging (FR-004); same chart + toolkit version ⇒ same
-      rules twice (FR-009, acceptance scenario 3) in
+- [ ] T021 [US1] `PromiseEvaluatorTest`, against a small hand-built promise-rule
+      fixture loaded via its own `KpToolkit.load("com/celestia/core/toolkit/
+      promise-fixture")` root (distinct from T011's, so neither shadows the other
+      or production) — include a trivial `toolkit.properties` (`sheets=0`) and an
+      empty `manifest.tsv` alongside `rules/promise-rules.tsv`, since `load()`
+      checks those two files against each other on every call, not just the real
+      one: the research.md §3 prototype check (1st CSL Venus in Pushya,
+      star lord Saturn occupying 7 and owning 10/11 ⇒ exactly `{7, 10, 11}`);
+      promised / condition-to-check / partly-indicated classification (FR-005);
+      retrograde flagging (FR-004); same chart + toolkit version ⇒ same rules twice
+      (FR-009, acceptance scenario 3). Add a T046-gated case: 1,000 calls to
+      `evaluate(chart)` on a golden chart, against `KpToolkit.bundled()`'s real
+      ~2,000 rules, average under 50 ms each (plan.md Performance Goals, SC-007) —
+      tolerant of CI noise (assert the mean, not a single call); meaningless against
+      the small fixture, so it must run against real data in
       `core/src/test/java/com/celestia/core/toolkit/PromiseEvaluatorTest.java`
-      (depends on T019, T020)
+      (depends on T019, T020; the timing case additionally depends on T046)
 - [ ] T022 [P] [US1] `SensitivityTest`: the four fixed advisory sentences (FR-010a)
       and `max()` ordering; rule-level keyword escalation on the fixture toolkit in
       `core/src/test/java/com/celestia/core/toolkit/SensitivityTest.java`
@@ -187,11 +215,21 @@ mindset reading, agreeing with the engine's own table.
 - [ ] T027 [US2] `KpToolkit.horary(int n)` (1..249; `IllegalArgumentException`
       outside range) in `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java`
       (depends on T010, T026)
-- [ ] T028 [US2] `ToolkitHoraryCrossCheckTest`: 249/249 rows agree with
-      `Horary249.arc(n)` on sign/star/sub lord (SC-003); the row-107 fix-up regression
-      (acceptance scenario 1); rejection outside 1..249 (acceptance scenario 2) in
+- [ ] T028 [US2] A Java test-fixture generator (`HoraryFixtureSupport`, in
+      `core/src/test/java/com/celestia/core/toolkit/HoraryFixtureSupport.java`) that
+      calls `Horary249.arc(n)` for n in 1..249 to build a 249-row fixture under
+      `com/celestia/core/toolkit/horary-fixture/tables/horary-249.tsv` with
+      placeholder mindset text — no Python involved, since the sign/star/sub-lord
+      columns are the engine's own calculation, not licensed content. Also write a
+      trivial `toolkit.properties` (`sheets=0`) and empty `manifest.tsv` alongside
+      it, since `load()` checks those two files against each other on every call,
+      not just the real one. `ToolkitHoraryCrossCheckTest` loads it via `KpToolkit.load(
+      "com/celestia/core/toolkit/horary-fixture")` and asserts 249/249 rows agree
+      with `Horary249.arc(n)` (SC-003 structural check) and rejection outside 1..249
+      (acceptance scenario 2). Add a second, T046-gated case asserting the row-107
+      fix-up (acceptance scenario 1) against `KpToolkit.bundled()`'s real table in
       `core/src/test/java/com/celestia/core/toolkit/ToolkitHoraryCrossCheckTest.java`
-      (depends on T027)
+      (depends on T027; the fix-up case additionally depends on T046)
 
 **Checkpoint**: User Stories 1 and 2 both work independently — **MVP complete**.
 
@@ -229,12 +267,24 @@ its text (spec.md Independent Test, US3).
       the two grahas are equal), `houseMeaning`, `relationship` — in
       `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java` (depends on T010,
       T032)
-- [ ] T034 [US3] `ToolkitLookupTest`: 108/108 nakshatra-quarters in both star tables
-      (SC-004); all 72 friendship pairs present; "Krittika 2-3-4Q" professions for a
-      10th CSL in Krittika quarter 3 (acceptance scenario 1); the education stream
-      keyed by a 9th CSL's star lord and the house it occupies (acceptance scenario 2)
-      in `core/src/test/java/com/celestia/core/toolkit/ToolkitLookupTest.java`
-      (depends on T033)
+- [ ] T034 [US3] A Java test-fixture generator
+      (`core/src/test/java/com/celestia/core/toolkit/StarLookupFixtureSupport.java`)
+      producing a synthetic fixture under
+      `com/celestia/core/toolkit/star-fixture/tables/` covering all 27×4
+      nakshatra-quarters and all 72 friendship pairs with placeholder text — built
+      in Java by iterating `Nakshatra.values()` × 1..4 and `Graha.values()` ×
+      `Graha.values()`, not hand-authored. Also write a trivial `toolkit.properties`
+      (`sheets=0`) and empty `manifest.tsv` alongside it, since `load()` checks
+      those two files against each other on every call, not just the real one.
+      `ToolkitLookupTest` loads it via
+      `KpToolkit.load("com/celestia/core/toolkit/star-fixture")` and asserts
+      108/108 resolve in both star tables (SC-004 structural check) and 72/72
+      friendship pairs present. Add a T046-gated case asserting the real
+      "Krittika 2-3-4Q" professions (acceptance scenario 1) and the real education
+      stream for a 9th CSL's star lord by house (acceptance scenario 2) against
+      `KpToolkit.bundled()` in
+      `core/src/test/java/com/celestia/core/toolkit/ToolkitLookupTest.java`
+      (depends on T033; the real-content cases additionally depend on T046)
 
 **Checkpoint**: User Stories 1–3 all work independently.
 
@@ -287,12 +337,19 @@ that sheet first (spec.md Independent Test, US5).
       still browsable by `sheet(id)` — in
       `core/src/main/java/com/celestia/core/toolkit/KpToolkit.java` (depends on T035,
       T037)
-- [ ] T039 [US5] `ToolkitCompletenessTest`: manifest row count == `toolkit.properties`
-      sheet count == `sheets().size()`; every `PromiseRule.source` resolves to a
-      manifest sheet id; at least 2,000 promise rules present (SC-002); non-answerable
-      sheets absent from `search()` results in
+- [ ] T039 [US5] `ToolkitCompletenessTest`, against T011's fixture loaded via
+      `KpToolkit.load("com/celestia/core/toolkit/fixture")`: manifest row count ==
+      `toolkit.properties` sheet count == `sheets().size()`; every `PromiseRule.
+      source` resolves to a manifest sheet id; non-answerable sheets absent from
+      `search()` results; every sheet in `TopicGroup.HEALTH_MEDICAL`, `LONGEVITY`,
+      `FINANCE_SPECULATION`, `VASTU_FENG_SHUI` and `NUMEROLOGY` is `answerable=true`
+      and found by `sheets(group)` (FR-010's named Sensitive and Beyond-natal-KP
+      groups, exercised by T011's representative sheets) — all runnable today,
+      independent of T046. Add a separate T046-gated case asserting ≥ 2,000 promise
+      rules and 75 sheets against `KpToolkit.bundled()` (SC-001, SC-002) in
       `core/src/test/java/com/celestia/core/toolkit/ToolkitCompletenessTest.java`
-      (depends on T038, T017)
+      (depends on T038, T017, T011; the SC-001/SC-002 case additionally depends on
+      T046)
 
 **Checkpoint**: User Stories 1–5 all work independently.
 
@@ -348,10 +405,18 @@ workbook with a new or renamed sheet stops and asks for that sheet to be classif
       <licensed-workbook.xlsx>` against the real *Prediction ToolKit for Advanced*
       workbook (quickstart.md step 1), review the generated diff rule by rule, and
       commit the real resources under
-      `core/src/main/resources/com/celestia/core/toolkit/`. SC-001, SC-002, SC-003,
-      SC-004 and SC-005 can only be certified once this step is done — the workbook
-      is licensed content that stays outside the repository and outside any coding
-      agent's reach
+      `core/src/main/resources/com/celestia/core/toolkit/`. The T046-gated cases in
+      T028, T034 and T039 (SC-001–SC-004) can only be certified once this step is
+      done — the workbook is licensed content that stays outside the repository and
+      outside any coding agent's reach
+- [ ] T047 **MANUAL — owner only**: for each of the 3 documented golden charts, run
+      `PromiseGoldenTest` against the real resources (post-T046), pull 10 promise
+      readings per chart (30 total) from its snapshot, and have a KP practitioner
+      mark each "correctly applied" or not. Record the score. SC-005 passes at
+      ≥9/10 per chart; a chart scoring below that is a defect in the rule-cell
+      grammar (T013) or the connecting-houses logic (T019), not in the review
+      itself — file it against the responsible task and re-run quickstart.md
+      step 5 after the fix (depends on T046, T023)
 
 ---
 
@@ -364,14 +429,18 @@ workbook with a new or renamed sheet stops and asks for that sheet to be classif
 - **User Stories (Phases 3–8)**: all depend on Foundational
   - US1 and US2 (both P1) have no dependency on each other and can proceed in
     parallel, or sequentially in spec order
-  - US3 and US4 depend only on Foundational (`KpToolkit.sheets()`/`sheet()`), not on
-    US1/US2 — they can start as soon as Foundational is done
-  - US5 (T037) depends on the Setup manifest (T003) but not on US1–US4's rule/look-up
-    content
+  - US4 depends only on Foundational (`KpToolkit.sheets()`/`sheet()`), not on
+    US1/US2 — it can start as soon as Foundational is done. US3 is likewise
+    independent of US1/US2/US4.
+  - US5 is **not** independent of US1 and US4: T038 (exclude non-answerable sheets
+    from search) depends on T035 (US4's `search()`), and T039 (completeness test)
+    depends on T017 (US1's `promiseRules()`) as well as T038. US5's manifest work
+    (T037) depends only on T003 and can start early, but its completeness *test*
+    cannot land before US1 and US4 do.
   - US6 (T040) depends on US5's manifest-application (T037)
 - **Polish (Phase 9)**: depends on all desired user stories being complete; T046 is
   independent of the others and can happen at any time once the owner has the
-  workbook
+  workbook. T047 depends on T046 and T023 (US1's `PromiseGoldenTest`)
 
 ### Within Each User Story
 
@@ -417,9 +486,11 @@ Task: "HoraryMindset record + reader in core/.../toolkit/HoraryMindset.java"    
 1. Complete Phase 1 (Setup) and Phase 2 (Foundational) — CRITICAL, blocks everything.
 2. Complete Phase 3 (US1: promise readings) and Phase 4 (US2: horary + mindset).
 3. **STOP and VALIDATE**: run `PromiseEvaluatorTest`, `PromiseGoldenTest` and
-   `ToolkitHoraryCrossCheckTest` against the fixture toolkit.
-4. The real correctness gates (SC-001–SC-005) wait on T046 (owner runs the real
-   import); everything else is verifiable today against the fixture.
+   `ToolkitHoraryCrossCheckTest` (the latter against its Java-generated 249-row
+   fixture, `HoraryFixtureSupport`) — all pass without the real workbook.
+4. The real-content cases in T028/T034/T039 and T047's practitioner review (SC-001,
+   SC-002, SC-003's fix-up, SC-004's real rows, SC-005) wait on T046 (owner runs the
+   real import); everything else is verifiable today against fixtures.
 
 ### Incremental Delivery
 
@@ -429,14 +500,16 @@ Task: "HoraryMindset record + reader in core/.../toolkit/HoraryMindset.java"    
 4. US4 → procedure/template retrieval for the agent to follow.
 5. US5 → completeness guarantee (nothing silently dropped).
 6. US6 → repeatable, auditable re-import.
-7. Polish → documentation, full build, then the owner's one manual import step.
+7. Polish → documentation, full build, the owner's manual import (T046), then the
+   practitioner review (T047).
 
 ### Parallel Team Strategy
 
 With multiple developers, after Foundational:
-- Developer A: US1 (promise rules + evaluator) then US5 (completeness)
+- Developer A: US1 (promise rules + evaluator)
 - Developer B: US2 (horary) then US6 (versioning)
 - Developer C: US3 (look-ups) then US4 (search/procedures)
+- Whoever finishes US1 and US4 first picks up US5 (completeness) — it needs both
 
 ---
 
@@ -448,5 +521,8 @@ With multiple developers, after Foundational:
   they are not optional for this feature
 - Commit after each task or logical group; stop at any checkpoint to validate a story
   independently
-- T046 is the one task genuinely blocked on the owner: everything else is buildable
-  and testable today against fixtures and golden charts
+- T046 and T047 are the two tasks genuinely blocked on the owner (the real workbook,
+  then a human practitioner's review); every other task is buildable and testable
+  today against Java-generated fixtures and golden charts — no Python-side
+  computation and no model call stands in for a `core` calculation anywhere in this
+  feature

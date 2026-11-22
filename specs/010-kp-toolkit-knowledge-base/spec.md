@@ -120,14 +120,16 @@ works". Without them the agent improvises method, which the constitution forbids
 for numbers and is risky for judgement.
 
 **Independent Test**: For each procedure sheet, the agent can retrieve its steps
-verbatim and in order; for time-of-event, every step that needs a number (dasha
-lords, ruling planets) is filled from the engine, never by the model.
+verbatim and in order (this feature's scope, FR-007). The full reply behaviour below
+— every step that needs a number filled from the engine, never by the model — is
+the agent-tool wiring of SPEC-012, which this feature's retrieval makes possible.
 
 **Acceptance Scenarios**:
 
 1. **Given** "when will my health improve?", **When** answered, **Then** the reply
    follows the Time of Event steps (dasha lord, bhukti lord, current ruling
-   planets) with the engine's values.
+   planets) with the engine's values. *(End-to-end behaviour delivered by SPEC-012;
+   this feature supplies the ordered, verbatim steps it fills.)*
 
 ---
 
@@ -216,7 +218,10 @@ classified.
   against the engine's own table, and the star, planet and house look-ups in
   User Story 3, keyed precisely (nakshatra + quarter, planet + house, house).
 - **FR-007**: The agent MUST be able to retrieve any method or template sheet's
-  steps in order, and every numeric value a step needs MUST come from the engine.
+  steps in order, verbatim, as this feature's knowledge-base query. Filling each
+  step's numeric values from the engine (dasha lords, ruling planets, …) is the
+  agent-tool wiring delivered by SPEC-012, which consumes this retrieval (see
+  Assumptions).
 - **FR-008**: Every statement in a reply that rests on the toolkit MUST cite its
   source sheet. The agent MUST NOT state KP interpretation that is not traceable to
   the toolkit or to an already-cited KP source.
@@ -304,6 +309,14 @@ classified.
   (injection gate, identity isolation, PII, payment gate) are not changed.
 - This feature delivers the knowledge base and its chart matching. Wiring it into
   the conversation is done by the topic-gate and agent features (PROJECT_PLAN
-  SPEC-011 / SPEC-012, re-ordered 2026-11-22), which consume FR-008, FR-010 and FR-011.
+  SPEC-011 / SPEC-012, re-ordered 2026-11-22), which consume FR-007's engine-filling
+  clause, FR-008, FR-010 and FR-011. FR-011a (the self-harm support line) is
+  specifically SPEC-011's responsibility: Constitution V places self-harm detection
+  in the input guardrail, before the model is invoked, so it is prepended by the
+  topic-gate, not by anything this feature or SPEC-012 builds. FR-012 (a second
+  person's birth data or horary number supplied in the conversation) is SPEC-012's
+  responsibility: the agent tool that parses the user's message passes the
+  resulting chart into this feature's `PromiseEvaluator`, which already accepts any
+  `NatalChart` and stores nothing (contracts/core-api.md).
 - Depends on the existing chart, significator and horary features (SPEC-002,
   003, 005).
