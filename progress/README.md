@@ -11,6 +11,7 @@ Open `index.html` in a browser to see every snapshot, newest first.
 
 | Date | Built | In progress | Not started | Summary |
 |------|------:|------------:|------------:|---------|
+| [2026-11-23c](2026-11-23c.html) | 5 | 1 | 3 | SPEC-011 (guardrail core) specified: 6 stories, 20 requirements, 9 criteria. Two owner decisions — multilingual gate (English/Hindi/Hinglish) and fail-closed on unmatched messages — which compound, so the in-scope corpus is required in all three registers and unmatched refusals counted separately. No code since 23b. |
 | [2026-11-23b](2026-11-23b.html) | 5 | 0 | 4 | The toolkit is built: import tool, `core.toolkit`, 72 tests, and the licensed workbook imported (75 sheets, 2,001 rules, 11 look-ups). SC-001–SC-004, SC-006, SC-007 verified against the real file; SC-005 awaits the practitioner review. Replies still echo. |
 | [2026-11-23](2026-11-23.html) | 4 | 1 | 4 | SPEC-010 fully planned: research, data model, contracts, 48-task breakdown. Four analyze passes and two clarification rounds closed every gap. Constitution v2.0.0 → v2.1.0 (ADR-0025): toolkit is internal-only, agent is the astrologer. Still no code. |
 | [2026-11-22b](2026-11-22b.html) | 4 | 1 | 4 | Evening, after the re-order: constitution v2.0.0 (toolkit is the source of KP judgement), ADR-0024, SPEC-010 spec written, roadmap in stages A–C with specs 010–023. The earlier toolkit code was discarded; SPEC-010 is spec-only. |
