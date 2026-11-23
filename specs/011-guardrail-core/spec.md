@@ -215,18 +215,31 @@ with no code change.
   still refused, for the same reason as above.
 - A toolkit sheet title that is also an ordinary English phrase (for example
   "Relationship", "Aspects", "Death") must not make an innocent reply look like
-  a toolkit leak. Leak detection keys on the toolkit's sheet *ids* and on
-  explicit source-citation phrasing, not on bare common words (FR-015).
+  a toolkit leak. Leak detection therefore splits the titles: one that cannot
+  occur in ordinary English (`ReadyReckoner`, `MarriageMatching`) is detected on
+  its own, while a prose-colliding one is detected only inside a citation frame.
+  Ids and row references are always detected; a bare common word never is
+  (FR-017).
 - The toolkit cannot be loaded (it has not been imported). The topic gate has no
   taxonomy to work from, so it refuses everything rather than failing open, and
   the condition is reported as a fault rather than as user error.
+- The same fault on the way out. The output stage keys its leak scan on the
+  toolkit's own sheet ids and titles, so without the toolkit it has nothing to
+  scan *for* — and a scan with no vocabulary delivers everything, including the
+  disclosures it exists to catch. FR-017 therefore makes `OutputStage.bundled()`
+  fail outright rather than hand back a stage that scans blind. Both halves of
+  the single path fail closed, and for the same reason.
 - A refusal and a self-harm support line are both warranted. The support line
   takes precedence and is sent; the astrological content is still withheld.
-- A message mixes scripts within one sentence ("mera 7th house ke baare mein
-  batao"). It is normalised and matched as one message, not split by script.
-- A transliterated word collides with an unrelated English word. Folding is
-  table-driven and reviewed, so a collision is a data decision recorded in the
-  table rather than an emergent accident (FR-011).
+- *(Post-launch, with Hindi and Hinglish.)* A message mixes scripts within one
+  sentence ("mera 7th house ke baare mein batao"). It will be normalised and
+  matched as one message, not split by script. In the first cut such a message
+  is refused as `UNMATCHED` unless its English terms carry it.
+- *(Post-launch, with Hindi and Hinglish.)* A transliterated word collides with
+  an unrelated English word. Folding will be table-driven and reviewed, so a
+  collision is a data decision recorded in the table rather than an emergent
+  accident. The first cut ships only the homoglyph fold table; the structural
+  requirement that folding stay table-driven holds now (FR-011).
 - A genuine question is refused because no in-scope indicator covered its
   wording. Fail-closed makes this the expected failure mode, so it is recorded
   as *unmatched* rather than off-topic, and that count is what tells the owner
@@ -253,10 +266,11 @@ with no code change.
   the tool definitions, or the model's internal reasoning; requests for another
   Celestia user's stored data identified by anything other than birth data or a
   horary number supplied in the message itself.
-- **FR-005**: The hostile check MUST see through obfuscation: encoded payloads
-  (base64, hex), zero-width and invisible characters, and homoglyph
-  substitutions MUST be normalised before matching, so the same attack written
-  plainly or hidden is treated alike.
+- **FR-005**: Encoded payloads (base64, hex) MUST be decoded into separate
+  candidate views and matched against the hostile rules, so the same attack
+  written plainly or hidden is treated alike. A decoded view MUST NEVER supply
+  in-scope evidence: decoding may only add grounds to refuse, never grounds to
+  allow, or an attacker could smuggle a subject word past the topic gate.
 - **FR-006**: The in-scope taxonomy MUST be derived from the toolkit itself —
   the topic groups that have answerable content — and not from a separately
   maintained list, so that widening the toolkit widens the gate. For the first
@@ -267,25 +281,28 @@ with no code change.
 - **FR-008**: A refused message MUST produce one fixed redirect message, set by
   the product and not generated. The text MUST be identical whether the refusal
   was for being out of scope or for being hostile, so that a probe learns
-  nothing about what was detected.
+  nothing about what was detected. The only permitted addition is the support
+  line of FR-015, which turns on what the sender wrote rather than on what the
+  gate detected, and so discloses nothing about the decision.
 - **FR-009**: A message matching no rule at all — neither hostile nor
   recognisably in scope — MUST be refused rather than allowed through
   (fail closed). *(Clarified 2026-11-23, Q2.)*
 - **FR-010**: Every refusal MUST record, for the operator and not for the user,
-  which rule matched and which of three outcome classes applied: hostile,
-  recognised off-topic, or unmatched. The unmatched count MUST be reportable on
-  its own, because it is the measure of how often fail-closed is refusing a
-  genuine question.
+  which rule matched and which refusal class applied: hostile, oversize
+  (FR-012), recognised off-topic, or unmatched. The unmatched count MUST be
+  reportable on its own, because it is the measure of how often fail-closed is
+  refusing a genuine question.
 - **FR-011**: Before any matching, inbound text MUST be normalised so that the
   same question is recognised however it is written: case, Unicode form,
-  invisible characters, confusable glyphs, and the obfuscations of FR-005.
+  invisible characters, confusable glyphs, and the encoded payloads of FR-005.
   Latin-script terms MUST be matched on word boundaries, never as bare
   substrings. The normaliser MUST NOT assume ASCII-only input, and term matching
   MUST be table-driven, so that adding a language later is a data change rather
   than a rewrite of the matcher. Recognising Hindi and Hinglish terms is
   deferred to post-launch. *(Clarified 2026-11-23, Q1 as revised.)*
-- **FR-012**: Messages MUST be checked within a bounded length; a message
-  exceeding the bound is refused rather than processed.
+- **FR-012**: Messages MUST be checked within a bounded length — 4,096
+  characters, WhatsApp's own text cap — and a message exceeding the bound is
+  refused rather than processed.
 
 #### The output stage, after the model
 
@@ -300,14 +317,28 @@ with no code change.
   helpline, before any astrological content. A message merely asking what the
   chart indicates about self-harm MUST NOT trigger this, and MUST be answered as
   ordinary health-class content.
-- **FR-016**: A reply carrying the out-of-scope marker MUST be replaced in full
-  by the fixed redirect of FR-008.
+- **FR-016**: A reply carrying the out-of-scope marker `<<OUT_OF_SCOPE>>` MUST be
+  replaced in full by the fixed redirect of FR-008.
 - **FR-017**: The output stage MUST NOT deliver a reply that discloses the system
   prompt, the tool definitions, internal reasoning, another user's data, or the
   identity of the licensed toolkit — its name, a sheet id or title, or a row
-  number. Detection MUST key on toolkit sheet ids and explicit source-citation
-  phrasing rather than on bare common words, so that an innocent reply using a
-  word that happens to be a sheet title is not blocked.
+  number. Detection MUST key on toolkit sheet ids, row references, sheet titles
+  and explicit source-citation phrasing rather than on bare common words. A
+  sheet title that cannot occur in ordinary English MUST be detected on its own,
+  since that is the likeliest form of an accidental disclosure; a title that is
+  also ordinary English or KP vocabulary MUST be detected only inside a citation
+  frame, so that an innocent reply using such a word is not blocked. The default
+  classification MUST be mechanical, so that a sheet added by a later toolkit
+  release is classified without anyone having to remember to, and every departure
+  from that default MUST be recorded in a reviewed table rather than decided in
+  code. Another user's data MUST be detected by identifier shape — a phone
+  number or user id that is not the recipient's own — and MUST NOT be triggered
+  by a horary number or by birth data the user supplied in the conversation,
+  which FR-012 of SPEC-010 deliberately permits. Because every one of these
+  checks is keyed on the toolkit's own content, the output stage MUST NOT be
+  obtainable without it: `OutputStage.bundled()` MUST fail rather than return a
+  stage whose scan has no vocabulary, which would deliver every disclosure this
+  requirement exists to catch.
 - **FR-018**: A reply that fails any check of FR-017 MUST be withheld in full and
   replaced by a fixed safe message, never partially redacted and sent.
 
@@ -334,6 +365,13 @@ with no code change.
 - **Reply decoration**: what the output stage adds to or substitutes for a draft
   reply: the advisory sentence, the support line, the redirect, or the safe
   replacement.
+- **Self-harm signal**: what a user's own message shows about intent to harm
+  themselves — nothing, an expression of intent, or a question about what the
+  chart indicates. Only the second owes the support line (FR-015).
+- **Leak rule**: one named family of disclosure the output stage must catch — a
+  sheet id, a sheet title, a row reference, a citation frame, a caller-supplied
+  secret, another party's identifier, or a reasoning marker — each keyed so that
+  ordinary English and ordinary KP vocabulary stay deliverable (FR-017).
 - **Corpus case**: one message with its required outcome, exercised on every
   build.
 
@@ -409,7 +447,7 @@ into a matcher built for ASCII is the expensive version of this work.
   their attempts was detected; the distinction is kept for the operator only
   (FR-008, FR-009).
 - A withheld reply is replaced wholesale rather than redacted. Partial redaction
-  risks leaving fragments of exactly the content that must not be sent (FR-016).
+  risks leaving fragments of exactly the content that must not be sent (FR-018).
 - Repeated-abuse handling — strike counting and cool-off periods — is out of
   scope here and belongs with the guardrail hardening of SPEC-021, as do the
   small-model classifier and the embedding fallback (ADR-0023 options 1 and 3).
@@ -421,14 +459,23 @@ into a matcher built for ASCII is the expensive version of this work.
 - The first cut is English-only, and the product therefore cannot serve a user
   who writes in Hindi or Hinglish until that is re-enabled. That is acceptable
   only because SPEC-012 serves the owner alone behind an allow-list; it is a
-  launch blocker for public traffic, not a permanent position. The drafted Hindi
-  work and what was learned from it are in `deferred-multilingual/`.
+  launch blocker for public traffic, not a permanent position. Its sharpest
+  consequence is the self-harm path: a Hinglish expression of intent fires
+  neither the support line (FR-015) nor an answer, since fail-closed refuses the
+  message too — the strongest single reason the English-only position cannot
+  survive first contact with public traffic. The drafted Hindi work and what was
+  learned from it are in `deferred-multilingual/`.
 - The hostile phrase list is assumed to stay predominantly English: attacks are
   copied from English-language sources, and an obfuscated attack still has to
   survive normalisation to match anything. Worth revisiting with real traffic,
   not a proven claim.
 - The entitlement check precedes the gate and is SPEC-012's responsibility; this
   feature assumes it has already run.
+- The `<<OUT_OF_SCOPE>>` marker of FR-016 is emitted by SPEC-012's hardened
+  prompt, which instructs the model to use it when it has no KP basis for a
+  question. This feature only recognises the marker; nothing here produces it, so
+  FR-016 is built and tested here (T028, T035) but cannot fire in production
+  until SPEC-012 lands.
 - The advisory sentences and the sensitivity ordering are SPEC-010's constants
   and are consumed, not restated, here.
 - Which sensitivity classes a reply drew on is reported by the agent's toolkit

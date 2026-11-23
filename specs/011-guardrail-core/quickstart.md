@@ -34,7 +34,9 @@ To see the gate fail honestly, add a line to
 `guardrail/src/test/resources/com/celestia/guardrail/corpus-in-scope.tsv` for a
 question phrased in a way the vocabulary does not cover, and re-run: it should
 fail as `UNMATCHED`. That is fail-closed working as designed, and the fix is a
-term in `topic-terms-en.tsv` or a stopword removed — not a code change.
+term in `topic-terms-en.tsv` or a stopword removed — not a code change. The leak
+scan has the same property: if an innocent reply is withheld because a sheet
+title is ordinary English, the fix is a line in `title-prose-classes.tsv`.
 
 ## 3. The single route (FR-003)
 
@@ -70,9 +72,13 @@ Expected: green for `guardrail` and `core`, including Spotless and the ArchUnit
 layering rules — which already list `com.celestia.guardrail..` among the pure
 packages, so a stray Spring or network import in this module fails the build.
 
-Two pre-existing failures in this environment are unrelated to this feature:
-`HoraryHouseProviderContractTest.isDeterministic` in `ephemeris`, and `agent`'s
-Testcontainers integration tests when Docker is not running (ADR-0008).
+One set of tests does not run in this environment, and it is unrelated to this
+feature: `agent`'s Testcontainers integration tests when Docker is not running
+(ADR-0008). Everything else is expected green — including
+`ephemeris`'s `HoraryHouseProviderContractTest`, which an earlier draft of this
+file wrongly listed as a standing failure (verified 2026-11-24: the whole module
+passes, 51 tests, 0 failures). A failure there is a real Constitution II defect,
+not expected noise.
 
 ## What is deliberately not validated here
 

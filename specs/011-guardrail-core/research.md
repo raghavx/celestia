@@ -43,9 +43,9 @@ this.
 - **Rationale**: the asymmetry is the whole point. If decoded text could supply
   in-scope evidence, an attacker would base64-encode the word "marriage" to buy
   passage through the topic gate, and the gate would have helped them. Decoding
-  can therefore only ever *incriminate*, never exonerate. Normalising before
-  matching is what makes FR-005 true — the same attack written plainly or hidden
-  behind homoglyphs reaches the same rule.
+  can therefore only ever *incriminate*, never exonerate — which is what FR-005
+  requires. Normalising before matching is the separate guarantee of FR-011: the
+  same attack written plainly or hidden behind homoglyphs reaches the same rule.
 - **Alternatives**: matching on the raw text (defeated by one zero-width
   character); decoding into the single text used for all matching (the hole
   above); attempting to detect encoding by entropy (unpredictable, and a false
@@ -131,12 +131,15 @@ this.
 
 ## §5 How much evidence is enough, and a deliberate asymmetry
 
-- **Decision**: one term is enough. A single KP-vocabulary term, toolkit matter
-  term or Hindi/Hinglish term allows the message.
+- **Decision**: one term is enough. A single KP-vocabulary term or toolkit matter
+  term allows the message.
+  *(Revised 2026-11-23 with §13: the decision originally read "or Hindi/Hinglish
+  term" and argued from "shaadi kab hogi?". The threshold itself was never
+  language-specific and is unchanged; only the examples moved.)*
 - **Rationale**: terms have already survived the stopword filter, so the ones
-  that remain are subject matter ("marriage", "disease", "naukri"), not filler.
-  Requiring two would refuse "shaadi kab hogi?" — three words, one of them the
-  entire question.
+  that remain are subject matter ("marriage", "disease", "job"), not filler.
+  Requiring two would refuse "marriage?" — one word, and that word is the entire
+  question.
 - **The asymmetry, stated plainly**: within *recognised* vocabulary this leans
   permissive, and that is deliberate. A message like "my sister's marriage is
   tomorrow" will be allowed and reach the model, which will answer from the
@@ -185,9 +188,13 @@ this.
 - **Decision**: the support line fires on a **first-person volitional
   construction combined with a self-harm term** — a first-person subject, a verb
   of wanting/intending/planning, and a harm object ("I want to die", "I'm going
-  to end it", "मैं मरना चाहता हूँ", "mujhe marna hai"). A question *about* the
-  chart ("does my chart show suicide", "is there danger to my life") has no such
-  construction and does not fire it.
+  to end it"). A question *about* the chart ("does my chart show suicide", "is
+  there danger to my life") has no such construction and does not fire it.
+  *(Revised 2026-11-23 with §13: the Hindi and Hinglish examples originally given
+  here — "मैं मरना चाहता हूँ", "mujhe marna hai" — are deferred with the rest of
+  the multilingual work. spec.md Assumptions now records that a Hinglish
+  expression of intent fires nothing in the first cut, and these are the first
+  cases to restore when the register comes back.)*
 - **When both appear, intent wins.** A message carrying both an intent
   construction and a chart referent ("my chart says I should die") gets the
   support line. A support line shown to someone who only wanted a reading is a
@@ -206,18 +213,55 @@ this.
 
 ## §8 Leak detection that does not trip on ordinary English
 
-- **Decision**: the scan keys on four signals, none of which is a bare word.
+- **Decision**: the scan keys on six signals, none of which is a bare word.
 
   1. **Sheet ids** — the slugs `1500-rules`, `ready-reckoner`,
      `horary-249-mindsets`. These are not natural English and never appear in a
      legitimate answer.
   2. **Row references** — `row 1349`, `r1349`, `<slug>:r<n>`.
-  3. **The toolkit title inside a citation frame** — "per the …", "according to
-     the …", "source: …", "(… sheet)" wrapped around a known sheet title or the
-     workbook's own title.
+  3. **Sheet titles, keyed by prose class.** The ids and titles of **all 75
+     sheets** come from `KpToolkit.sheets()` — housekeeping included, since
+     leaking `Version Control` is still a leak. They split in two, because one
+     rule for all of them is wrong in opposite directions:
+     - **Non-prose titles are keyed bare** — `ReadyReckoner`, `MarriageMatching`,
+       `JobRules`, `DeathModeRules`, `1500+Rules`, `249Mindsets`, `TimeOfEvent`,
+       `MissingPerson`: 34 of the 75 at the current release, counted by the rule
+       below rather than listed. These cannot occur in natural English, so
+       requiring a citation frame buys nothing and costs the likeliest leak of
+       all. The model is shown `sheetTitle` next to `sheetId` on every tool
+       result and the title is the human-readable half, so a bare parrot
+       ("ReadyReckoner says your 7th house…") is the form to expect.
+     - **Prose-colliding titles need the frame** — `Relationship`, `Aspects`,
+       `Death`, `Difficulty`, `Fortuna`, `Numerology`, `Vimshottari`,
+       `Medical Astrology`: the other 41 at the current release. Several are KP
+       vocabulary a reply must be free to use, which is what the frame
+       requirement exists for.
+     The class is decided mechanically — a title is non-prose when any of its
+     words carries an internal capital, a digit or a `+` — with a reviewed
+     exceptions table overriding it **in both directions**, so an awkward case is
+     a recorded data decision rather than an emergent accident (the discipline
+     FR-011 already applies to transliteration folds). `ABCD Significance` is the
+     first such exception: `ABCD` is real KP technique vocabulary (sign, star,
+     sub and sub-sub lords), so an answer may legitimately write it.
+     The workbook's own title is keyed bare, as it is non-prose by the same test.
   4. **Secrets passed in by the caller** — the system prompt text and the tool
      names, which only SPEC-012 knows; the output stage receives them rather
      than guessing them.
+  5. **Another party's identifier** — an E.164-shaped number (7+ digits after
+     separators are stripped, with or without a leading `+`) or a product
+     user-id token appearing in the draft and **not equal to the caller's
+     `recipientRef`**. This is the outbound counterpart of the inbound
+     `CROSS_USER` rule (§6) and the control FR-017's "another user's data" limb
+     needs; without it the limb is a requirement with no mechanism.
+     It cannot collide with what SPEC-010 FR-012 legitimately allows: a horary
+     number is 1–249, and a second person's birth data is a date, a time and a
+     place — none of them identifier-shaped.
+  6. **Structural reasoning markers** — a `<thinking>` or `<scratchpad>` tag, a
+     `system:` or `assistant:` role prefix at the start of a line, or "I should
+     call the … tool". FR-017 names internal reasoning and the four signals
+     above do not reach it: `secrets` holds the system prompt and the tool
+     names, not the model's own commentary. Structural only — "let me think"
+     as ordinary prose is not a marker.
 
 - **Rationale**: FR-017 names the hazard directly, and the toolkit's real sheet
   titles make it concrete: `Relationship`, `Aspects`, `Death`, `Fortuna`,
@@ -225,7 +269,11 @@ this.
   an answer must be able to discuss. Keying on the bare title would make "your
   relationship with your partner" undeliverable. Requiring a citation *frame*
   around the title, or an id, or a row number, separates "naming the source" from
-  "using the word".
+  "using the word". The identifier signal of (5) follows the same discipline: it
+  keys on identifier *shape* against a known-good reference, never on a bare
+  number, so "you were born in 1987" and "take horary number 108" stay
+  deliverable. So does (6): a tag or a role prefix is structure the model emitted,
+  not a word a user might write.
 - **Withhold whole, never redact**: a reply failing any signal is replaced by the
   fixed safe message (FR-018). Partial redaction leaves fragments of exactly the
   content that must not be sent, and a half-redacted reply also tells the

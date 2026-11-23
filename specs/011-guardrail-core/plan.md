@@ -22,10 +22,15 @@ Make Constitution V's single guarded route a property of the code.
   misses ("gemstone" where it says "gems" — research §12). **English only for the
   first cut**; the matcher stays script-aware and table-driven so adding a
   language later is data, not surgery.
-- **Output stage.** A pure pass over the draft reply: the single advisory sentence
-  for the most severe class used, the crisis support line when the user's own
-  message showed intent, the fixed redirect for the out-of-scope marker, and a
-  leak scan that withholds the whole reply rather than redacting it.
+- **Output stage.** A pure pass over every reply, the refusal redirect included:
+  the single advisory sentence for the most severe class used, the crisis support
+  line when the user's own message showed intent, the fixed redirect for the
+  out-of-scope marker, and a leak scan that withholds the whole reply rather than
+  redacting it. The scan keys on the toolkit's own ids and titles, splitting the
+  titles by prose class so `ReadyReckoner` is caught bare while `Relationship`
+  and `Vimshottari` stay ordinary English. Routing refusals through the stage too
+  is what makes the support line reach someone whose message the gate could not
+  place (FR-013, FR-015).
 - **The seam that makes it enforceable.** `GuardedPipeline` takes an `Answerer`
   and calls it *only* on an allowed decision. SPEC-012 supplies the LLM-backed
   `Answerer`; the adversarial corpus wires a counting fake and asserts zero
@@ -43,7 +48,7 @@ in this module (the module's own README comment already anticipates this).
 **Storage**: classpath resources under
 `guardrail/src/main/resources/com/celestia/guardrail/` (small TSVs: hostile
 phrases, off-topic phrases, stopwords, English supplementary terms, homoglyph
-folds).
+folds, sheet-title prose classes).
 The two corpora live in `src/test/resources`. No database change.
 
 **Testing**: JUnit 5 + AssertJ (already in `guardrail`'s pom). Parameterised tests
@@ -74,8 +79,12 @@ notice". Vocabulary is built once per JVM from the already-loaded toolkit.
 
 **Scale/Scope**: 5 hostile-rule families plus obfuscation handling, 15 answerable
 topic groups, English only for the first cut, 2 corpus files (15 in-scope cases
-plus the adversarial set), 1 new ArchUnit rule. The ~1,700-term in-scope
-vocabulary is derived, not authored.
+plus the adversarial set), 1 new ArchUnit rule. The output stage carries 6 leak
+signals across 7 leak families — the largest single mechanism here — over all 75
+sheet titles split by prose class. 6 resource TSVs, 11 test classes. The
+~1,700-term in-scope vocabulary and the title classification are both derived,
+not authored; only the stopwords, the English supplement, the homoglyph folds and
+the reviewed prose-class exceptions are committed data.
 
 ## Constitution Check
 
@@ -140,7 +149,8 @@ guardrail/src/main/resources/com/celestia/guardrail/
 ├── offtopic-phrases.tsv       # diagnosis only: separates off-topic from unmatched
 ├── stopwords.tsv              # English function words excluded from derivation
 ├── topic-terms-en.tsv         # compounds/synonyms the toolkit's wording misses
-└── homoglyph-folds.tsv        # confusable → Latin
+├── homoglyph-folds.tsv        # confusable → Latin
+└── title-prose-classes.tsv    # reviewed overrides: which sheet titles are prose
 
 guardrail/src/test/resources/com/celestia/guardrail/
 ├── corpus-adversarial.tsv     # message → expected reason class
@@ -153,8 +163,11 @@ guardrail/src/test/java/com/celestia/guardrail/
 ├── SelfHarmSignalTest.java          # FR-015, intent vs inquiry
 ├── OutputStageTest.java             # FR-013..FR-018
 ├── AdversarialCorpusTest.java       # SC-001, zero answerer invocations
-├── InScopeCorpusTest.java           # SC-002, 45-question coverage
-└── GuardedPipelineTest.java         # FR-003, the single route
+├── InScopeCorpusTest.java           # SC-002, 15-question coverage
+├── GuardedPipelineTest.java         # FR-003, the single route
+├── LeakRuleTest.java                # FR-017, the title prose classification
+├── LoadValidationTest.java          # fail fast on bad resource data
+└── GatePerformanceTest.java         # SC-008, the 1 ms budget
 
 agent/src/test/java/com/celestia/agent/architecture/
 └── DeterminismArchitectureTest.java # + the single-path-to-the-model rule

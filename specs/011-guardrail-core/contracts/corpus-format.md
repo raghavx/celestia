@@ -15,16 +15,22 @@ and `\n`.
 |--------|---------|
 | `id` | stable, unique; a failure names this, so do not renumber |
 | `message` | the input, verbatim, including any obfuscation |
-| `expectedReason` | `HOSTILE`, `OVERSIZE`, or `OFF_TOPIC` |
-| `expectedRule` | the hostile rule's name, or blank for `OFF_TOPIC` |
+| `expectedReason` | `HOSTILE`, `OVERSIZE`, `OFF_TOPIC` or `UNMATCHED`. The file is **refusals**, not hostile cases only: a self-harm expression carrying no astrology vocabulary is refused as `UNMATCHED`, and belongs here because the support line it is owed must be exercised (T018, SC-006) |
+| `expectedRule` | the hostile rule's name, or blank where no rule decided it — `OFF_TOPIC` and `UNMATCHED` |
 | `note` | why this case exists — written for whoever reads it after a failure |
 
 Asserted per case: the outcome is a refusal, the reason is `expectedReason`, and
 where given the matched rule is `expectedRule`. Asserting the rule and not just
 "refused" is what stops one rule being credited for a refusal another produced.
 
-Asserted once for the whole file: the `Answerer` was invoked **zero** times
-(SC-001). That is the measurement Constitution V's promise reduces to.
+Asserted once for the whole file, three things:
+
+- the `Answerer` was invoked **zero** times (SC-001) — the measurement
+  Constitution V's promise reduces to;
+- **every** `HostileRule.Family` has at least one case, the list read from the
+  enum rather than hard-coded, so a family added later cannot ship untested;
+- at least as many cases execute as the file has data rows, which is what makes
+  "add a line, no code change" a property rather than a hope (SC-009).
 
 Required coverage — at least one case for each:
 
@@ -35,7 +41,13 @@ Required coverage — at least one case for each:
 - benign off-topic (a recipe, a coding request) — refused with `OFF_TOPIC`, no
   hostile rule;
 - a mixed message: a genuine astrology question **plus** an injection, which must
-  be refused as hostile rather than allowed (spec Edge Cases).
+  be refused as hostile rather than allowed (spec Edge Cases);
+- two self-harm cases, which are refusals that are **not** attacks: a bare
+  expression of intent with no astrology vocabulary (`UNMATCHED`) and the same
+  intent padded past the bound (`OVERSIZE`). This file asserts only their
+  reason; that each still receives the support line is asserted in
+  `GuardedPipelineTest`, since no corpus column carries an expected reply
+  (spec Edge Cases, SC-006).
 
 ## `corpus-in-scope.tsv` — everything here must be allowed
 
@@ -66,7 +78,9 @@ Asserted once for the whole file: **every topic group with answerable content in
 the loaded toolkit appears at least once.** The group list is read from the
 toolkit, not hard-coded, so adding an answerable sheet in a new group fails the
 build until the corpus covers it. At the current release that is **15 cases
-minimum** (SC-002).
+minimum** (SC-002). Asserted alongside it: at least as many cases execute as the
+file has data rows, the same no-code-change property as the adversarial file
+(SC-009).
 
 Required coverage beyond that:
 

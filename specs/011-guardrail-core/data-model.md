@@ -24,8 +24,8 @@ What the gate is asked about. Deliberately not a channel type (Constitution IX).
 | matchedRule | text | the name of the rule or the topic group that decided it; **never the message text** (research §9) |
 | topicGroup | `TopicGroup` or absent | **best-effort diagnostic only.** Present only when allowed, naming the most specific group the matched vocabulary could be attributed to. Often absent or generic even for a clearly on-topic message, because the master rule book's vocabulary carries no subject claim (research §12, §13). No decision depends on it and nothing asserts it |
 
-`Reason` — the three classes FR-010 requires be countable apart, plus the
-oversize case:
+`Reason` — the four refusal classes FR-010 requires be countable apart, plus
+`IN_SCOPE` for an allowed decision:
 
 | Reason | Outcome it implies | Meaning |
 |--------|--------------------|---------|
@@ -97,11 +97,16 @@ not have to guess.
 
 | Field | Type | Rule |
 |-------|------|------|
-| draft | text | what the answerer produced |
-| sensitivityUsed | `Sensitivity` | the most severe class the answer drew on, reported by the toolkit tools — **not** inferred from the draft text |
-| selfHarm | `SelfHarmSignal` | carried forward from the inbound message |
+| draft | text | what the answerer produced — or, on a refusal, the fixed redirect |
+| sensitivityUsed | `Sensitivity` | the most severe class the answer drew on, reported by the toolkit tools — **not** inferred from the draft text. `NONE` on a refusal |
+| selfHarm | `SelfHarmSignal` | computed by `GuardedPipeline` from the inbound message, for refused decisions as well as allowed ones |
 | recipientRef | text | so another party's identifier in the draft is detectable |
 | secrets | list of text | the system prompt and tool names, known only to SPEC-012 (research §8) |
+
+**Refusal form.** `OutputRequest.refusal(SelfHarmSignal, String recipientRef)`
+builds the refused case: `draft` is `FixedMessages.refusalRedirect()`,
+`sensitivityUsed` is `NONE`, `secrets` is empty. The result is `delivered = true`
+with no `withheldReason` — a refusal is a delivered reply, not a withheld one.
 
 ### OutputResult
 
@@ -111,8 +116,36 @@ not have to guess.
 | text | text | what the user receives: the decorated reply, the fixed redirect, or the fixed safe message |
 | withheldReason | `LeakFamily` or absent | present only when `delivered` is false |
 
-`LeakFamily`: `SHEET_ID` · `ROW_REFERENCE` · `CITATION_FRAME` · `SECRET` ·
-`OTHER_PARTY_IDENTIFIER`.
+### LeakRule
+
+One named family of disclosure the scan must catch (research §8).
+
+| Field | Type | Rule |
+|-------|------|------|
+| family | `LeakFamily` | which of the seven below |
+| name | text, unique | what a withheld result reports to the operator |
+
+**What each family keys on is not modelled here**, deliberately: the six signals
+are not one kind of thing. Sheet ids are literal slugs, row references are
+patterns, a citation frame is a template wrapped around a title, secrets arrive
+as a caller-supplied list, another party's identifier is a *shape test against
+`recipientRef`*, and reasoning markers are structural tags. A single `signal`
+field would mis-describe at least three of them. Research §8 carries the detail
+per family, and that is the only place it belongs. The invariant that survives
+modelling: **never a bare common word and never a bare number.**
+
+`LeakFamily`: `SHEET_ID` · `SHEET_TITLE` · `ROW_REFERENCE` · `CITATION_FRAME` ·
+`SECRET` · `OTHER_PARTY_IDENTIFIER` · `REASONING_MARKER`.
+
+`SHEET_ID` and `SHEET_TITLE` are separate so the operator can tell a parroted
+slug — which points at tool-result plumbing — from a parroted title, which points
+at the prompt. `CITATION_FRAME` stays for a prose-colliding title caught inside a
+frame. The three differ in what you fix, not in how severe they are.
+
+**Title prose class** — every sheet title is `NON_PROSE` (keyed bare) or
+`PROSE_COLLIDING` (keyed only inside a citation frame). The class is derived
+mechanically from the title's own shape, with `title-prose-classes.tsv` recording
+every reviewed departure from that default (FR-017, research §8).
 
 ### FixedMessage
 
@@ -133,7 +166,10 @@ The four advisory sentences are **not** here: they come from SPEC-010's
 |-------|------|------|
 | id | text, unique | stable, so a failure names a case |
 | message | text | the input |
-| expected | `Reason` (adversarial) or `TopicGroup` (in-scope) | |
+| expectedReason | `Reason`, adversarial file only | asserted per case |
+| expectedRule | text, adversarial file only | the hostile rule's name, or blank where no rule decided it (`OFF_TOPIC`, `UNMATCHED`); asserted where given, so one rule is not credited for another's refusal |
+| language | `en`, in-scope file only | coverage metadata only. It MUST never restrict which terms are matched (research §12) |
+| topicGroup | `TopicGroup`, in-scope file only | **documentation, not an assertion** — what the question is about, so the completeness check can see a group is covered. Nothing asserts the decision's own group (research §13, contracts/corpus-format.md) |
 | note | text | why the case exists, for the next reader |
 
 ## Decoration order
@@ -149,17 +185,33 @@ Steps 1 and 2 are terminal: a withheld reply is never decorated, because
 decorating it would mean assembling a message around content already judged
 undeliverable.
 
+This same order is the refusal path (`OutputRequest.refusal`). Steps 1, 2 and 4
+are vacuous there — product copy carries no marker, no secret and no sensitivity
+— so the only decoration a refusal can receive is step 3's support line. That is
+what spec.md's edge case "a refusal and a self-harm support line are both
+warranted" requires: the support line is sent, the astrological content is not.
+
+An invariant follows, and is asserted in `GuardedPipelineTest`: the fixed
+redirect and the fixed safe replacement must both survive their own leak scan
+unchanged. If a future copy edit made one of them trip the scan, every refusal
+would silently become the safe message instead.
+
 ## Validation at load (fail fast)
 
 - every `InScopeTerm.group` has answerable content in the loaded toolkit;
 - `topic-terms-en.tsv` names only known `TopicGroup` values;
 - no hostile phrase is empty, and every phrase belongs to a known family;
 - no stopword appears as a `SUPPLEMENT` term (it would silence that term);
-- the toolkit is loadable at all — if it is not, the gate has no taxonomy and
-  refuses everything, reporting a fault rather than user error (spec Edge Cases).
+- every title in `title-prose-classes.tsv` is a real sheet title in the loaded
+  manifest, so a renamed sheet cannot leave a stale override behind;
+- the toolkit is loadable at all, checked at **both** entry points — without it
+  `Gate.bundled()` has no taxonomy and `OutputStage.bundled()` has no leak
+  vocabulary, so each fails rather than falling open, reporting a fault rather
+  than user error (spec Edge Cases, FR-017).
 
 ## Relationships
 
 `GateRequest → NormalisedMessage → GateDecision`;
 `HostileRule *—1 family`; `InScopeTerm *—1 TopicGroup`;
+`LeakRule *—1 LeakFamily`; `sheet title —1 prose class`;
 `GuardedPipeline: GateRequest → GateDecision → (Answerer only if ALLOWED) → OutputRequest → OutputResult`.

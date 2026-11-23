@@ -73,8 +73,9 @@ and every test depends on.
 - [ ] T005 [P] `GateRequest` record (`text`, `senderRef`) in
       `guardrail/src/main/java/com/celestia/guardrail/GateRequest.java`.
       Deliberately not a channel type (Constitution IX)
-- [ ] T006 [P] `GateDecision` record + `Outcome` and `Reason` enums
-      (`IN_SCOPE`, `HOSTILE`, `OVERSIZE`, `OFF_TOPIC`, `UNMATCHED`) in
+- [ ] T006 [P] `GateDecision` record + `Outcome` (`ALLOWED`,
+      `REFUSED_OUT_OF_SCOPE`, `REFUSED_HOSTILE` — FR-001's three outcomes) and
+      `Reason` (`IN_SCOPE`, `HOSTILE`, `OVERSIZE`, `OFF_TOPIC`, `UNMATCHED`) in
       `guardrail/src/main/java/com/celestia/guardrail/GateDecision.java`.
       Javadoc `topicGroup` as **best-effort diagnostic only** and `matchedRule`
       as never carrying the message text (research.md §9, §13)
@@ -94,6 +95,14 @@ and every test depends on.
       from the normalised view**, since conflating them is what would let an
       attacker encode a subject word past the topic gate in
       `guardrail/src/test/java/com/celestia/guardrail/NormaliserTest.java`
+      (depends on T008)
+- [ ] T009a `SelfHarmSignal.of` (FR-015): `INTENT` requires a **first-person
+      volitional construction with a harm term**; a question about what the chart
+      indicates is `CHART_INQUIRY`; **`INTENT` wins when both appear**, because a
+      support line shown unnecessarily costs little and a missed one is not
+      recoverable (research.md §7). Foundational rather than US4, because
+      `GuardedPipeline` needs it on the refusal path (T017), in
+      `guardrail/src/main/java/com/celestia/guardrail/SelfHarmSignal.java`
       (depends on T008)
 
 **Checkpoint**: text can be normalised deterministically. Rule work can begin.
@@ -154,24 +163,38 @@ invocations across the whole file (spec.md US1, SC-001).
       than fall open, in
       `guardrail/src/main/java/com/celestia/guardrail/Gate.java` (depends on
       T006, T014; the in-scope branch is T022)
-- [ ] T017 [US1] `GuardedPipeline.handle` — every reply passes the output stage
-      (FR-013): gate, then call the `Answerer`
-      **only** on `ALLOWED`, then run the output stage; a refusal returns the
-      fixed redirect without touching the answerer, in
+- [ ] T017 [US1] `GuardedPipeline.handle` — **every** reply passes the output
+      stage (FR-013): normalise once and derive `SelfHarmSignal.of` from the
+      normalised view truncated to the 4,096-character bound, gate, call the
+      `Answerer` **only** on `ALLOWED`, then run the result — or, on a refusal,
+      `OutputRequest.refusal(selfHarm, recipientRef)` — through the output stage.
+      A refusal never touches the answerer, and **a refused message carrying
+      self-harm intent still receives the support line** (spec.md Edge Cases,
+      SC-006), in
       `guardrail/src/main/java/com/celestia/guardrail/GuardedPipeline.java`
-      (depends on T015, T016; the output stage is T028)
+      (depends on T009a, T015, T016; the output stage is T028)
 - [ ] T018 [US1] `corpus-adversarial.tsv` — `id`, `message`, `expectedReason`,
       `expectedRule`, `note` — with at least one case per hostile family, one per
       obfuscation (base64, hex, zero-width, homoglyph), an oversize case, a benign
-      off-topic case, and **a mixed message (a real astrology question plus an
-      injection) that must be refused as hostile** — in
+      off-topic case, **a mixed message (a real astrology question plus an
+      injection) that must be refused as hostile**, and **two self-harm cases: a
+      bare expression of intent carrying no astrology vocabulary (refused as
+      `UNMATCHED`, support line owed) and the same intent padded past the
+      4,096-character bound (refused as `OVERSIZE`, support line still owed) —
+      the corpus asserts their reason, and T036 asserts the support line, since
+      this file carries no expected reply text** — in
       `guardrail/src/test/resources/com/celestia/guardrail/corpus-adversarial.tsv`
       per [contracts/corpus-format.md](contracts/corpus-format.md)
 - [ ] T019 [US1] `AdversarialCorpusTest`: parameterised over T018 — each case
       refused with its `expectedReason` and, where given, its `expectedRule`
       (asserting the rule stops one rule being credited for another's refusal) —
       plus **one assertion over the whole file that a counting fake `Answerer`
-      was invoked zero times** (SC-001), in
+      was invoked zero times** (SC-001); a **family-completeness assertion**
+      reading `HostileRule.Family` values and failing when any family has no case
+      in the file — the mirror of T025's group completeness, so a family added
+      later cannot ship untested; and the **SC-009 structural assertion** that
+      the executed cases come from the resource file, at least as many running as
+      the file has data rows, so a reviewer adding a line changes no code, in
       `guardrail/src/test/java/com/celestia/guardrail/AdversarialCorpusTest.java`
       (depends on T017, T018)
 - [ ] T020 [US1] `GateTest`: the decision order explicitly — hostile beats
@@ -213,8 +236,11 @@ answerable topic group — and every one must be allowed (spec.md US2, SC-002).
       term to a `TopicGroup`, **except terms from the master rule book
       `1500-rules`, which span every subject and so carry no subject claim**
       (research.md §12 finding 1). Latin-script terms match on **word
-      boundaries, never bare substrings** (§12 finding 4). Wire the in-scope
-      branch of `Gate.decide` to it, in
+      boundaries, never bare substrings** (§12 finding 4). **One matched term is
+      enough** (research.md §5): the terms that survive T021's stopwords are
+      subject matter, and requiring two would refuse the short questions that are
+      the common case on WhatsApp. Wire the in-scope branch of `Gate.decide` to
+      it, in
       `guardrail/src/main/java/com/celestia/guardrail/InScopeVocabulary.java`
       (depends on T001, T016, T021)
 - [ ] T023 [US2] `topic-terms-en.tsv` — the small supplement of compounds and
@@ -236,7 +262,9 @@ answerable topic group — and every one must be allowed (spec.md US2, SC-002).
       diagnostic label rather than a result (research.md §13,
       contracts/corpus-format.md). Plus one completeness assertion reading the
       answerable groups **from the toolkit** so a new answerable group fails the
-      build until the corpus covers it, in
+      build until the corpus covers it, and the **SC-009 structural assertion**
+      that at least as many cases run as the file has data rows, so adding a line
+      needs no code change, in
       `guardrail/src/test/java/com/celestia/guardrail/InScopeCorpusTest.java`
       (depends on T022, T023)
 - [ ] T026 [US2] Extend `GateTest` with the US2 acceptance scenarios: a bare
@@ -244,7 +272,9 @@ answerable topic group — and every one must be allowed (spec.md US2, SC-002).
       (disease, lifespan, speculation, a gemstone) is **allowed rather than
       refused**, because the advisory sentence is how those are handled; and a
       second person's birth data supplied in the message is allowed, as the
-      counterpart to T012's `CROSS_USER` cases, in
+      counterpart to T012's `CROSS_USER` cases; and **a one-word question
+      ("marriage?") is allowed**, pinning the single-term threshold of
+      research.md §5 so it cannot be tightened to two without a failing test, in
       `guardrail/src/test/java/com/celestia/guardrail/GateTest.java`
       (depends on T022, T012)
 
@@ -298,24 +328,19 @@ is the support line; messages merely asking what the chart indicates do not
 
 ### Implementation for User Story 4
 
-- [ ] T030 [US4] `SelfHarmSignal.of` (FR-015): `INTENT` requires a **first-person
-      volitional construction with a harm term**; a question about what the chart
-      indicates is `CHART_INQUIRY`; **`INTENT` wins when both appear**, because a
-      support line shown unnecessarily costs little and a missed one is not
-      recoverable (research.md §7), in
-      `guardrail/src/main/java/com/celestia/guardrail/SelfHarmSignal.java`
-      (depends on T008)
 - [ ] T031 [US4] Wire the support line into `OutputStage`: prepended when and
-      only when the signal is `INTENT`, and before any astrological content, in
-      `guardrail/src/main/java/com/celestia/guardrail/OutputStage.java`
-      (depends on T028, T030)
+      only when the signal is `INTENT`, and before any astrological content —
+      which by the composition order also covers the refusal path, since
+      `OutputRequest.refusal` carries the signal and nothing else decorates it,
+      in `guardrail/src/main/java/com/celestia/guardrail/OutputStage.java`
+      (depends on T009a, T028)
 - [ ] T032 [US4] `SelfHarmSignalTest`: "I want to die" and "I'm going to end it"
       are `INTENT`; "does my chart show suicide" and "is there danger to my life"
       are `CHART_INQUIRY` and get the health advisory with **no** support line
       (SPEC-010 FR-011 vs FR-011a); "my chart says I should die" — both present —
       is `INTENT` (SC-006), in
       `guardrail/src/test/java/com/celestia/guardrail/SelfHarmSignalTest.java`
-      (depends on T030, T031)
+      (depends on T009a, T031)
 
 **Checkpoint**: the crisis path works and is distinct from the chart question.
 
@@ -328,30 +353,89 @@ definitions, internal reasoning, another user's data, or any trace of the
 toolkit's identity.
 
 **Independent Test**: feed the output stage replies deliberately containing each
-forbidden class and confirm none is delivered (spec.md US5).
+forbidden class and confirm none is delivered (spec.md US5), and confirm the
+title classification resolves every sheet the toolkit carries — the scan cannot
+be trusted on a title it never classified.
 
 ### Implementation for User Story 5
 
-- [ ] T033 [P] [US5] `LeakRule` record naming one disclosure family in
-      `guardrail/src/main/java/com/celestia/guardrail/LeakRule.java`
-- [ ] T034 [US5] The leak scan in `OutputStage`, keyed on the four signals of
-      research.md §8 — toolkit **sheet ids** (`1500-rules`, `ready-reckoner`),
-      **row references** (`row 1349`, `<slug>:r<n>`), the toolkit title or a
-      sheet title **inside a citation frame** ("per the …", "source: …"), and the
-      **secrets supplied by the caller**. **Never on a bare word**: `Relationship`,
-      `Aspects`, `Death` and `Property` are real sheet titles and ordinary English
-      an answer must be able to use (FR-017), in
+- [ ] T033 [P] [US5] `LeakRule` record (`family`, `name`) + the `LeakFamily` enum
+      (`SHEET_ID`, `SHEET_TITLE`, `ROW_REFERENCE`, `CITATION_FRAME`, `SECRET`,
+      `OTHER_PARTY_IDENTIFIER`, `REASONING_MARKER`) in
+      `guardrail/src/main/java/com/celestia/guardrail/LeakRule.java`.
+      What each family keys on is **not** a field: the six signals are
+      heterogeneous and live in T034's code with research.md §8 as their
+      reference (data-model.md `LeakRule`)
+- [ ] T033a [P] [US5] `title-prose-classes.tsv` — `title`, `class`
+      (`NON_PROSE` | `PROSE_COLLIDING`), `reason` — the **reviewed exceptions**
+      to the mechanical classification of T034, not a copy of the 75 titles. Seed
+      it with `ABCD Significance` → `PROSE_COLLIDING` (`ABCD` is KP technique
+      vocabulary: sign, star, sub and sub-sub lords), and note `BTR` in a comment
+      as the one classified `NON_PROSE` most likely to need revisiting, in
+      `guardrail/src/main/resources/com/celestia/guardrail/title-prose-classes.tsv`
+      (research.md §8)
+- [ ] T034 [US5] The leak scan in `OutputStage`, keyed on the six signals of
+      research.md §8: toolkit **sheet ids** (`1500-rules`, `ready-reckoner`),
+      **row references** (`row 1349`, `<slug>:r<n>`), **sheet titles by prose
+      class**, the **secrets supplied by the caller**, **another party's
+      identifier**, and **structural reasoning markers**. The three that need
+      stating precisely:
+      **Titles by prose class** — ids and titles for all 75 sheets read from
+      `KpToolkit.sheets()`, housekeeping included, since leaking
+      `Version Control` is still a leak. A **non-prose** title is keyed **bare**
+      (`ReadyReckoner`, `MarriageMatching`, `1500+Rules` — 34 of the 75 at the
+      current release, derived not listed: `LeakFamily.SHEET_TITLE`); a
+      **prose-colliding** one only **inside a citation frame**
+      ("per the …", "source: …" — `Relationship`, `Aspects`,
+      `Death`, `Vimshottari`: `LeakFamily.CITATION_FRAME`). The class is decided
+      mechanically — any word with an internal capital, a digit or a `+` is
+      non-prose — and overridden in both directions by T033a. Title matching is
+      case-insensitive on the whole title at word boundaries, so `ReadyReckoner`
+      fires and "ready to reckon with it" does not.
+      **Another party's identifier** — an E.164-shaped number or user-id token
+      that is not the caller's `recipientRef`
+      (`LeakFamily.OTHER_PARTY_IDENTIFIER`, the control FR-017's "another user's
+      data" limb requires).
+      **Structural reasoning markers** — a `<thinking>` tag or a
+      `system:`/`assistant:` role prefix (`LeakFamily.REASONING_MARKER`,
+      FR-017's internal-reasoning limb).
+      **Never on a bare common word or a bare number**: `Relationship`,
+      `Aspects`, `Death` and `Numerology` are real sheet titles and ordinary
+      English an answer must be able to use, and a horary number or a birth year
+      is not an identifier (FR-017), in
       `guardrail/src/main/java/com/celestia/guardrail/OutputStage.java`
-      (depends on T028, T033)
+      (depends on T028, T033, T033a)
 - [ ] T035 [US5] Extend `OutputStageTest` for the leak scan: a draft quoting the
       system prompt, naming a sheet ("per the ReadyReckoner sheet"), citing a row,
       or exposing a tool call is **withheld in full and replaced** by the safe
       message, never partly redacted (FR-018); a draft carrying
-      `<<OUT_OF_SCOPE>>` is replaced by the fixed redirect; and — the regression
-      that matters — "your relationship with your partner" **is** delivered,
-      proving a bare sheet title does not trip the scan (SC-005), in
+      `<<OUT_OF_SCOPE>>` is replaced by the fixed redirect; the regression that
+      matters — "your relationship with your partner" **is** delivered,
+      proving a prose-colliding sheet title does not trip the scan (SC-005); the
+      **bare-title pair that this feature nearly shipped without** — "ReadyReckoner
+      says your 7th house sub lord connects to 11" **is withheld** as
+      `SHEET_TITLE` with no citation frame present, while "your Vimshottari dasha
+      runs to 2031" and "the aspects between them are close" **are delivered**,
+      proving the prose class is what separates them; the identifier
+      pair, where **a draft containing a phone number that is not the
+      recipient's is withheld as `OTHER_PARTY_IDENTIFIER`** while "take horary
+      number 108", "you were born in 1987" and the recipient's own number are
+      delivered; and a draft carrying a `<thinking>` block or an `assistant:`
+      role prefix is withheld as `REASONING_MARKER`, in
       `guardrail/src/test/java/com/celestia/guardrail/OutputStageTest.java`
       (depends on T034)
+- [ ] T035a [US5] `LeakRuleTest` — the classification itself, which T035 only
+      exercises through three example drafts: **every** title from
+      `KpToolkit.sheets()` resolves to exactly one class, so no sheet is
+      unclassified; every override in T033a names a title that exists in the
+      loaded manifest (data-model "Validation at load"), so a renamed sheet
+      cannot leave a stale line behind; and the mechanical rule is pinned at both
+      ends — `ReadyReckoner` and `1500+Rules` are `NON_PROSE`, `Relationship` and
+      `Medical Astrology` are `PROSE_COLLIDING`. Assert the split is **derived**,
+      never a hard count: a toolkit release that adds a sheet must change the
+      numbers without failing this test, in
+      `guardrail/src/test/java/com/celestia/guardrail/LeakRuleTest.java`
+      (depends on T033a, T034)
 
 **Checkpoint**: US1–US5 hold. The reply path is safe in both directions.
 
@@ -360,19 +444,27 @@ forbidden class and confirm none is delivered (spec.md US5).
 ## Phase 8: User Story 6 - The owner can see why, and extend the gate (Priority: P3)
 
 **Goal**: every refusal says which rule matched, `UNMATCHED` is countable on its
-own, and a reviewer can extend either corpus without touching code.
+own, and a reviewer can extend either corpus — or any resource table — without
+touching code and without silently breaking the gate.
 
 **Independent Test**: every refusal carries a non-empty reason; adding a line to
-either corpus file is exercised on the next run with no code change (spec.md US6).
+either corpus file is exercised on the next run with no code change (spec.md
+US6); and a malformed resource edit fails the build loudly rather than yielding a
+gate that misbehaves quietly.
 
 ### Implementation for User Story 6
 
 - [ ] T036 [US6] `GuardedPipelineTest`: a refused request never reaches the
       answerer (the property FR-003 asserts, tested directly rather than only
-      through the corpus); an allowed one reaches it exactly once; and the result
-      always passes through the output stage, in
+      through the corpus); an allowed one reaches it exactly once; the result
+      always passes through the output stage, refusals included; **a refused
+      message expressing self-harm intent comes back with the support line as its
+      first line** (SC-006 — the case the pipeline would otherwise drop); and
+      both `FixedMessages.refusalRedirect()` and `safeReplacement()` survive
+      their own leak scan unchanged, so a copy edit cannot turn every refusal
+      into the safe message, in
       `guardrail/src/test/java/com/celestia/guardrail/GuardedPipelineTest.java`
-      (depends on T017, T028)
+      (depends on T017, T028, T031)
 - [ ] T037 [US6] Extend `GateTest`: every refusal carries a non-empty
       `matchedRule`; **no decision carries the message text anywhere** (the check
       that keeps the refusal log from quietly becoming a store of rejected
@@ -380,6 +472,25 @@ either corpus file is exercised on the next run with no code change (spec.md US6
       `OFF_TOPIC` so the cost of failing closed is measurable (FR-010, SC-007), in
       `guardrail/src/test/java/com/celestia/guardrail/GateTest.java`
       (depends on T016, T020)
+- [ ] T037a [US6] **Fail fast on bad data** — implement and test all six
+      load-time validations of data-model.md "Validation at load", which no task
+      covered: every `InScopeTerm.group` has answerable content; `topic-terms-en.tsv`
+      names only known `TopicGroup` values; no hostile phrase is empty and every
+      one belongs to a known family; no stopword appears as a `SUPPLEMENT` term
+      (it would silence that term); every `title-prose-classes.tsv` entry names a
+      real sheet title; and **the toolkit is loadable at all — for both
+      `Gate.bundled()` and `OutputStage.bundled()`**. If it is not, each fails
+      loudly rather than yielding a gate with no taxonomy or a leak scan with no
+      vocabulary, either of which would fall open (spec.md Edge Cases; the gate
+      half was implemented in T016 but untested, and the output half is new —
+      the leak scan gained its dependency on `KpToolkit.sheets()` with T034).
+      This is the owner's story because a bad data edit must break the
+      build, not the gate: each check gets a negative test proving the bad input
+      is rejected, in `HostileRules.java`, `InScopeVocabulary.java`, `Gate.java`
+      and `OutputStage.java` under
+      `guardrail/src/main/java/com/celestia/guardrail/`, with the tests in
+      `guardrail/src/test/java/com/celestia/guardrail/LoadValidationTest.java`
+      (depends on T014, T016, T022, T034)
 - [ ] T038 [US6] Add the single-path ArchUnit rule to
       `agent/src/test/java/com/celestia/agent/architecture/DeterminismArchitectureTest.java`:
       no class outside `GuardedPipeline` may depend on a chat-model type. It
@@ -406,22 +517,26 @@ either corpus file is exercised on the next run with no code change (spec.md US6
       (contracts/guardrail-api.md "Stability") in
       `guardrail/src/main/java/com/celestia/guardrail/package-info.java`
 - [ ] T041 [P] `GatePerformanceTest`: a warmed-JIT timing assertion that a
-      decision on a message at the 4,096-character bound averages well under a
-      tenth of a second over 1,000 calls — the mean, not a single call, so one
-      GC pause does not fail CI (SC-008). Also assert the structural property
-      behind SC-009: `InScopeCorpusTest` and `AdversarialCorpusTest` derive their
-      cases **from the resource files**, so a reviewer adding a line changes no
-      code — assert each file contributes at least as many executed cases as it
-      has data rows, in
+      decision on a message at the 4,096-character bound averages **well under
+      1 ms** over 1,000 calls — plan.md's Performance Goal rather than SC-008's
+      much looser "tenth of a second", so a hundredfold regression fails CI
+      instead of passing it; the mean, not a single call, so one GC pause does
+      not fail CI (SC-008), in
       `guardrail/src/test/java/com/celestia/guardrail/GatePerformanceTest.java`
-      (depends on T019, T025)
+      (depends on T016, T022). SC-009's structural assertion now lives in the two
+      corpus tests themselves (T019, T025), where the resource files are read
 - [ ] T042 Run quickstart.md steps 1, 2, 3 and 5 — `./mvnw -pl guardrail -am
       test`, the two corpus tests, `DeterminismArchitectureTest`, and
       `./mvnw verify` — and confirm green, including Spotless and the ArchUnit
       layering rules that already list `com.celestia.guardrail..` among the pure
-      packages. Two pre-existing failures are unrelated and expected:
-      `HoraryHouseProviderContractTest.isDeterministic`, and `agent`'s
-      Testcontainers tests without Docker
+      packages. The build is expected **green**. The only tests that do not run
+      are `agent`'s Testcontainers integration tests when Docker is not running
+      (environmental, ADR-0008, not a defect). An earlier draft of this task also
+      listed `ephemeris`'s `HoraryHouseProviderContractTest.isDeterministic` as a
+      standing failure; **that was wrong** — verified 2026-11-24, it passes, as
+      does the whole `ephemeris` module (51 tests, 0 failures), and the provider
+      has not changed since SPEC-005 landed it. Treat any failure of it as a real
+      Constitution II defect, not as expected noise
 - [ ] T043 **MANUAL — owner only**: read
       `guardrail/src/test/resources/com/celestia/guardrail/corpus-in-scope.tsv`
       as a user would type it and correct anything stilted, then read
@@ -447,9 +562,15 @@ either corpus file is exercised on the next run with no code change (spec.md US6
   - **US3 owns `OutputStage`** (T028). US4 (T031) and US5 (T034) both extend that
     same file, so they follow US3 and should not be worked in parallel with each
     other.
+  - **The self-harm signal is Foundational, not US4** (T009a). `GuardedPipeline`
+    computes it for every message, because a refused message can be the one that
+    most needs the support line. US4 keeps only the wiring (T031) and the tests
+    (T032).
   - **US6 depends on US1 and US3**: T036 needs both the pipeline and the output
     stage; T037 extends `GateTest`. T038 (the ArchUnit rule) depends on nothing
-    and could land at any time.
+    and could land at any time. **T037a is last of the six**, because it
+    validates data that every other loader reads — T014, T016, T022 and T034
+    must all exist before their bad-input paths can be tested.
 - **Polish (Phase 9)**: T039–T042 after the stories; T043 is the owner's and can
   begin as soon as T025 passes
 
@@ -466,6 +587,8 @@ either corpus file is exercised on the next run with no code change (spec.md US6
 - US1: T010 and T011 are independent of each other; T018 (the corpus TSV) can be
   authored in parallel with T014–T017
 - US2: T021 and T023 are both data files, independent of T022's code
+- US5: T033 and T033a are both independent of T034's code; T035a is a separate
+  test class from T035 and can be written alongside it
 - Across stories: T038's ArchUnit rule is independent of everything here
 - **Not parallel**: anything touching `Gate.java` (T016, T022) or
   `OutputStage.java` (T028, T031, T034), and the three tasks that extend

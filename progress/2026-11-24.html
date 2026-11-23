@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celestia map 2026-11-24</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: plain, orienting, honest — a map for someone who lost the thread.
+   IDEA: a metro line map — one WhatsApp message riding from "in" to "reply", stopping at each part of the system.
+   PICTURE: the line itself; stations filled (done), ringed (built, not wired), hollow-dashed (not started).
+   COLOUR and TYPE: white paper / night ground; line ink; one saffron accent for "the gap"; Overpass (signage face).
+   LAYOUT: title + line in the first screen; then the gap, modules, decisions, reading order. Line turns vertical on phones. */
+:root{color-scheme:light dark;
+  --bg:light-dark(#fbfaf7,#121218);--ink:light-dark(#1b1b22,#ecebf2);--mute:light-dark(#5d5d6b,#a3a2b3);
+  --rule:light-dark(#e3e1da,#2a2a35);--card:light-dark(#ffffff,#1a1a22);
+  --done:light-dark(#16795f,#3fbf98);--wired:light-dark(#2f5bd3,#7c9cff);--todo:light-dark(#a7a6b2,#5b5a6a);
+  --gap:#e8a317}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Overpass,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px);max-width:1240px;margin:0 auto}
+h1{font-size:clamp(30px,4.4vw,48px);line-height:1.05;font-weight:800;margin:0 0 12px;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:26px;line-height:1.15;margin:0 0 14px;font-weight:800;text-wrap:balance}
+p{max-width:68ch;margin:0 0 12px}
+.lede{font-size:18px;color:var(--mute);max-width:62ch}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin:22px 0 6px;font-size:14px;color:var(--mute)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.dot{width:16px;height:16px;border-radius:50%;display:inline-block;flex:none}
+.d-done{background:var(--done)}.d-wired{background:var(--card);border:4px solid var(--wired)}
+.d-todo{background:var(--card);border:3px dashed var(--todo)}.d-gap{background:var(--gap)}
+
+/* the line */
+.line{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:0}
+.st{position:relative;padding:0 6px;text-align:center}
+.st::before{content:"";position:absolute;top:15px;left:0;right:0;height:8px;background:var(--seg,var(--todo))}
+.st:first-child::before{left:50%}.st:last-child::before{right:50%}
+.st.done{--seg:var(--done)}.st.wired{--seg:var(--wired)}.st.todo{--seg:repeating-linear-gradient(90deg,var(--todo) 0 10px,transparent 10px 18px)}
+.st .o{position:relative;z-index:1;width:38px;height:38px;margin:0 auto 12px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:800;font-size:14px}
+.st.done .o{background:var(--done);color:#fff}
+.st.wired .o{border:6px solid var(--wired);color:var(--wired)}
+.st.todo .o{border:3px dashed var(--todo);color:var(--mute)}
+.st.gap .o{box-shadow:0 0 0 6px var(--bg),0 0 0 10px var(--gap)}
+.st b{display:block;font-size:15px;line-height:1.2;margin-bottom:4px}
+.st small{display:block;font-size:13px;line-height:1.35;color:var(--mute)}
+.st .spec{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--ink);background:var(--rule);border-radius:4px;padding:1px 6px}
+.under{margin-top:26px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:16px 18px}
+.box h3{margin:0 0 6px;font-size:17px}
+.box p{font-size:15px;margin:0;color:var(--mute)}
+@media(max-width:860px){
+  .line{grid-template-columns:1fr}
+  .st{display:grid;grid-template-columns:52px minmax(0,1fr);text-align:left;padding:0 0 22px;column-gap:12px}
+  .st::before{top:0;bottom:0;left:21px;right:auto;width:8px;height:auto;background:var(--seg,var(--todo))}
+  .st.todo{--seg:repeating-linear-gradient(180deg,var(--todo) 0 10px,transparent 10px 18px)}
+  .st:first-child::before{top:19px;left:21px}.st:last-child::before{bottom:auto;height:19px;right:auto}
+  .st .o{margin:0 0 0 2px;grid-row:span 3}
+  .under{grid-template-columns:1fr}
+}
+
+/* gap band */
+.gapband{background:light-dark(#fff6e2,#241d10);border-block:1px solid light-dark(#f1dca8,#3b2e14)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0 18px;font-weight:600}
+.flow span{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:8px 12px}
+.flow .hot{border:2px solid var(--gap)}
+.flow i{font-style:normal;color:var(--mute)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:var(--rule);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-size:13px;color:var(--mute);font-weight:600}
+td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:14px}
+.tag .dot{width:11px;height:11px}.tag .d-wired{border-width:3px}.tag .d-todo{border-width:2px}
+.cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(20px,4vw,48px)}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+ol.read{padding-left:22px;margin:0}ol.read li{margin-bottom:10px}
+.foot{font-size:13px;color:var(--mute);border-top:1px solid var(--rule)}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--rule)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7em;margin-inline-start:-7.5em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}td.n{text-align:start}}
+@media(prefers-reduced-motion:no-preference){.st.gap .o{animation:pulse 2.4s ease-in-out infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px var(--bg),0 0 0 14px color-mix(in srgb,var(--gap) 35%,transparent)}}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+
+<section class="band">
+  <p style="margin:0 0 10px;font-size:14px;color:var(--mute)"><a href="index.html" style="color:inherit">All snapshots</a> · Snapshot of 24 Nov 2026 — the gate is planned to the last task</p>
+  <h1>The gate is planned to the last task. 46 of them, and no code yet.</h1>
+  <p class="lede">SPEC-011 now has everything but its code: research, data model, two API contracts, a quickstart and <b>46 tasks</b>. Five <code>/speckit-analyze</code> passes took it from 22 findings to clean, closing two that mattered — a message in crisis that the gate refused would have received <b>no crisis helpline</b>, and the output stage had <b>no mechanism</b> for the one disclosure Principle V names outright. Both now have code to write and tests to prove it. Nothing new reaches the user: replies are still an echo.</p>
+  <div class="legend">
+    <span><i class="dot d-done"></i>Built and tested</span>
+    <span><i class="dot d-wired"></i>Spec written, not built</span>
+    <span><i class="dot d-todo"></i>Not started</span>
+    <span><i class="dot d-gap"></i>The gap to close first</span>
+  </div>
+  <ol class="line" id="line"></ol>
+  <div class="under">
+    <div class="box"><h3>Today, end to end</h3><p>A message arrives, is verified and queued, and the reply that goes back is still the same text — <code>EchoReplyHandler</code>. The toolkit can now judge any chart, but nothing calls it from the reply path yet. That wiring is SPEC-011 + SPEC-012.</p></div>
+    <div class="box"><h3>What changed since the last snapshot</h3><p>The multilingual answer was <b>revised the same day it was given</b>: drafting the Hindi corpus showed the quality turns on a native-speaker review that cannot be short-cut, and it was holding up the first cut for a register no user is served by yet. So: <b>English only</b>, with the drafted Hindi work parked rather than discarded. That also un-compounds the risk — fail-closed now runs against ~1,700 terms derived from the toolkit itself, so the residual gap is a missing synonym, not a missing language. Then plan, research, data model, contracts, quickstart and 46 tasks, hardened by five analyze passes.</p></div>
+  </div>
+</section>
+
+<section class="gapband"><div class="band">
+  <h2>Next to build: the guardrail core (SPEC-011) — planned, not built</h2>
+  <p>Stage A ends with one real answer to the owner on WhatsApp, grounded in the toolkit but speaking as the astrologer — never naming its source (ADR-0025). The toolkit is done and the gate is planned to the task; what remains is writing it, then the agent that replaces the echo in <code>ReplyHandler</code>.</p>
+  <div class="flow">
+    <span>010 Toolkit knowledge base ✓</span><i>→</i><span class="hot">011 Guardrail core — 46 tasks ready, build next</span><i>→</i><span>012 Owner-preview agent</span><i>→</i><span>first toolkit-grounded answer</span>
+  </div>
+  <p>SPEC-011 needs no LLM, so it is not blocked on where the LLM runs (ADR-0009 / 0010 — Llama 4 on Ollama is planned; the hardware isn't bought). That decision still blocks SPEC-012. A good share of the work is <em>data, not code</em>: 15 in-scope questions, one per answerable toolkit topic group, plus the adversarial corpus — both run as a CI gate, and both extendable by adding a line to a file.</p>
+  <p><b>What the five analyze passes caught</b>, because it says something about where the risk in a spec actually lives. Two were serious. A refused message never reached the output stage, so someone writing "I want to end my life" — a message no astrology vocabulary places, therefore refused — would have got the bare redirect and <b>no helpline</b>; refusals now pass through the output stage too. And FR-017 required the reply never disclose "another user's data" while nothing implemented it; it has a signal and a test now. A third, found by reading the toolkit's real sheet titles: the leak scan demanded a citation frame around every title, so a reply saying <b>"ReadyReckoner says your 7th house…"</b> would have sailed through. 34 of the 75 titles cannot occur in English and are now caught bare; the other 41 — <code>Relationship</code>, <code>Death</code>, <code>Vimshottari</code> — still need the frame, so ordinary KP language stays deliverable.</p>
+  <p>Two tasks now wait on a human, not on code. <b>SPEC-010 T048</b>: the KP-practitioner review of 10 readings per golden chart (SC-005), generated and waiting in <code>core/target/promise-readings/</code> — 792 promised, 29 condition-to-check, 887 partly indicated. And <b>SPEC-011 T043</b>: read the 15 in-scope questions as a user would really type them. Under fail-closed every gap in that file is a real question refused, which makes it the highest-value review in the feature and the only task there that code cannot do.</p>
+
+  <h2 style="margin-top:30px">What the import actually produced</h2>
+  <table class="stack"><thead><tr><th>Criterion</th><th>Target</th><th>Verified</th></tr></thead><tbody id="sc"></tbody></table>
+  <h2 style="margin-top:30px">The re-ordered roadmap</h2>
+  <table class="stack"><thead><tr><th>Stage</th><th>Specs</th><th>Outcome</th></tr></thead><tbody id="stages"></tbody></table>
+</div></section>
+
+<section class="band cols">
+  <div>
+    <h2>Code by module</h2>
+    <table class="stack">
+      <thead><tr><th>Module</th><th>What it does</th><th>Status</th><th class="n">Main / test lines</th></tr></thead>
+      <tbody id="mods"></tbody>
+    </table>
+  </div>
+  <div>
+    <h2>Read these four, in order</h2>
+    <ol class="read">
+      <li><b>.specify/memory/constitution.md</b> — v2.1.0; read Principles V and X first. X now says plainly: the toolkit is internal, never named to the user (ADR-0025).</li>
+      <li><b>core/README.md</b> — one table listing every engine call. This is the part that works.</li>
+      <li><b>agent/…/channel/ReplyHandler.java</b> — the seam where the agent plugs in.</li>
+      <li><b>core/src/main/java/com/celestia/core/toolkit/PromiseEvaluator.java</b> — the 40 lines that turn "the 7th sub lord connects to 2, 7, 11" into matched toolkit rules. This is why Constitution IV holds.</li>
+      <li><b>specs/011-guardrail-core/spec.md</b> — the gate's 20 requirements, and why US1 (refuse the hostile) and US2 (allow the genuine) are both P1: each is the test of the other.</li>
+    </ol>
+    <h2 style="margin-top:28px">Decisions waiting on you</h2>
+    <table class="stack">
+      <thead><tr><th>ADR</th><th>Question</th><th>Blocks</th></tr></thead>
+      <tbody id="adrs"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="band foot">
+  <p>Sources: the repo at <code>~/celestia</code> — commits <code>567c87d</code> (the toolkit, 128 files), <code>aab5d0b</code> (golden readings use the real rule book; republished <code>sepl_18.se1</code> accepted after its checksum failed and all 142 golden assertions passed against it), <code>7c71caf</code> (the SPEC-011 spec) and <code>14c041c</code> (its plan and tasks), plus the uncommitted amendments from five analyze passes — 449 insertions across 8 files in <code>specs/011-guardrail-core/</code>. Constitution v2.1.0 + ADR-0025. Module source counts unchanged since 23b: <b>no code has been written in two days</b>; the work was specification. One claim in the 23c snapshot was later checked and found false — <code>HoraryHouseProviderContractTest</code> was listed as a standing failure and is not one (the whole <code>ephemeris</code> module passes, 51 tests). Old snapshots are never edited, so it still says so there. The licensed workbook is not in the repository; only its imported content is.</p>
+</section>
+
+<script>
+{
+const st=[
+ ["1","WhatsApp in","Webhook, signature check, de-dup, inbox queue, worker","done","009"],
+ ["2","Who is this?","Phone → user record exists; consent + birth-detail questions don't","todo","017"],
+ ["3","Place & time","Birth place → lat/lon, historical time zone → UTC","done","007"],
+ ["4","Allowed?","Owner allow-list first (012), paid plans later","todo","012 · 018–020"],
+ ["5","On topic?","Injection/jailbreak rules, topic gate from the toolkit's groups, advisory sentences, leak scan — 46 tasks ready, not built","wired gap","011"],
+ ["6","Agent (LLM)","Reads the question, calls engine + toolkit tools, answers as the astrologer","todo","012"],
+ ["7","KP engine","Chart, cusps, sub lords, significators, RPs, dasha, horary, daily","done","001–006"],
+ ["8","Toolkit","75 sheets, 2,001 rules matched to the chart in code, 11 keyed look-ups, 72 tests","done","010"],
+ ["9","Reply out","Outbox, Graph API sender, 24-h window templates","done","009"]];
+document.getElementById('line').innerHTML=st.map(([n,t,d,c,s])=>`<li class="st ${c}"><span class="o">${n}</span><b>${t}</b><small>${d}</small><span class="spec">SPEC-${s}</span></li>`).join('');
+
+const tag={done:['d-done','Done'],wired:['d-wired','Spec only'],todo:['d-todo','Empty']};
+const stages=[
+ ["Done","001–009 · 010","Engine, geo, database, WhatsApp plumbing (echo reply), and the toolkit knowledge base"],
+ ["A — the toolkit answers the owner","<s>010 toolkit</s> · 011 guardrail core (spec ✓) · 012 owner-preview agent","The owner gets a toolkit-grounded answer on WhatsApp, in the agent's own voice"],
+ ["B — grow the agent","013 natal · 014 timing &amp; methods · 015 horary &amp; others' charts · 016 remedies, Vastu, numerology","Each topic group passes a practitioner review (≥ 9/10)"],
+ ["C — open to the public","017 onboarding · 018–020 plans &amp; payments · 021 guardrail hardening · 022 ops · 023 daily push","Sign-up, payment, safe public launch"]];
+const sc=[
+ ["SC-001 every sheet stored","75 of 75","75 sheets, none empty"],
+ ["SC-002 structured promise rules","&ge; 2,000","<b>2,001</b>, each traceable to its sheet and row"],
+ ["SC-003 horary agrees with the engine","249 of 249","249/249, lord for lord"],
+ ["SC-004 star look-ups total","108 of 108","108/108 in both tables, no overlaps (+72 friendship pairs, 9 planets, 12 signs)"],
+ ["SC-005 practitioner review","&ge; 9 of 10 per chart","<b>waiting on you</b> — snapshots generated"],
+ ["SC-006 re-import is a no-op","zero differences","two runs byte-identical"],
+ ["SC-007 reading speed","well under 1 s","&lt; 50 ms mean for all 12 houses"]];
+document.getElementById('sc').innerHTML=sc.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join('');
+document.getElementById('stages').innerHTML=stages.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join('');
+const mods=[
+ ["ephemeris","Swiss Ephemeris wrapper: planet positions, houses, sunrise","done",1061,603],
+ ["core","KP rules: lords, chart, significators, dasha, horary, prediction, <b>toolkit</b>","done",4046,6603],
+ ["geo","Geocoding + time-zone resolution","done",937,1021],
+ ["agent","Spring Boot app: persistence + WhatsApp worker (echo reply)","done",2567,2265],
+ ["channel-whatsapp","WhatsApp payload types","done",659,463],
+ ["guardrail","Gate + output stage (planned: 46 tasks, 11 test classes)","todo",8,0],
+ ["billing","Plans & entitlements (placeholder)","todo",7,0],
+ ["payments-razorpay","Payment links & webhook (placeholder)","todo",7,0]];
+document.getElementById('mods').innerHTML=mods.map(([m,d,s,a,b])=>`<tr><td><code>${m}</code></td><td>${d}</td><td><span class="tag"><i class="dot ${tag[s][0]}"></i>${tag[s][1]}</span></td><td class="n">${a.toLocaleString()} / ${b.toLocaleString()}</td></tr>`).join('');
+
+const adrs=[
+ ["0009 · 0010","Which machine runs the LLM (Llama 4 on Ollama)?","SPEC-012 — the first answer"],
+ ["0024","Revisit: suicide-related rules shown like other rules (your Q2: B)","Public launch"],
+ ["—","T048: review 10 promise readings per golden chart (SC-005)","Calling SPEC-010 done"],
+ ["—","T043: read the 15 in-scope corpus questions as a user would type them","Trusting the gate not to refuse real questions"],
+ ["—","Re-enable Hindi/Hinglish (drafted work parked in <code>deferred-multilingual/</code>)","Public traffic — a Hinglish message is refused, and a Hinglish crisis message gets no helpline"],
+ ["0011 · 0012","Meta Business account, WhatsApp number, templates","Going live on WhatsApp"],
+ ["0013","Geocoder API key (OpenCage)","Real birth places"],
+ ["0017 · 0020","Billing model, grace period","Payments"],
+ ["0022","Terms / privacy / refund pages","Razorpay live, launch"],
+ ["0001","Swiss Ephemeris licence (buy at go-live)","Launch"]];
+document.getElementById('adrs').innerHTML=adrs.map(([a,q,b])=>`<tr><td style="white-space:nowrap">${a}</td><td>${q}</td><td>${b}</td></tr>`).join('');
+}
+</script>
+</body>
+</html>

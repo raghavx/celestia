@@ -29,11 +29,22 @@ single route structural rather than documentary.
 
 Behaviour:
 
-1. `gate.decide(request)`.
-2. If **not** `ALLOWED` — return the fixed refusal redirect. **`answerer` is not
-   called.** This is the property SC-001 measures.
-3. If `ALLOWED` — call `answerer.answer(...)` exactly once, then run the result
-   through `OutputStage`.
+1. Normalise the message once and derive `SelfHarmSignal.of(...)` from it. This
+   happens for **every** message, allowed or refused, because the support line is
+   owed on what the sender wrote and not on what the gate decided (FR-015).
+   The signal is taken from the normalised view truncated to the 4,096-character
+   bound, so padding a message past the bound cannot drop the support line.
+2. `gate.decide(request)`.
+3. If **not** `ALLOWED` — **`answerer` is not called** (the property SC-001
+   measures) — and the refusal still goes through `OutputStage`, as
+   `OutputRequest.refusal(selfHarm, recipientRef)`. No reply of any kind leaves
+   this module without passing the output stage (FR-013).
+4. If `ALLOWED` — call `answerer.answer(...)` exactly once, then run the result
+   through `OutputStage` with the same signal.
+
+The refusal path needs no special case inside `OutputStage`: the fixed decoration
+order of data-model.md already yields the redirect with the support line
+prepended on `INTENT` and nothing else added.
 
 ## `Answerer`
 
@@ -60,7 +71,7 @@ below forbids a second path.
 
 | Method | Returns | Notes |
 |--------|---------|-------|
-| `static OutputStage bundled()` | the shared stage | |
+| `static OutputStage bundled()` | the shared stage, built once from `KpToolkit.bundled()` | `IllegalStateException` if the toolkit cannot be loaded — the leak scan keys on its sheet ids and titles, and a scan with no vocabulary would deliver the very disclosures it exists to catch. Symmetric with `Gate.bundled()`: both halves of the path fail closed |
 | `OutputResult decorate(OutputRequest request)` | delivered text, or withheld | composes in the fixed order of data-model "Decoration order" |
 
 Guarantees:
