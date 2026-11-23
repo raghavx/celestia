@@ -77,9 +77,9 @@ everything is as useless as no gate: it would make the product unable to answer
 its own subject. The two stories together define the gate; each is tested in the
 opposite direction.
 
-**Independent Test**: Replay the in-scope corpus — at least one question for
-every toolkit topic group that has answerable content, in each of English, Hindi
-and Hinglish — through the gate. Every one must be allowed.
+**Independent Test**: Replay the in-scope corpus — at least one English question
+for every toolkit topic group that has answerable content — through the gate.
+Every one must be allowed.
 
 **Acceptance Scenarios**:
 
@@ -93,9 +93,10 @@ and Hinglish — through the gate. Every one must be allowed.
 4. **Given** a user supplying a second person's birth data for a matching
    question, **When** it is gated, **Then** it is allowed, because the data came
    from the message and not from another user's record.
-5. **Given** the same question written in Devanagari Hindi, and again in
-   transliterated Hinglish, **When** each is gated, **Then** both are allowed,
-   as the English form is.
+5. **Given** a question using a compound or synonym the toolkit does not word
+   the same way ("gemstone" where the toolkit says "gems"), **When** it is
+   gated, **Then** it is still allowed — the supplementary English terms exist
+   for exactly this (research §12, finding 3).
 
 ---
 
@@ -258,9 +259,9 @@ with no code change.
   plainly or hidden is treated alike.
 - **FR-006**: The in-scope taxonomy MUST be derived from the toolkit itself —
   the topic groups that have answerable content — and not from a separately
-  maintained list, so that widening the toolkit widens the gate. The evidence
-  that a message belongs to one of those groups MUST be recognised in English,
-  Hindi and transliterated Hinglish alike. *(Clarified 2026-11-23, Q1.)*
+  maintained list, so that widening the toolkit widens the gate. For the first
+  cut the evidence need only be recognised in English.
+  *(Clarified 2026-11-23, Q1 as revised.)*
 - **FR-007**: Housekeeping and author-"ignore" toolkit content MUST NOT make a
   message in scope.
 - **FR-008**: A refused message MUST produce one fixed redirect message, set by
@@ -276,11 +277,13 @@ with no code change.
   its own, because it is the measure of how often fail-closed is refusing a
   genuine question.
 - **FR-011**: Before any matching, inbound text MUST be normalised so that the
-  same question is recognised however it is written: Devanagari and Latin
-  scripts, transliteration variants of one word, mixed-script messages, and the
-  obfuscations of FR-005. Transliteration folding MUST be table-driven and
-  reviewable the way the toolkit's own star-name aliases are, so an unrecognised
-  spelling is a data gap to fill rather than a code change.
+  same question is recognised however it is written: case, Unicode form,
+  invisible characters, confusable glyphs, and the obfuscations of FR-005.
+  Latin-script terms MUST be matched on word boundaries, never as bare
+  substrings. The normaliser MUST NOT assume ASCII-only input, and term matching
+  MUST be table-driven, so that adding a language later is a data change rather
+  than a rewrite of the matcher. Recognising Hindi and Hinglish terms is
+  deferred to post-launch. *(Clarified 2026-11-23, Q1 as revised.)*
 - **FR-012**: Messages MUST be checked within a bounded length; a message
   exceeding the bound is refused rather than processed.
 
@@ -305,7 +308,7 @@ with no code change.
   number. Detection MUST key on toolkit sheet ids and explicit source-citation
   phrasing rather than on bare common words, so that an innocent reply using a
   word that happens to be a sheet title is not blocked.
-- **FR-018**: A reply that fails any check of FR-015 MUST be withheld in full and
+- **FR-018**: A reply that fails any check of FR-017 MUST be withheld in full and
   replaced by a fixed safe message, never partially redacted and sent.
 
 #### The corpus, as a standing gate
@@ -341,9 +344,8 @@ with no code change.
 - **SC-001**: 100 % of hostile and off-topic corpus cases are refused, and the
   answering model is invoked zero times across the whole hostile corpus.
 - **SC-002**: 100 % of in-scope corpus questions are allowed, with at least one
-  question present for each of the toolkit's answerable topic groups (15 at the
-  current toolkit release) in each of English, Hindi and Hinglish — 45 questions
-  at minimum, all allowed.
+  English question present for each of the toolkit's answerable topic groups —
+  15 at the current toolkit release, all allowed.
 - **SC-003**: The same message produces the same decision on every run, with no
   variation across repeated runs of the full corpus.
 - **SC-004**: A reply drawing on sensitive content ends with exactly one advisory
@@ -368,24 +370,34 @@ with no code change.
 
 ### Session 2026-11-23
 
-- Q: Which languages must the deterministic gate understand in v1? → A: **English,
-  Hindi (Devanagari) and transliterated Hinglish from the start**, including
-  messages that mix scripts. Real WhatsApp traffic in India is written that way,
-  and refusing it is the failure US2 exists to prevent (FR-006, FR-011).
+- Q: Which languages must the deterministic gate understand in v1? → A (first
+  answer): English, Hindi and transliterated Hinglish from the start.
+  **→ Revised the same day, after the cost became concrete: English only for the
+  first cut, with Hindi and Hinglish moving to post-launch.** Drafting the Hindi
+  corpus and term table showed the work is substantial and, more to the point,
+  that its quality turns on a native-speaker review that cannot be short-cut —
+  it was holding up the first cut for a register no user is served by yet, since
+  SPEC-012 serves only the owner behind an allow-list. The drafted work is kept
+  in `deferred-multilingual/` rather than discarded (FR-006, FR-011).
 - Q: What happens to a message matching no rule at all — neither hostile nor
   recognisably in scope? → A: **Refuse it (fail closed)**, recorded under its own
   reason so false refusals stay visible and countable. Revisited when the
-  small-model classifier lands in SPEC-021, which is what makes fail-closed
-  tolerable at public scale (FR-009, FR-010).
+  small-model classifier lands in SPEC-021 (FR-009, FR-010).
 
-**How these two answers interact, and why it matters.** Fail-closed means
-anything the gate does not recognise as in scope is refused. Multilingual means
-the in-scope evidence must be recognised in three registers. Together they make
-in-scope coverage *safety-critical for usability*: a gap in the Hindi or Hinglish
-indicators is not a cosmetic miss, it is a genuine question refused. Hence the
-in-scope corpus is required in all three registers (FR-019, SC-002), and
-unmatched refusals are counted separately (FR-010, SC-007) — that count is the
-product's early warning that coverage has become too narrow.
+**How the revision changes the risk.** The two original answers compounded badly:
+fail-closed plus multilingual meant a gap in the Hindi indicators was a genuine
+question refused, with no classifier yet to catch it. English-only removes that
+compounding. Fail-closed now runs against vocabulary derived from the toolkit
+itself — about 1,700 terms from the rule matters and sheet titles — so the
+recognised surface is wide from the first commit and the residual risk is a
+missing compound or synonym rather than a whole missing language. The
+`UNMATCHED` count (FR-010, SC-007) remains the instrument for watching it, and
+matters more now that it is the only one.
+
+**What deferring does not change.** The gate must still be built so that adding a
+language is data, not surgery: normalisation stays script-aware and
+transliteration folding stays table-driven (FR-011), because retrofitting those
+into a matcher built for ASCII is the expensive version of this work.
 
 ## Assumptions
 
@@ -406,11 +418,15 @@ product's early warning that coverage has become too narrow.
   refusal count is the agreed instrument for judging whether the in-scope
   indicators are wide enough; the spec does not set a target for it, because
   there is no traffic yet to set one from.
-- Hindi and Hinglish coverage is required of the *in-scope* indicators and of the
-  normalisation step. The hostile phrase list is assumed to stay predominantly
-  English in v1: attacks are copied from English-language sources, and a
-  transliterated attack still has to survive normalisation to match anything.
-  This is an assumption worth revisiting with real traffic, not a proven claim.
+- The first cut is English-only, and the product therefore cannot serve a user
+  who writes in Hindi or Hinglish until that is re-enabled. That is acceptable
+  only because SPEC-012 serves the owner alone behind an allow-list; it is a
+  launch blocker for public traffic, not a permanent position. The drafted Hindi
+  work and what was learned from it are in `deferred-multilingual/`.
+- The hostile phrase list is assumed to stay predominantly English: attacks are
+  copied from English-language sources, and an obfuscated attack still has to
+  survive normalisation to match anything. Worth revisiting with real traffic,
+  not a proven claim.
 - The entitlement check precedes the gate and is SPEC-012's responsibility; this
   feature assumes it has already run.
 - The advisory sentences and the sensitivity ordering are SPEC-010's constants

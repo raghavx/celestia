@@ -1,0 +1,34 @@
+# DEFERRED: Hindi and Hinglish in-scope cases, drafted 2026-11-23 and parked
+# the same day when multilingual support moved to post-launch. Not in the build.
+# Never reviewed by a native speaker - see README.md before trusting any row.
+id	message	language	topicGroup	note
+kp-hi	मेरे सातवें भाव में राहु का क्या मतलब है?	hi	KP_FOUNDATIONS	bhav + rahu
+kp-hil	mere 7th house me rahu ka kya matlab hai	hi-latn	KP_FOUNDATIONS	no punctuation, as people actually type
+hor-hi	मेरा होरारी नंबर 107 है, क्या यह सौदा होगा?	hi	HORARY	needs review: is "होरारी" what a Hindi speaker writes, or "प्रश्न कुंडली"?
+hor-hil	mera horary number 107 hai deal hogi kya	hi-latn	HORARY	
+meth-hi	अभी मेरी कौन सी दशा चल रही है?	hi	PREDICTION_METHOD	
+meth-hil	abhi meri kaun si dasha chal rahi hai	hi-latn	PREDICTION_METHOD	
+life-hi	क्या इस साल मेरा भाग्य बदलेगा?	hi	LIFE_MATTERS	
+life-hil	is saal mera bhagya badlega kya	hi-latn	LIFE_MATTERS	"kismat" is the commoner word - review which to prefer
+marr-hi	मेरी शादी कब होगी?	hi	MARRIAGE_RELATIONSHIPS	
+marr-hil	meri shaadi kab hogi	hi-latn	MARRIAGE_RELATIONSHIPS	also spelt "shadi" - both are in the term table
+care-hi	क्या मुझे सरकारी नौकरी मिलेगी?	hi	CAREER_EDUCATION	
+care-hil	mujhe sarkari naukri milegi kya	hi-latn	CAREER_EDUCATION	
+fin-hi	क्या मुझे शेयर बाजार में पैसा लगाना चाहिए?	hi	FINANCE_SPECULATION	
+fin-hil	share market me paisa lagana chahiye kya	hi-latn	FINANCE_SPECULATION	
+prop-hi	क्या मेरा अपना घर बनेगा?	hi	PROPERTY	
+prop-hil	apna ghar kab banega	hi-latn	PROPERTY	
+heal-hi	मैं बार बार बीमार क्यों पड़ता हूँ?	hi	HEALTH_MEDICAL	
+heal-hil	main baar baar bimar kyun padta hun	hi-latn	HEALTH_MEDICAL	"beemar" spelling also in the term table
+long-hi	मेरी उम्र लंबी होगी या नहीं?	hi	LONGEVITY	deliberately avoids "कुंडली" so the group is unambiguous - see gap 1
+long-hil	meri umar lambi hogi ya nahi	hi-latn	LONGEVITY	
+trav-hi	क्या मैं विदेश जाऊँगा?	hi	TRAVEL	
+trav-hil	kya main videsh jaunga	hi-latn	TRAVEL	
+chil-hi	संतान कब होगी?	hi	CHILDBIRTH	
+chil-hil	bacche kab honge	hi-latn	CHILDBIRTH	
+rem-hi	मुझे कौन सा रत्न पहनना चाहिए?	hi	REMEDIES	
+rem-hil	mujhe kaun sa ratna pehnna chahiye	hi-latn	REMEDIES	"ratan" and "nag" are the spoken forms - review
+vas-hi	मेरा बेडरूम किस दिशा में होना चाहिए?	hi	VASTU_FENG_SHUI	
+vas-hil	bedroom kis disha me hona chahiye	hi-latn	VASTU_FENG_SHUI	
+num-hi	मेरा शुभ अंक कौन सा है?	hi	NUMEROLOGY	
+num-hil	mera lucky number kya hai	hi-latn	NUMEROLOGY	"ank" alone is unsafe in Latin script - see gap 2

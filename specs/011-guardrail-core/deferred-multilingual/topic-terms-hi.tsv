@@ -1,0 +1,143 @@
+# SPEC-011 FR-011: Hindi and Hinglish in-scope terms, by toolkit topic group.
+# The toolkit is written in English and cannot supply these, so unlike the
+# English vocabulary (derived at load from the toolkit itself) this table is
+# hand-maintained data. Adding a spelling is a data change, never a code change.
+#
+# DRAFT for owner review. Terms marked "SHORT" are below the length at which a
+# Latin-script term is safe to match even on a word boundary - see the notes.
+group	language	term	note
+KP_FOUNDATIONS	hi	भाव		
+KP_FOUNDATIONS	hi	कुंडली		
+KP_FOUNDATIONS	hi	ग्रह		
+KP_FOUNDATIONS	hi	लग्न		
+KP_FOUNDATIONS	hi	नक्षत्र		
+KP_FOUNDATIONS	hi	राशि		
+KP_FOUNDATIONS	hi	राहु		
+KP_FOUNDATIONS	hi	केतु		
+KP_FOUNDATIONS	hi-latn	kundli		
+KP_FOUNDATIONS	hi-latn	kundali		
+KP_FOUNDATIONS	hi-latn	lagna		
+KP_FOUNDATIONS	hi-latn	nakshatra		
+KP_FOUNDATIONS	hi-latn	rashi		
+KP_FOUNDATIONS	hi-latn	bhav	SHORT: also a Hindi word for emotion; low risk in Latin script
+HORARY	hi	होरारी	needs review: may be rare in Hindi - "प्रश्न कुंडली" could be commoner
+HORARY	hi	प्रश्न कुंडली		
+HORARY	hi-latn	horary		
+HORARY	hi-latn	prashna		
+PREDICTION_METHOD	hi	दशा		
+PREDICTION_METHOD	hi	अंतर्दशा		
+PREDICTION_METHOD	hi	गोचर		
+PREDICTION_METHOD	hi-latn	dasha		
+PREDICTION_METHOD	hi-latn	antardasha		
+PREDICTION_METHOD	hi-latn	gochar		
+LIFE_MATTERS	hi	भाग्य		
+LIFE_MATTERS	hi	किस्मत		
+LIFE_MATTERS	hi	परेशानी		
+LIFE_MATTERS	hi	मुकदमा		
+LIFE_MATTERS	hi-latn	bhagya		
+LIFE_MATTERS	hi-latn	kismat		
+LIFE_MATTERS	hi-latn	kismet		
+LIFE_MATTERS	hi-latn	pareshani		
+LIFE_MATTERS	hi-latn	mukadma		
+MARRIAGE_RELATIONSHIPS	hi	शादी		
+MARRIAGE_RELATIONSHIPS	hi	विवाह		
+MARRIAGE_RELATIONSHIPS	hi	पति		
+MARRIAGE_RELATIONSHIPS	hi	पत्नी		
+MARRIAGE_RELATIONSHIPS	hi	जीवनसाथी		
+MARRIAGE_RELATIONSHIPS	hi	प्रेम		
+MARRIAGE_RELATIONSHIPS	hi-latn	shaadi		
+MARRIAGE_RELATIONSHIPS	hi-latn	shadi		
+MARRIAGE_RELATIONSHIPS	hi-latn	vivah		
+MARRIAGE_RELATIONSHIPS	hi-latn	jeevansathi		
+MARRIAGE_RELATIONSHIPS	hi-latn	patni		
+MARRIAGE_RELATIONSHIPS	hi-latn	pati	SHORT: collides with English "patio", "patient" if matched loosely
+CAREER_EDUCATION	hi	नौकरी		
+CAREER_EDUCATION	hi	पढ़ाई		
+CAREER_EDUCATION	hi	शिक्षा		
+CAREER_EDUCATION	hi	व्यापार		
+CAREER_EDUCATION	hi	तरक्की		
+CAREER_EDUCATION	hi-latn	naukri		
+CAREER_EDUCATION	hi-latn	nokri		
+CAREER_EDUCATION	hi-latn	padhai		
+CAREER_EDUCATION	hi-latn	shiksha		
+CAREER_EDUCATION	hi-latn	vyapar		
+CAREER_EDUCATION	hi-latn	tarakki		
+FINANCE_SPECULATION	hi	पैसा		
+FINANCE_SPECULATION	hi	धन		
+FINANCE_SPECULATION	hi	शेयर		
+FINANCE_SPECULATION	hi	सट्टा		
+FINANCE_SPECULATION	hi	निवेश		
+FINANCE_SPECULATION	hi-latn	paisa		
+FINANCE_SPECULATION	hi-latn	paise		
+FINANCE_SPECULATION	hi-latn	share market		
+FINANCE_SPECULATION	hi-latn	satta		
+FINANCE_SPECULATION	hi-latn	nivesh		
+FINANCE_SPECULATION	hi-latn	dhan	SHORT: collides with the name "Dhanush", "dhaniya"
+PROPERTY	hi	घर		
+PROPERTY	hi	मकान		
+PROPERTY	hi	जमीन		
+PROPERTY	hi	संपत्ति		
+PROPERTY	hi-latn	makan		
+PROPERTY	hi-latn	jameen		
+PROPERTY	hi-latn	zameen		
+PROPERTY	hi-latn	sampatti		
+PROPERTY	hi-latn	ghar	SHORT: safe on a word boundary; would be unsafe as a substring
+HEALTH_MEDICAL	hi	बीमारी		
+HEALTH_MEDICAL	hi	बीमार		
+HEALTH_MEDICAL	hi	सेहत		
+HEALTH_MEDICAL	hi	स्वास्थ्य		
+HEALTH_MEDICAL	hi	इलाज		
+HEALTH_MEDICAL	hi-latn	bimari		
+HEALTH_MEDICAL	hi-latn	beemari		
+HEALTH_MEDICAL	hi-latn	bimar		
+HEALTH_MEDICAL	hi-latn	beemar		
+HEALTH_MEDICAL	hi-latn	sehat		
+HEALTH_MEDICAL	hi-latn	swasthya		
+HEALTH_MEDICAL	hi-latn	ilaj		
+HEALTH_MEDICAL	hi-latn	rog	SHORT: unsafe as substring ("progress", "programme"); boundary only
+LONGEVITY	hi	आयु		
+LONGEVITY	hi	उम्र		
+LONGEVITY	hi	जीवनकाल		
+LONGEVITY	hi-latn	umar		
+LONGEVITY	hi-latn	umra		
+LONGEVITY	hi-latn	jeevankal		
+LONGEVITY	hi-latn	ayu	SHORT: unsafe as substring ("ayurveda", "Mayur"); boundary only
+TRAVEL	hi	विदेश		
+TRAVEL	hi	यात्रा		
+TRAVEL	hi	सफर		
+TRAVEL	hi-latn	videsh		
+TRAVEL	hi-latn	yatra		
+TRAVEL	hi-latn	safar		
+CHILDBIRTH	hi	संतान		
+CHILDBIRTH	hi	बच्चा		
+CHILDBIRTH	hi	बच्चे		
+CHILDBIRTH	hi	गर्भ		
+CHILDBIRTH	hi	औलाद		
+CHILDBIRTH	hi-latn	santan		
+CHILDBIRTH	hi-latn	santaan		
+CHILDBIRTH	hi-latn	baccha		
+CHILDBIRTH	hi-latn	bacche		
+CHILDBIRTH	hi-latn	aulad		
+CHILDBIRTH	hi-latn	garbh		
+REMEDIES	hi	उपाय		
+REMEDIES	hi	रत्न		
+REMEDIES	hi	यंत्र		
+REMEDIES	hi	पूजा		
+REMEDIES	hi-latn	upay		
+REMEDIES	hi-latn	upaay		
+REMEDIES	hi-latn	ratna		
+REMEDIES	hi-latn	ratan		
+REMEDIES	hi-latn	yantra		
+REMEDIES	hi-latn	nag	SHORT: unsafe as substring ("manage", "nagging"); boundary only
+VASTU_FENG_SHUI	hi	वास्तु		
+VASTU_FENG_SHUI	hi	दिशा		
+VASTU_FENG_SHUI	hi-latn	vastu		
+VASTU_FENG_SHUI	hi-latn	vaastu		
+VASTU_FENG_SHUI	hi-latn	disha		
+NUMEROLOGY	hi	अंक		
+NUMEROLOGY	hi	अंक ज्योतिष		
+NUMEROLOGY	hi	मूलांक		
+NUMEROLOGY	hi-latn	ank jyotish		
+NUMEROLOGY	hi-latn	mulank		
+NUMEROLOGY	hi-latn	lucky number		
+NUMEROLOGY	hi-latn	ank	SHORT: unsafe as substring ("bank", "thanks"); boundary only

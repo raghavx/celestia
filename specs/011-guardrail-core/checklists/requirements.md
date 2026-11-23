@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [x] No [NEEDS CLARIFICATION] markers remain (resolved 2026-11-23: Q1 multilingual, Q2 fail-closed)
+- [x] No [NEEDS CLARIFICATION] markers remain (resolved 2026-11-23: Q1 revised to English-only, Q2 fail-closed)
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -33,16 +33,24 @@
 
 - Iteration 1 (2026-11-23): all content and readiness items pass; two
   clarifications raised, neither having a reasonable default.
-- Iteration 2 (2026-11-23): both resolved by the owner. Q1 — the gate handles
-  English, Hindi and Hinglish from the start. Q2 — an unmatched message is
-  refused (fail closed), revisited when the SPEC-021 classifier lands. All 16
-  items now pass.
-- The two answers compound, and the spec says so explicitly rather than leaving
-  it to be discovered: fail-closed plus multilingual makes in-scope coverage
-  safety-critical for usability, since a gap in the Hindi or Hinglish indicators
-  refuses a genuine question. That is why the in-scope corpus is required in all
-  three registers (45 questions minimum, SC-002) and why unmatched refusals are
-  counted separately (SC-007) as the early warning.
+- Iteration 2 (2026-11-23): both resolved by the owner. Q1 — English, Hindi and
+  Hinglish from the start. Q2 — an unmatched message is refused (fail closed),
+  revisited when the SPEC-021 classifier lands. All 16 items passed.
+- Iteration 3 (2026-11-23, same day, after planning): **Q1 revised to
+  English-only for the first cut**, multilingual deferred to post-launch
+  (spec.md Clarifications, research §13). Drafting the Hindi corpus showed the
+  blocking cost was the native-speaker review, not the authoring, and it was
+  gating a register no user is served by yet. SC-002 drops from 45 cases to 15.
+  All 16 items still pass.
+- The revision also removed the compounding risk the previous note described:
+  fail-closed is much safer against ~1,700 toolkit-derived English terms than
+  against a hand-authored Hindi list. The `UNMATCHED` count (SC-007) remains the
+  instrument for watching what fail-closed costs, and matters more now that it
+  is the only one.
+- **Known limitation, recorded as such**: the product cannot serve a Hindi or
+  Hinglish speaker until multilingual support is re-enabled. On WhatsApp in
+  India that is most of the eventual audience, so this is a launch blocker for
+  public traffic, not a permanent position.
 - Terminology note: the spec deliberately names `<<OUT_OF_SCOPE>>` and the
   Tele-MANAS number. Both are fixed product copy carried over from PROJECT_PLAN
   and SPEC-010 FR-011a, not implementation detail.
