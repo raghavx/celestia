@@ -1,0 +1,18 @@
+# SPEC-011 T033a — reviewed EXCEPTIONS to the mechanical prose classification
+# of sheet titles (FR-017, research.md §8).
+#
+# This is not a copy of the 75 titles. The default is derived: a title is
+# NON_PROSE when any of its words carries an internal capital, a digit or a "+"
+# (ReadyReckoner, 1500+Rules, MarriageMatching), and PROSE_COLLIDING otherwise
+# (Relationship, Death, Numerology). A sheet added by a later toolkit release is
+# therefore classified without anyone having to remember to.
+#
+# Only departures from that default belong here, in either direction, each with
+# the reason — so an awkward case is a recorded data decision rather than an
+# emergent accident (the discipline FR-011 already applies to folding tables).
+#
+# WATCH: "BTR" classifies NON_PROSE and is left that way. It is an acronym for
+# birth-time rectification that an answer would normally spell out, so keying it
+# bare is safe today — but it is the most likely of the 34 to need revisiting.
+title	class	reason
+ABCD Significance	PROSE_COLLIDING	ABCD is real KP technique vocabulary (sign, star, sub and sub-sub lords), so an answer may legitimately write "the ABCD significance of the cusp"

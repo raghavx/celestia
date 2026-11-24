@@ -1,0 +1,94 @@
+# SPEC-011 T007 — confusable glyph -> Latin equivalent (FR-005, FR-011).
+#
+# Applied after NFKC and before lower-casing, so both cases are listed. NFKC
+# already folds full-width, ligatures and most compatibility forms; this table
+# carries only what it does not reach: Cyrillic, Greek and a few Latin and
+# Cherokee look-alikes.
+#
+# A fold is a DATA DECISION, reviewable here rather than an emergent accident of
+# the matcher (FR-011). Adding a language later adds rows, not code.
+confusable	latin	note
+а	a	Cyrillic a
+е	e	Cyrillic ie
+о	o	Cyrillic o
+р	p	Cyrillic er
+с	c	Cyrillic es
+у	y	Cyrillic u
+х	x	Cyrillic ha
+і	i	Cyrillic byelorussian i
+ј	j	Cyrillic je
+ѕ	s	Cyrillic dze
+ԁ	d	Cyrillic komi de
+ь	b	Cyrillic soft sign
+т	t	Cyrillic te
+м	m	Cyrillic em
+н	h	Cyrillic en
+к	k	Cyrillic ka
+в	b	Cyrillic ve
+г	r	Cyrillic ghe
+ѵ	v	Cyrillic izhitsa
+А	A	Cyrillic A
+Е	E	Cyrillic IE
+О	O	Cyrillic O
+Р	P	Cyrillic ER
+С	C	Cyrillic ES
+У	Y	Cyrillic U
+Х	X	Cyrillic HA
+І	I	Cyrillic I
+Ј	J	Cyrillic JE
+Ѕ	S	Cyrillic DZE
+Т	T	Cyrillic TE
+М	M	Cyrillic EM
+Н	H	Cyrillic EN
+К	K	Cyrillic KA
+В	B	Cyrillic VE
+Г	R	Cyrillic GHE
+ο	o	Greek omicron
+α	a	Greek alpha
+ε	e	Greek epsilon
+ρ	p	Greek rho
+ν	v	Greek nu
+τ	t	Greek tau
+ι	i	Greek iota
+κ	k	Greek kappa
+μ	m	Greek mu
+χ	x	Greek chi
+υ	y	Greek upsilon
+σ	o	Greek sigma
+γ	y	Greek gamma
+η	n	Greek eta
+ϲ	c	Greek lunate sigma
+Ο	O	Greek OMICRON
+Α	A	Greek ALPHA
+Ε	E	Greek EPSILON
+Ρ	P	Greek RHO
+Ν	N	Greek NU
+Τ	T	Greek TAU
+Ι	I	Greek IOTA
+Κ	K	Greek KAPPA
+Μ	M	Greek MU
+Χ	X	Greek CHI
+Υ	Y	Greek UPSILON
+Η	H	Greek ETA
+Β	B	Greek BETA
+Ζ	Z	Greek ZETA
+ı	i	dotless i
+ȷ	j	dotless j
+ɡ	g	script g
+ɩ	i	latin iota
+ℓ	l	script small l
+Ⅰ	I	Roman numeral one
+Ⅴ	V	Roman numeral five
+Ⅹ	X	Roman numeral ten
+ᴀ	a	small capital A
+ᴇ	e	small capital E
+ɴ	n	small capital N
+ᴏ	o	small capital O
+ᴛ	t	small capital T
+ʀ	r	small capital R
+ꜱ	s	small capital S
+ʏ	y	small capital Y
+⁰	0	superscript zero
+Ꭺ	A	Cherokee GO
+Ꭼ	E	Cherokee GV
+Ꮎ	O	Cherokee NA
