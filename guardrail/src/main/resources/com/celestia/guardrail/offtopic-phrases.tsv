@@ -1,0 +1,25 @@
+# SPEC-011 T013 — recognisably off-topic requests (research.md §3).
+#
+# This list buys DIAGNOSIS, NOT A DECISION. Under fail-closed (FR-009) every
+# message here would be refused anyway, because none of it carries in-scope
+# evidence. It exists so OFF_TOPIC can be counted apart from UNMATCHED, and
+# that distinction is the only instrument the product has for judging whether
+# failing closed is costing it real questions (FR-010, SC-007).
+#
+# Patterns are matched on word boundaries, like the hostile phrases.
+name	pattern
+code.write	(write|generate|give me|create) (me )?(a |some )?(python|java|javascript|c\\+\\+|sql|bash|shell|html|css|rust|go) (script|code|program|function|snippet)
+code.debug	(debug|fix|refactor|review) (my |this )?(code|function|script|program|bug)
+code.general	(regex|api|endpoint|docker|kubernetes|git merge|pull request|stack trace|compile error)
+recipe.cook	(recipe for|how (do i|to) (cook|bake|make)|ingredients for)
+recipe.food	(what should i (cook|eat) for (dinner|lunch|breakfast))
+chat.smalltalk	(how are you|what'?s up|who made you|are you (a )?(human|robot|ai|chatgpt|bot)|tell me a joke|sing me)
+chat.weather	(weather|temperature|forecast) (today|tomorrow|in \\w+)
+homework.essay	(write|draft) (me )?(an? )?(essay|poem|story|email|cover letter|resume|cv|blog post)
+homework.translate	translate (this|the following|it) (into|to) \\w+
+homework.summarise	(summari[sz]e|tldr|tl;dr) (this|the following|that article)
+news.current	(latest news|who won|election result|match score|stock price of|exchange rate)
+math.arithmetic	(what is|calculate|compute) \\d+ ?[+*/x-] ?\\d+
+shopping.buy	(where can i buy|cheapest|discount code|coupon|order online)
+medical.direct	(what medicine should i take|prescribe me|dosage for|is this rash)
+legal.direct	(should i sue|is it legal to|draft a contract|notice period in my contract)

@@ -93,6 +93,11 @@ Guarantees:
 wins over `CHART_INQUIRY` when both appear (research §7). A question about what
 the chart indicates is `CHART_INQUIRY` and is ordinary health-class content.
 
+A message opening with an interrogative is a question about the future, not a
+statement of intent — "when will I die?" is `CHART_INQUIRY`, not `INTENT` —
+**unless** it carries a reflexive self-harm phrase, which means intent wherever
+it appears: "should I kill myself" is `INTENT`.
+
 ## `FixedMessages`
 
 | Method | Returns |

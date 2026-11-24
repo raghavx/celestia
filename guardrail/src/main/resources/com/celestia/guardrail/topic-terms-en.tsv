@@ -1,0 +1,16 @@
+# SPEC-011 T023 — the small English supplement: compounds and synonyms the
+# toolkit's own wording misses (research.md §12 finding 3).
+#
+# SCOPE DISCIPLINE. This is NOT a per-topic keyword list — that is exactly what
+# FR-006 exists to forbid. Every row here must be a compound or a synonym for
+# wording the toolkit already has, and the reason belongs in the note column so
+# the next reader can judge it. If a row looks like new taxonomy, it belongs in
+# the toolkit instead.
+#
+# Each row was added because replaying corpus-in-scope.tsv showed a real
+# question the derived vocabulary could not place.
+term	group	note
+gemstone	REMEDIES	the sheet writes "gems"; a user writes "gemstone" (research §12 finding 3)
+gemstones	REMEDIES	plural of the above
+gem stone	REMEDIES	spaced spelling
+birthstone	REMEDIES	common synonym for the same question

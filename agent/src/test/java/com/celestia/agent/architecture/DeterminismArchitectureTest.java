@@ -33,6 +33,22 @@ class DeterminismArchitectureTest {
         "com.celestia.guardrail.."
     };
 
+    /**
+     * Chat-model types, by package. SPEC-011 FR-003 requires that no code path
+     * reach a chat model except through the guardrail, and that this be
+     * mechanically enforced rather than trusted.
+     */
+    private static final String[] CHAT_MODEL_PACKAGES = {
+        "org.springframework.ai..",
+        "dev.langchain4j..",
+        "io.github.ollama4j..",
+        "com.openai..",
+        "com.anthropic.."
+    };
+
+    /** The only type permitted to reach one (SPEC-011 contracts/guardrail-api.md). */
+    private static final String GUARDED_PIPELINE = "com.celestia.guardrail.GuardedPipeline";
+
     private static final List<String> AMBIENT_CLOCK = List.of(
             "java.time.Instant.now(",
             "java.time.LocalDate.now(",
@@ -149,6 +165,32 @@ class DeterminismArchitectureTest {
                 .should()
                 .notHaveRawType(timeshape)
                 .as("SPEC-007 FR-011: no timeshape type in a public field of com.celestia.geo")
+                .allowEmptyShould(true)
+                .check(celestia);
+    }
+
+    /**
+     * Constitution V / SPEC-011 FR-003: there is exactly one route from a user
+     * message to an answer, and it is {@code GuardedPipeline}.
+     *
+     * <p><b>This rule passes vacuously today</b> — there is no chat model in the
+     * build until SPEC-012 introduces one — and that is precisely the point. It
+     * is in place <em>before</em> a second path can be written, so the day
+     * someone wires an LLM call into a handler, a worker or a controller, the
+     * build says no instead of a reviewer having to notice.
+     */
+    @Test
+    void onlyTheGuardedPipelineMayReachAChatModel() {
+        noClasses()
+                .that()
+                .resideInAPackage("com.celestia..")
+                .and()
+                .doNotHaveFullyQualifiedName(GUARDED_PIPELINE)
+                .should()
+                .dependOnClassesThat()
+                .resideInAnyPackage(CHAT_MODEL_PACKAGES)
+                .as("Constitution V / SPEC-011 FR-003: no code path reaches the chat model except "
+                        + "through GuardedPipeline")
                 .allowEmptyShould(true)
                 .check(celestia);
     }

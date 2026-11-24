@@ -15,11 +15,21 @@
     <description>Deterministic injection/jailbreak detection, astrology-only topic gate, and output filter. The only path to the chat model.</description>
 
     <!--
-      The intent-classifier client (small Ollama model) is injected as an interface
-      so this module stays free of Spring AI. Adversarial test corpus lives under
-      src/test/resources.
+      Depends on core for the toolkit taxonomy (TopicGroup), the advisory sentences
+      (Sensitivity) and the imported workbook (KpToolkit). Constitution X says that
+      judgement comes from the toolkit rather than being restated here, so the
+      in-scope vocabulary and the leak scan's sheet ids and titles are both derived
+      from it (SPEC-011 FR-006, FR-017).
+
+      No Spring and no Spring AI: this module is pure and deterministic
+      (Constitution II). ADR-0023's small-model classifier is SPEC-021, not here.
+      The two corpora live under src/test/resources and run on every build.
     -->
     <dependencies>
+        <dependency>
+            <groupId>com.celestia</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

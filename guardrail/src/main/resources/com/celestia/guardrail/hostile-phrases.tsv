@@ -1,0 +1,46 @@
+# SPEC-011 T012 — the hostile rules (FR-004, research.md §6).
+#
+# Five families, covering all three limbs of FR-004: instruction override,
+# prompt and reasoning extraction, role impersonation, and cross-user probes.
+#
+# kind=phrase  the pattern is matched on WORD BOUNDARIES, never as a bare
+#              substring (FR-011), so "ank" cannot match inside "bank".
+# kind=regex   the pattern is matched as written. Used only where a shape rather
+#              than a word is the signal — an E.164 number, a turn marker.
+#
+# CROSS_USER keys on the IDENTIFIER (an E.164-shaped number, a user id, "the
+# user who..."), never on "another person": SPEC-010 FR-012 deliberately allows
+# a user to supply a second person's BIRTH DATA for marriage matching, and
+# keying on the wrong thing either leaks another user's data or breaks that.
+#
+# The name is what a refusal reports. Renaming one requires updating
+# corpus-adversarial.tsv in the same change (contracts/guardrail-api.md).
+family	name	kind	pattern
+INSTRUCTION_OVERRIDE	override.ignore-previous	phrase	ignore (all )?(previous|prior|above|earlier) (instructions?|prompts?|rules?|messages?)
+INSTRUCTION_OVERRIDE	override.disregard	phrase	disregard (all |any )?(previous|prior|the above|your) (instructions?|rules?|guidelines?)
+INSTRUCTION_OVERRIDE	override.forget	phrase	forget (everything|all|your) (you were told|instructions?|rules?|training)
+INSTRUCTION_OVERRIDE	override.you-are-now	phrase	you are (now|no longer) (an?|not) ?\\w*
+INSTRUCTION_OVERRIDE	override.new-instructions	phrase	(new|updated|revised) (instructions?|system prompt|rules?)( follow| are| :)
+INSTRUCTION_OVERRIDE	override.from-now-on	phrase	from now on,? you (will|must|should|are)
+INSTRUCTION_OVERRIDE	override.jailbreak-named	phrase	(jailbreak|dan mode|do anything now|developer mode|sudo mode|god mode)
+INSTRUCTION_OVERRIDE	override.pretend-no-rules	phrase	(pretend|act as if|imagine) (you )?(have no|had no|are not bound|without) (rules?|restrictions?|guidelines?|filters?)
+INSTRUCTION_OVERRIDE	override.bypass	phrase	(bypass|circumvent|get around|turn off|disable) (your |the )?(guardrails?|filters?|rules?|restrictions?|safety)
+PROMPT_EXTRACTION	extraction.system-prompt	phrase	(system prompt|initial prompt|original prompt|hidden prompt)
+PROMPT_EXTRACTION	extraction.your-instructions	phrase	(what|show|tell|print|repeat|reveal|output|give) (me )?(are |is )?your (instructions?|prompt|rules?|system message|configuration)
+PROMPT_EXTRACTION	extraction.repeat-above	phrase	(repeat|print|output|echo) (the |everything )?(text |words |prompt )?above
+PROMPT_EXTRACTION	extraction.verbatim	phrase	(verbatim|word for word|exactly as written) (instructions?|prompt|rules?)
+PROMPT_EXTRACTION	extraction.tool-definitions	phrase	(what|list|show|tell me) (are )?(your |the )?(tools?|functions?|tool definitions?|available functions?)
+PROMPT_EXTRACTION	extraction.first-message	phrase	(first|very first|earliest) (message|instruction|line) (you|in this)
+REASONING_EXTRACTION	reasoning.chain-of-thought	phrase	(chain of thought|chain-of-thought|internal monologue|scratchpad|inner monologue)
+REASONING_EXTRACTION	reasoning.show-your-reasoning	phrase	(show|reveal|print|output|tell me) (me )?your (reasoning|thinking|thought process|internal \\w+)
+REASONING_EXTRACTION	reasoning.thinking-tags	phrase	(thinking|thought) (tags?|blocks?|section)
+ROLE_IMPERSONATION	impersonation.role-prefix	regex	(^|\\n)\\s*(system|assistant|user)\\s*:
+ROLE_IMPERSONATION	impersonation.turn-marker	regex	(<\\|im_start\\|>|<\\|im_end\\|>|\\[/?inst\\]|<<sys>>|### instruction)
+ROLE_IMPERSONATION	impersonation.new-session	phrase	(new|begin|start) (system message|session|conversation)( now|:|$)
+ROLE_IMPERSONATION	impersonation.end-of-conversation	phrase	(end of (conversation|transcript|context)|conversation ends here)
+CROSS_USER	cross-user.e164-contiguous	regex	\\+?\\d{10,15}
+CROSS_USER	cross-user.e164-separated	regex	\\+\\d{1,3}[\\s().-]{0,2}\\d{3,5}[\\s().-]{0,2}\\d{4,}
+CROSS_USER	cross-user.user-id	phrase	(user ?id|userid|user_id|account id|customer id|their user record)
+CROSS_USER	cross-user.the-user-who	phrase	the (user|person|account|number|customer) (who|at|with|whose)
+CROSS_USER	cross-user.another-users-data	phrase	(another|other|someone else'?s?) (user'?s?|account'?s?|customer'?s?) (data|details?|chart|record|birth)
+CROSS_USER	cross-user.stored-record	phrase	(stored|saved|in your database|from your records?|on file) (details?|data|chart|birth)
