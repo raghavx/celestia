@@ -36,6 +36,7 @@ it starts. Amending an accepted ADR requires a new ADR that supersedes it.
 | [0023](0023-topic-gate-mechanism.md) | Topic-gate mechanism (layered: rules + small-model classifier + embedding fallback) | accepted (taxonomy superseded by 0024) | Phase 7 |
 | [0024](0024-toolkit-centred-constitution.md) | Toolkit-centred constitution v2.0.0 (toolkit is the KP judgement; full-toolkit scope; security unchanged) | accepted (Principle X wording amended by 0025) | SPEC-010 |
 | [0025](0025-toolkit-is-internal-only.md) | Toolkit is internal-only; the agent is the astrologer (v2.1.0 — traceability stays, but never named to the user) | accepted | SPEC-010, SPEC-012 |
+| [0026](0026-owner-preview-on-a-third-party-api.md) | May the owner preview run on a third-party inference API? Six conditions, one enforced at startup; would require constitution **v3.0.0** — a weakening, not a clarification | **proposed** | SPEC-012 T040, T041, T044 — and Stage A's exit criterion |
 
 ## Still needing an owner decision
 
