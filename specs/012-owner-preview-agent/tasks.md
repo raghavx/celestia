@@ -64,9 +64,9 @@ Dependencies section says so plainly rather than pretending otherwise.
       in `agent/src/main/java/com/celestia/agent/entitlement/EntitlementProperties.java`
 - [ ] T004 Add the `celestia.llm.*` and `celestia.entitlement.*` keys to
       `agent/src/main/resources/application.yaml` with **development** defaults
-      (ADR-0009, ADR-0010): `base-url` a local `ollama serve`, `model` the
-      smallest Qwen that `ollama show` reports as supporting `tools`, the
-      configured fallback, a **short** keep-alive because the dev machine is a
+      (ADR-0009, ADR-0010): `base-url` a local `ollama serve`, `model`
+      **`qwen2.5:0.5b`** (provisional — T043 verifies it can tool-call at all,
+      and the answer may be another model entirely), the configured fallback, a **short** keep-alive because the dev machine is a
       16 GB laptop rather than a dedicated VM, and an **empty** allow-list —
       empty denies everyone (FR-003), the safe default for a key someone will
       forget to set. Production values are supplied per environment, not
@@ -516,6 +516,27 @@ thing code cannot judge is sitting in a folder waiting for a person.
       for the data, no prompt logging. Propagated to `PROJECT_PLAN.md` (overview,
       D9, technology summary) and `README.md`; ADR-0010 updated to record that
       its outstanding item is closed
+
+- [ ] T043 **Verify the dev model can tool-call before relying on it**: run
+      `ollama show qwen2.5:0.5b` and look for `tools` among the capabilities. If
+      it is absent, find the smallest small model that has it — **it may not be a
+      Qwen** — change `model` in
+      `agent/src/main/resources/application.yaml`, and record the outcome in
+      `docs/adr/0009-llm-runtime-and-model.md` (open item 1). Cheap, and worth
+      doing before the first tier-2 smoke test rather than after an hour spent
+      debugging the wrong layer: a model with **no tool template** fails inside
+      Ollama and tells you nothing about this code, while one that is merely too
+      small emits malformed arguments, which is the fallback path working
+- [ ] T044 **OPEN ITEM — get a production-level host before the prompt and the
+      tool surface are frozen.** Developing only against a 0.5B CPU model pulls
+      two ways at once: you start adding workarounds for *its* failures that
+      Llama 4 Scout does not need and may be hurt by, and you never meet the
+      problems only a capable model creates — long tool chains, richer answers
+      hitting the 4,096-character reply budget, leak phrasings a small model is
+      not fluent enough to generate. Both surface late and expensively. Exercise
+      `system-prompt.md` (T013) and the tool adapters (T011, T012) against Scout
+      on the VM **before** T041 asks a practitioner to judge them, and record the
+      date it happened in `docs/adr/0009-llm-runtime-and-model.md` (open item 2)
 
 ---
 
