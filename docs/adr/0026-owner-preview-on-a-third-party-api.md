@@ -137,6 +137,29 @@ valuable rather than merely convenient.
 `PROJECT_PLAN.md` D9, D10 and the overview would need the same propagation
 v2.3.0 received.
 
+## Condition 3 — status
+
+Recorded as it is settled, because "under what terms were those ten questions
+answered?" must be answerable later, and because a half-confirmed condition is
+easy to mistake for a confirmed one.
+
+| Requirement | Status | Date | Source |
+|---|---|---|---|
+| Provider does not train on the prompts | **confirmed off** | 2026-11-24 | owner, from the account settings |
+| Retention at the provider's minimum | **outstanding** | — | zero data retention is available to API customers **on request** — it is not a toggle, so it has to be asked for and takes longer than the other two |
+| Data-processing agreement in place | **outstanding** | — | accepting the published DPA is what makes the provider a processor rather than part of the trust boundary — the same logic v2.2.0 applied to a rented host |
+
+**Condition 3 is therefore not yet satisfied, and SPEC-012 T039a stays open.** One
+of three is not a pass: the condition exists to bound what happens to the owner's
+birth details at rest and in the provider's hands, and training is only the first
+of those. T044, T040 and T041 remain gated — not procedurally, but because once
+the data has been sent it has been sent.
+
+**If retention cannot be brought below the standard period** and that is not
+acceptable for the owner's own birth details, the honest move is to rent the GPU
+VM after all. This ADR was written so that a failing condition 3 falls back to
+self-hosting rather than to relaxing the condition.
+
 ## Consequences
 
 - **Stage A becomes reachable without procurement.** T044, T040 and T041 can all

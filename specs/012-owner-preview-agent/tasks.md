@@ -636,6 +636,13 @@ thing code cannot judge is sitting in a folder waiting for a person.
       date — in `docs/adr/0026-owner-preview-on-a-third-party-api.md`, so a year
       from now the answer to "under what terms were those ten questions answered?"
       is written down
+      → **Partially settled 2026-11-24**: the provider **does not train on the
+      prompts** (confirmed by the owner from the account settings, recorded in
+      ADR-0026 "Condition 3 — status"). **Two outstanding**: retention at the
+      provider's minimum — zero data retention is available to API customers *on
+      request* rather than as a setting, so it has to be asked for — and the
+      data-processing agreement. **The task stays open**: one of three is not a
+      pass, and T044/T040/T041 remain gated until all three are recorded
 - [ ] T040 Measure SC-008 **against whatever the preview is deployed on** — the
       Claude API under v3.0.0's exception, or a warm self-hosted VM — and never on
       a laptop-sized model. Record the figure. If 30 seconds does not hold, the honest
