@@ -7,14 +7,11 @@ import com.celestia.ephemeris.HouseProvider;
 import com.celestia.ephemeris.PositionProvider;
 import com.celestia.ephemeris.SunriseProvider;
 import com.celestia.guardrail.GuardedPipeline;
-import io.micrometer.observation.ObservationRegistry;
 import java.time.Clock;
 import java.util.concurrent.Semaphore;
 import org.springframework.ai.model.tool.DefaultToolCallingManager;
 import org.springframework.ai.model.tool.ToolCallingManager;
-import org.springframework.ai.ollama.OllamaChatModel;
-import org.springframework.ai.ollama.api.OllamaApi;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +25,12 @@ import org.springframework.context.annotation.Configuration;
  * switch is a different option set rather than a second client to keep in step
  * (ADR-0009). {@link OwnerAnswerer} is the only type that calls it.
  *
+ * <p><b>And one provider of two</b>, chosen by {@code celestia.llm.provider}:
+ * self-hosted Ollama (the committed default, so a clone with no credentials still
+ * builds) or the Claude API (ADR-0009's 2026-11-24 amendment, the development
+ * story). Only the per-request options differ between them — everything else in
+ * the answering path was already provider-agnostic.
+ *
  * <p><b>The permit is the handler's to take, not the answerer's.</b> This class
  * only provides it; {@code GuardedReplyHandler} acquires it after the entitlement
  * check and before the gate (FR-010b), so a sender who may not be answered cannot
@@ -40,10 +43,6 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(LlmProperties.class)
 public class LlmConfig {
 
-    @Bean
-    OllamaApi ollamaApi(LlmProperties properties) {
-        return OllamaApi.builder().baseUrl(properties.baseUrl()).build();
-    }
 
     /**
      * Wraps Spring AI's default manager so a turn can be bounded and recorded —
@@ -54,18 +53,54 @@ public class LlmConfig {
         return new TurnToolCallingManager(DefaultToolCallingManager.builder().build(), clock);
     }
 
-    @Bean
-    OllamaChatModel ollamaChatModel(
-            OllamaApi api, LlmProperties properties, ToolCallingManager toolCallingManager) {
-        return OllamaChatModel.builder()
-                .ollamaApi(api)
-                .toolCallingManager(toolCallingManager)
-                .observationRegistry(ObservationRegistry.NOOP)
-                .options(OllamaChatOptions.builder()
-                        .model(properties.model())
-                        .keepAlive(properties.keepAlive())
-                        .build())
-                .build();
+    /**
+     * The per-request options for the configured provider, chosen by
+     * {@code celestia.llm.provider}.
+     *
+     * <p><b>Neither branch defines a {@code ChatModel}.</b> Spring AI's own
+     * autoconfiguration builds it — for Ollama and for Anthropic alike — and
+     * <b>both factory methods take a {@link ToolCallingManager}</b>, so they pick
+     * up {@link TurnToolCallingManager} and the turn stays bounded and recorded
+     * whichever provider is serving. Defining one here collided with the
+     * autoconfiguration's bean name, which is the framework saying the same thing.
+     *
+     * <p>So the only provider-specific thing left is the options object: Ollama
+     * wants a keep-alive, Anthropic wants adaptive thinking and an effort level.
+     * That is the whole of the seam.
+     *
+     * <p><b>Nested {@code @Configuration} classes of a {@code @Configuration} are
+     * registered</b> — unlike nested ones inside a {@code @Component}, which are
+     * silently ignored and cost this project a dead seed command once.
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnProperty(name = "celestia.llm.provider", havingValue = LlmProperties.OLLAMA,
+            matchIfMissing = true)
+    static class OllamaProvider {
+
+        @Bean
+        TurnOptions ollamaTurnOptions(LlmProperties properties) {
+            return new OllamaTurnOptions(properties);
+        }
+    }
+
+    /**
+     * The Claude API (ADR-0009's 2026-11-24 amendment) — the development story,
+     * because a small local model cannot drive eleven tool definitions at all.
+     *
+     * <p>Needs an <b>API key</b>, not a subscription: {@code ANTHROPIC_API_KEY}, or
+     * {@code celestia.llm.api-key} when it must come from configuration. Nothing
+     * here changes what is stored or what "forget me" deletes, and serving anyone
+     * but the owner from a third-party API remains prohibited by the Technology
+     * Constraints.
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnProperty(name = "celestia.llm.provider", havingValue = LlmProperties.ANTHROPIC)
+    static class AnthropicProvider {
+
+        @Bean
+        TurnOptions anthropicTurnOptions(LlmProperties properties) {
+            return new AnthropicTurnOptions(properties);
+        }
     }
 
     /**

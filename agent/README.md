@@ -38,11 +38,51 @@ point: a second reply path in the code is what SPEC-012 exists to prevent.
 Everything below comes from the environment; the committed defaults are for
 development. **Production values are supplied per environment, never committed.**
 
+### Which model serves a turn
+
+One environment variable picks the provider, and it drives both this module's
+`celestia.llm.provider` and Spring AI's own `spring.ai.model.chat`, so the two
+cannot disagree:
+
+```bash
+# development (ADR-0009, amended 2026-11-24) — an API KEY, not a subscription
+export CELESTIA_LLM_PROVIDER=anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# self-hosted Ollama — the committed default, needs no credentials
+export CELESTIA_LLM_PROVIDER=ollama
+```
+
+**Why the API for development.** A small local model cannot drive this tool
+surface at all: eleven tool definitions, a hardened prompt and twelve cusps of
+context put the first token past the HTTP read timeout on a CPU. It was measured —
+~24 minutes a question, three faults in four. The Claude API costs about
+$0.05–0.08 a question, so the whole evaluation set runs under a dollar, and it
+de-risks the production hosting decision instead of pre-committing to it.
+
+**Why Ollama is still the committed default.** A clone with no credentials must
+still build and test. `./mvnw verify` needs no API key.
+
+Whichever is selected, **the chat model is built around `TurnToolCallingManager`** —
+Spring AI's autoconfiguration factory takes a `ToolCallingManager` — so the round
+cap, the deadline and the per-call records hold either way. The only
+provider-specific code is `TurnOptions`: Ollama wants a keep-alive, Anthropic
+wants adaptive thinking and an effort level.
+
+> **Serving anyone other than the owner from a third-party API is still
+> prohibited** by the Technology Constraints and needs a constitution amendment
+> with its own ADR. This covers development and the owner's own evaluation runs,
+> where the only personal data in flight is his own.
+
 ### `celestia.llm.*` — the chat model (ADR-0009, ADR-0010)
 
 | Key | Default | Notes |
 |---|---|---|
-| `base-url` | `http://localhost:11434` | a local `ollama serve` in development; the warm GPU VM in production |
+| `provider` | `ollama` | `ollama` or `anthropic`; also sets `spring.ai.model.chat` |
+| `max-tokens` | `16000` | **Anthropic only.** A ceiling, not a reservation — unused headroom costs nothing, and hitting the cap truncates mid-thought |
+| `effort` | *unset* | **Anthropic only.** `low` … `max` thinking depth. **Not** a token budget: Sonnet 5 rejects `budget_tokens` outright |
+| `api-key` | *unset* | **Anthropic only.** Blank reads `ANTHROPIC_API_KEY`, which is the usual case |
+| `base-url` | `http://localhost:11434` | **Ollama only.** A local `ollama serve` in development; the warm GPU VM in production |
 | `model` | `qwen2.5:0.5b` | **provisional** — verify it reports the `tools` capability (`ollama show <model>`) before relying on it |
 | `fallback-model` | `qwen2.5:1.5b` | not optional: this feature is almost entirely tool calling and tool-call JSON from a small model is often unreadable |
 | `keep-alive` | `5m` | short on a laptop; long on the VM, which never pays the cold load |

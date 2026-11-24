@@ -22,6 +22,26 @@ spring:
     validate-on-migrate: true
     baseline-on-migrate: false
 
+  # SPEC-012: Spring AI's own provider switch, driven by the SAME environment
+  # variable as celestia.llm.provider so the two can never disagree. Whichever is
+  # selected, the autoconfigured chat model is built around TurnToolCallingManager
+  # — its factory takes a ToolCallingManager — so the turn stays bounded and
+  # recorded either way (ADR-0009, amended 2026-11-24).
+  ai:
+    model:
+      chat: ${CELESTIA_LLM_PROVIDER:ollama}
+    ollama:
+      base-url: ${CELESTIA_LLM_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: "${CELESTIA_LLM_MODEL:qwen2.5:0.5b}"
+    anthropic:
+      # An API key, NOT a subscription.
+      api-key: ${ANTHROPIC_API_KEY:}
+      chat:
+        options:
+          model: ${CELESTIA_LLM_MODEL_ANTHROPIC:claude-sonnet-5}
+
 server:
   port: 8080
 
@@ -55,6 +75,13 @@ whatsapp:
 # values are supplied per environment, not committed.
 celestia:
   llm:
+    # ollama | anthropic. ADR-0009 (amended 2026-11-24): development runs against
+    # the Claude API, because a small local model cannot drive eleven tool
+    # definitions at all. Ollama stays the COMMITTED DEFAULT so a clone with no
+    # credentials still builds and tests.
+    #   export CELESTIA_LLM_PROVIDER=anthropic ANTHROPIC_API_KEY=sk-ant-...
+    # An API key, not a subscription.
+    provider: ${CELESTIA_LLM_PROVIDER:ollama}
     base-url: ${CELESTIA_LLM_BASE_URL:http://localhost:11434}
     # Provisional — T043 verifies this model can tool-call at all, and the answer
     # may be another model entirely. Production is llama4:scout (ADR-0009).
@@ -68,6 +95,14 @@ celestia:
     # end to end on the warm VM (T040) and production tunes this against it.
     turn-deadline: ${CELESTIA_LLM_TURN_DEADLINE:PT60S}
     max-concurrent-turns: ${CELESTIA_LLM_MAX_CONCURRENT_TURNS:1}
+    # Anthropic only. A ceiling, not a reservation — unused headroom costs
+    # nothing, and hitting the cap truncates mid-thought and wastes the turn.
+    max-tokens: ${CELESTIA_LLM_MAX_TOKENS:16000}
+    # Thinking depth: low | medium | high | xhigh | max, or blank for the API's
+    # default. NOT a token budget — Sonnet 5 rejects budget_tokens outright.
+    effort: ${CELESTIA_LLM_EFFORT:}
+    # Blank reads ANTHROPIC_API_KEY from the environment, which is the usual case.
+    api-key: ${CELESTIA_LLM_API_KEY:}
   entitlement:
     # EMPTY DENIES EVERYONE (FR-003). The safe default for a key someone will
     # forget to set — an empty list meaning "allow all" is how a configuration

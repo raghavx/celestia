@@ -20,7 +20,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Component;
@@ -58,6 +58,7 @@ public class OwnerAnswerer implements Answerer {
     private static final Logger log = LoggerFactory.getLogger(OwnerAnswerer.class);
 
     private final ChatModel model;
+    private final TurnOptions turnOptions;
     private final LlmProperties properties;
     private final SystemPrompt systemPrompt;
     private final EngineTools engineTools;
@@ -66,12 +67,14 @@ public class OwnerAnswerer implements Answerer {
 
     public OwnerAnswerer(
             ChatModel model,
+            TurnOptions turnOptions,
             LlmProperties properties,
             SystemPrompt systemPrompt,
             EngineTools engineTools,
             ToolkitTools toolkitTools,
             Clock clock) {
         this.model = model;
+        this.turnOptions = turnOptions;
         this.properties = properties;
         this.systemPrompt = systemPrompt;
         this.engineTools = engineTools;
@@ -146,13 +149,15 @@ public class OwnerAnswerer implements Answerer {
         return new Answer(AgentMessages.COULD_NOT_COMPLETE, Sensitivity.NONE);
     }
 
-    private OllamaChatOptions options(String modelName) {
+    /**
+     * The fixed tool set and the model for this call, built by whichever provider
+     * is configured (ADR-0009's amendment). The answerer names the model per
+     * request, which is what makes a fallback switch an option set rather than a
+     * second client.
+     */
+    private ToolCallingChatOptions options(String modelName) {
         ToolCallback[] callbacks = ToolCallbacks.from(engineTools, toolkitTools);
-        return OllamaChatOptions.builder()
-                .model(modelName)
-                .keepAlive(properties.keepAlive())
-                .toolCallbacks(List.of(callbacks))
-                .build();
+        return turnOptions.forModel(modelName, List.of(callbacks));
     }
 
     private static String draftOf(ChatResponse response) {

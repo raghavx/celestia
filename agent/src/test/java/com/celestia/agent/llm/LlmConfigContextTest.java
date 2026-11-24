@@ -17,6 +17,7 @@ import java.util.concurrent.Semaphore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.model.anthropic.autoconfigure.AnthropicChatAutoConfiguration;
 import org.springframework.ai.model.ollama.autoconfigure.OllamaApiAutoConfiguration;
 import org.springframework.ai.model.ollama.autoconfigure.OllamaChatAutoConfiguration;
 import org.springframework.ai.model.tool.ToolCallingManager;
@@ -77,9 +78,16 @@ class LlmConfigContextTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(
-                    OllamaApiAutoConfiguration.class, OllamaChatAutoConfiguration.class))
+                    OllamaApiAutoConfiguration.class, OllamaChatAutoConfiguration.class,
+                    AnthropicChatAutoConfiguration.class))
             .withUserConfiguration(EngineStubs.class, LlmConfig.class)
             .withPropertyValues(
+                    // Spring AI's own switch, which application.yml drives from the
+                    // same environment variable — without it BOTH autoconfigurations
+                    // activate, which is exactly what the property exists to prevent.
+                    "spring.ai.model.chat=ollama",
+                    "celestia.llm.provider=ollama",
+                    "celestia.llm.max-tokens=16000",
                     "celestia.llm.base-url=http://localhost:11434",
                     "celestia.llm.model=primary-model",
                     "celestia.llm.fallback-model=fallback-model",
@@ -89,16 +97,18 @@ class LlmConfigContextTest {
                     "celestia.llm.max-concurrent-turns=1");
 
     @Test
-    @DisplayName("exactly one ChatModel, and it is the one built around the bounded manager")
+    @DisplayName("exactly one ChatModel, and it is built around the bounded manager")
     void thereIsExactlyOneChatModel() {
         runner.run(context -> {
             assertThat(context).hasNotFailed();
-            assertThat(context.getBeansOfType(ChatModel.class))
-                    .as("a second ChatModel would make the bounded one a matter of bean ordering")
-                    .hasSize(1);
+            // Spring AI's autoconfiguration builds it, and its factory takes a
+            // ToolCallingManager — so the model the answerer gets is the bounded
+            // one. A second would make that a matter of bean ordering.
+            assertThat(context.getBeansOfType(ChatModel.class)).hasSize(1);
             assertThat(context.getBeansOfType(OllamaApi.class)).hasSize(1);
             assertThat(context.getBean(ToolCallingManager.class))
                     .isInstanceOf(TurnToolCallingManager.class);
+            assertThat(context.getBean(TurnOptions.class).providerName()).isEqualTo("ollama");
         });
     }
 
@@ -108,6 +118,67 @@ class LlmConfigContextTest {
         runner.run(context -> assertThat(context.getBean(Semaphore.class).availablePermits()).isEqualTo(1));
         runner.withPropertyValues("celestia.llm.max-concurrent-turns=3")
                 .run(context -> assertThat(context.getBean(Semaphore.class).availablePermits()).isEqualTo(3));
+    }
+
+    @Test
+    @DisplayName("ollama is the default, so a clone with no credentials still starts")
+    void ollamaIsTheCommittedDefault() {
+        // ADR-0009's amendment makes the Claude API the development story, but the
+        // committed default must need no credentials or `./mvnw verify` would
+        // require an API key on every machine.
+        new ApplicationContextRunner()
+                .withUserConfiguration(EngineStubs.class, LlmConfig.class)
+                .withPropertyValues(
+                        "spring.ai.model.chat=ollama",
+                        "celestia.llm.base-url=http://localhost:11434",
+                        "celestia.llm.model=primary-model",
+                        "celestia.llm.fallback-model=fallback-model",
+                        "celestia.llm.keep-alive=5m",
+                        "celestia.llm.max-tool-rounds=6",
+                        "celestia.llm.turn-deadline=PT60S",
+                        "celestia.llm.max-concurrent-turns=1")
+                .run(context -> assertThat(context.getBean(TurnOptions.class).providerName())
+                        .isEqualTo("ollama"));
+    }
+
+    @Test
+    @DisplayName("the anthropic provider contributes its options and no second chat model")
+    void theAnthropicProviderSwapsOnlyTheOptions() {
+        // The ChatModel comes from Spring AI's own autoconfiguration, whose factory
+        // takes a ToolCallingManager — so the turn stays bounded by
+        // TurnToolCallingManager whichever provider is selected. All this config
+        // contributes is the per-request options.
+        runner.withPropertyValues(
+                        "celestia.llm.provider=anthropic",
+                        "spring.ai.model.chat=anthropic",
+                        "spring.ai.anthropic.api-key=test-key-not-used")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context.getBean(TurnOptions.class).providerName()).isEqualTo("anthropic");
+                    // Both starters are on the classpath on purpose, so an idle
+                    // OllamaApi bean may exist — it is a REST client object that
+                    // opens nothing. What must be unambiguous is the chat model.
+                    assertThat(context.getBeansOfType(ChatModel.class))
+                            .as("exactly one, from Spring AI's Anthropic autoconfiguration")
+                            .hasSize(1);
+                    assertThat(context.getBean(ChatModel.class).getClass().getSimpleName())
+                            .isEqualTo("AnthropicChatModel");
+                    assertThat(context.getBean(ToolCallingManager.class))
+                            .isInstanceOf(TurnToolCallingManager.class);
+                });
+    }
+
+    @Test
+    @DisplayName("base-url is not required for the Claude API, and an unknown provider fails fast")
+    void providerAwareValidation() {
+        runner.withPropertyValues(
+                        "celestia.llm.provider=anthropic",
+                        "spring.ai.model.chat=anthropic",
+                        "spring.ai.anthropic.api-key=test-key-not-used",
+                        "celestia.llm.base-url=")
+                .run(context -> assertThat(context).hasNotFailed());
+        runner.withPropertyValues("celestia.llm.provider=vertex")
+                .run(context -> assertThat(context).hasFailed());
     }
 
     @Test

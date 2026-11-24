@@ -100,3 +100,85 @@ this ADR expected**. Recorded so nobody repeats the experiment.
   for exercising the agent. Everything about prompt and tool-surface behaviour
   waits for the rented GPU VM (**T044**), which is this ADR's own advice taken
   seriously rather than worked around.
+
+## Amendment, 2026-11-24: development runs against the Claude API
+
+The "Development model" section above prescribes a local `ollama serve` with the
+smallest tool-capable Qwen. **That prescription is withdrawn.** It was measured the
+same day it was written and it does not work — see "Measured on the dev machine"
+above: ~24 minutes a question, three faults in four, nothing learned about the
+prompt or the tools. Keeping a development story the project has disproved is the
+kind of drift Constitution I calls a defect.
+
+**Decision.** Development and local testing call the Claude API —
+`claude-sonnet-5` via Spring AI's Anthropic model — selected by
+`celestia.llm.provider=anthropic`. Ollama remains fully wired and is the
+committed default, so a clone with no credentials still builds and tests.
+
+### Why this is not a constitution amendment
+
+The Technology Constraint reads: *"what no **deployment** may give up: no prompt
+and no user data reaches a third-party inference API."* It is scoped to
+deployments, and this is not one:
+
+- **Nothing is deployed.** Development and the evaluation harness run on a
+  developer machine against a database that is thrown away.
+- **The only personal data in flight is the owner's own** — his birth details and
+  his own questions. The preview has an allow-list of one and no other user
+  exists, so there is no third party's data to protect and the owner consents for
+  himself.
+- **Constitution VII is unaffected**: nothing changes about what is stored, what
+  "forget me" deletes, or the retention purge.
+
+**Serving anyone other than the owner from a third-party API remains
+prohibited** and still requires a constitution amendment with its own ADR. This
+amendment does not grant it, and the hosting decision for production is
+deliberately left open — see below.
+
+### Why the API rather than renting the GPU now
+
+- **It de-risks the hosting decision instead of pre-committing to it.** As things
+  stand, the only way to learn whether the prompt and the tool surface work is to
+  rent a machine ADR-0010 itself calls "a standing monthly figure". The API costs
+  about **$0.05–0.08 a question** at `claude-sonnet-5` ($3/M input, $15/M output),
+  so the ten-question evaluation set runs well under a dollar. Learn first, then
+  choose production hosting with evidence.
+- **It removes this ADR's own largest risk from the development loop.** The
+  Context above warns that Llama 4's tool-calling under Ollama is immature, and
+  that is why the fallback model was made mandatory. On a capable API model the
+  fallback stops being load-bearing. It stays configured.
+- **The architecture already made this a configuration choice.** Model ids are
+  configuration (see Consequences), `OwnerAnswerer` holds a `ChatModel`, and both
+  single-path ArchUnit rules are expressed over chat-model packages and call
+  sites. Swapping the provider adds one bean and changes no architecture.
+
+### What this does not decide, and the trap to avoid
+
+**Production hosting is still open.** But the two questions interact, and the
+interaction has a sharp edge: **a practitioner's verdict is tied to a model.**
+Tuning `system-prompt.md` against Sonnet 5 and then deploying Llama 4 Scout is
+T044's own warning in reverse — fitting one model's behaviour — and SC-001's
+verdict would not transfer.
+
+So the order is: develop against the API, decide production hosting, and get
+**T041's verdict on whatever production actually runs**. If production becomes the
+API too, T044 stops being a risk item and the verdict earned in development is the
+verdict that counts.
+
+### Obligations that come with it
+
+- **An API key, not a subscription.** Spring AI wants
+  `spring.ai.anthropic.api-key` / `ANTHROPIC_API_KEY`. A Claude Code or claude.ai
+  plan is not an API credential and is not licensed to serve an application's
+  users.
+- **Check the account's data-retention setting.** It is the substance the
+  Technology Constraint protects; zero-retention is available to API customers on
+  request, and it is worth having before the evaluation set carries real birth
+  data.
+- **Model pinning changes meaning.** A weights file is pinned for ever; an API
+  model has a deprecation schedule. Constitution III makes a model change that
+  drops below SC-001's bar a regression, so a retirement means re-running the
+  verdict, not editing a property.
+- **No `budget_tokens`.** Sonnet 5 rejects the fixed thinking-budget parameter
+  outright (HTTP 400). Adaptive thinking is the only on-mode; the configuration
+  below uses it, and `celestia.llm.effort` carries the depth knob instead.

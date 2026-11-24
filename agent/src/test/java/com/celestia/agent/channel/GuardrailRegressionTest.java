@@ -149,7 +149,8 @@ class GuardrailRegressionTest {
                 counting,
                 mock(TurnRecordStore.class),
                 new SystemPrompt(),
-                new LlmProperties("http://localhost:11434", "m", "f", "5m", 6, Duration.ofMinutes(5), 1),
+                new LlmProperties(LlmProperties.OLLAMA, "http://localhost:11434", "m", "f", "5m", 6,
+                        Duration.ofMinutes(5), 1, 16000, "", ""),
                 TurnFixtures.clock(),
                 new SimpleMeterRegistry());
     }

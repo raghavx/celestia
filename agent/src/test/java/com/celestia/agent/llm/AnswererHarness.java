@@ -53,11 +53,13 @@ public final class AnswererHarness {
         ToolCallingManager manager =
                 new TurnToolCallingManager(DefaultToolCallingManager.builder().build(), clock);
         this.model = new StubChatModel(manager);
+        LlmProperties properties = new LlmProperties(
+                LlmProperties.OLLAMA, "http://localhost:11434", "primary-model", "fallback-model",
+                "5m", maxRounds, deadline, 1, 16000, "", "");
         this.answerer = new OwnerAnswerer(
                 model,
-                new LlmProperties(
-                        "http://localhost:11434", "primary-model", "fallback-model", "5m",
-                        maxRounds, deadline, 1),
+                new OllamaTurnOptions(properties),
+                properties,
                 new SystemPrompt(),
                 engineTools,
                 toolkitTools,
