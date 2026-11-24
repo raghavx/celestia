@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celestia map 2026-11-24c</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: plain, orienting, honest — a map for someone who lost the thread.
+   IDEA: a metro line map — one WhatsApp message riding from "in" to "reply", stopping at each part of the system.
+   PICTURE: the line itself; stations filled (done), ringed (built, not wired), hollow-dashed (not started).
+   COLOUR and TYPE: white paper / night ground; line ink; one saffron accent for "the gap"; Overpass (signage face).
+   LAYOUT: title + line in the first screen; then the gap, modules, decisions, reading order. Line turns vertical on phones. */
+:root{color-scheme:light dark;
+  --bg:light-dark(#fbfaf7,#121218);--ink:light-dark(#1b1b22,#ecebf2);--mute:light-dark(#5d5d6b,#a3a2b3);
+  --rule:light-dark(#e3e1da,#2a2a35);--card:light-dark(#ffffff,#1a1a22);
+  --done:light-dark(#16795f,#3fbf98);--wired:light-dark(#2f5bd3,#7c9cff);--todo:light-dark(#a7a6b2,#5b5a6a);
+  --gap:#e8a317}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Overpass,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px);max-width:1240px;margin:0 auto}
+h1{font-size:clamp(30px,4.4vw,48px);line-height:1.05;font-weight:800;margin:0 0 12px;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:26px;line-height:1.15;margin:0 0 14px;font-weight:800;text-wrap:balance}
+p{max-width:68ch;margin:0 0 12px}
+.lede{font-size:18px;color:var(--mute);max-width:62ch}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin:22px 0 6px;font-size:14px;color:var(--mute)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.dot{width:16px;height:16px;border-radius:50%;display:inline-block;flex:none}
+.d-done{background:var(--done)}.d-wired{background:var(--card);border:4px solid var(--wired)}
+.d-todo{background:var(--card);border:3px dashed var(--todo)}.d-gap{background:var(--gap)}
+
+/* the line */
+.line{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:0}
+.st{position:relative;padding:0 6px;text-align:center}
+.st::before{content:"";position:absolute;top:15px;left:0;right:0;height:8px;background:var(--seg,var(--todo))}
+.st:first-child::before{left:50%}.st:last-child::before{right:50%}
+.st.done{--seg:var(--done)}.st.wired{--seg:var(--wired)}.st.todo{--seg:repeating-linear-gradient(90deg,var(--todo) 0 10px,transparent 10px 18px)}
+.st .o{position:relative;z-index:1;width:38px;height:38px;margin:0 auto 12px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:800;font-size:14px}
+.st.done .o{background:var(--done);color:#fff}
+.st.wired .o{border:6px solid var(--wired);color:var(--wired)}
+.st.todo .o{border:3px dashed var(--todo);color:var(--mute)}
+.st.gap .o{box-shadow:0 0 0 6px var(--bg),0 0 0 10px var(--gap)}
+.st b{display:block;font-size:15px;line-height:1.2;margin-bottom:4px}
+.st small{display:block;font-size:13px;line-height:1.35;color:var(--mute)}
+.st .spec{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--ink);background:var(--rule);border-radius:4px;padding:1px 6px}
+.under{margin-top:26px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:16px 18px}
+.box h3{margin:0 0 6px;font-size:17px}
+.box p{font-size:15px;margin:0;color:var(--mute)}
+@media(max-width:860px){
+  .line{grid-template-columns:1fr}
+  .st{display:grid;grid-template-columns:52px minmax(0,1fr);text-align:left;padding:0 0 22px;column-gap:12px}
+  .st::before{top:0;bottom:0;left:21px;right:auto;width:8px;height:auto;background:var(--seg,var(--todo))}
+  .st.todo{--seg:repeating-linear-gradient(180deg,var(--todo) 0 10px,transparent 10px 18px)}
+  .st:first-child::before{top:19px;left:21px}.st:last-child::before{bottom:auto;height:19px;right:auto}
+  .st .o{margin:0 0 0 2px;grid-row:span 3}
+  .under{grid-template-columns:1fr}
+}
+
+/* gap band */
+.gapband{background:light-dark(#fff6e2,#241d10);border-block:1px solid light-dark(#f1dca8,#3b2e14)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0 18px;font-weight:600}
+.flow span{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:8px 12px}
+.flow .hot{border:2px solid var(--gap)}
+.flow i{font-style:normal;color:var(--mute)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:var(--rule);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-size:13px;color:var(--mute);font-weight:600}
+td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:14px}
+.tag .dot{width:11px;height:11px}.tag .d-wired{border-width:3px}.tag .d-todo{border-width:2px}
+.cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(20px,4vw,48px)}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+ol.read{padding-left:22px;margin:0}ol.read li{margin-bottom:10px}
+.foot{font-size:13px;color:var(--mute);border-top:1px solid var(--rule)}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--rule)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7em;margin-inline-start:-7.5em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}td.n{text-align:start}}
+@media(prefers-reduced-motion:no-preference){.st.gap .o{animation:pulse 2.4s ease-in-out infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px var(--bg),0 0 0 14px color-mix(in srgb,var(--gap) 35%,transparent)}}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+
+<section class="band">
+  <p style="margin:0 0 10px;font-size:14px;color:var(--mute)"><a href="index.html" style="color:inherit">All snapshots</a> · Snapshot of 24 Nov 2026, evening — the path is complete, the model is not rented</p>
+  <h1>The echo is gone. Every part of the answer path is built — and no real answer exists yet.</h1>
+  <p class="lede">SPEC-012 is <b>47 of 51 tasks done</b>: entitlement, the turn permit, the tool surface, the hardened prompt, the reference swap, the turn record, and the clamp — <b>3,028 new lines in <code>agent</code></b> and <b>108 tests, all green</b>. <code>EchoReplyHandler</code> is deleted; there is exactly one <code>ReplyHandler</code> now, which is the point. What is <em>not</em> done is the one thing the stage exists for: a real answer. Tested against a 0.5B model on this laptop, three questions in four timed out after <b>24 minutes each</b>. The remaining four tasks need a rented GPU, not more code.</p>
+  <div class="legend">
+    <span><i class="dot d-done"></i>Built and tested</span>
+    <span><i class="dot d-wired"></i>Spec written, not built</span>
+    <span><i class="dot d-todo"></i>Not started</span>
+    <span><i class="dot d-gap"></i>The gap to close first</span>
+  </div>
+  <ol class="line" id="line"></ol>
+  <div class="under">
+    <div class="box"><h3>Today, end to end</h3><p>A message arrives, is verified and queued, entitlement decides whether anyone is answered at all, one turn permit is taken, the chart is pre-fetched, the gate judges the message, the model is asked, the output stage scans the draft and appends the advisory, the reply is clamped to one WhatsApp message, and the turn is recorded for review. <b>Every stop on the line is now built.</b> Ask it a question with a capable model behind it and you get an answer; there is no capable model behind it.</p></div>
+    <div class="box"><h3>What changed since this morning</h3><p>The agent, written and tested in one sitting. The ArchUnit rule that had <em>passed vacuously</em> since SPEC-011 now does real work — and it had to be <b>split in two</b>, because "no class may depend on a chat-model type" became impossible the moment one existed. Three bugs were found only by turning a container runtime on, and one by a model too slow to hide it. <b>Nothing reaches the model except through the gate: still measured, now against the real wiring.</b></p></div>
+  </div>
+</section>
+
+<section class="gapband"><div class="band">
+  <h2>Next: rent a GPU machine. Four tasks and the whole stage sit behind it.</h2>
+  <p>Stage A ends with one real answer to the owner on WhatsApp, grounded in the toolkit but speaking as the astrologer — never naming its source (ADR-0025). The toolkit is built, the gate is built, and now the agent is too. What is missing is a machine that can run the model: ADR-0010 settled <em>what to rent</em> (a warm cloud GPU VM) and it has not been rented.</p>
+  <div class="flow">
+    <span>010 Toolkit ✓</span><i>→</i><span>011 Guardrail ✓</span><i>→</i><span>012 Agent ✓ built</span><i>→</i><span class="hot">rent the GPU VM</span><i>→</i><span>first toolkit-grounded answer</span>
+  </div>
+  <p><b>This was tested, not assumed.</b> Ollama ran locally with the smallest model that reports a tool-calling capability (<code>qwen2.5:0.5b</code> — it does, so SPEC-012 T043 is closed). It then failed to drive the tool surface at all: eleven tool definitions, a hardened prompt and twelve cusps of context put the first token far past the HTTP read timeout on a 2019 Intel CPU. Four evaluation questions took <b>~24 minutes each</b> — three ended in a fault after the primary and then the fallback timed out, and the fourth answered and had its draft <b>withheld by the leak scan</b>. ADR-0009 predicted malformed tool JSON exercising the fallback as the normal path; the real failure is <em>no response inside any sane timeout</em>, which a second slow model cannot help with.</p>
+  <p>So there is nothing further to learn about the prompt or the tools locally. <b>The laptop is for compiling and for the stub-model tier.</b></p>
+  <p>What SPEC-012 measures, now that it runs:</p>
+  <table class="stack"><thead><tr><th>Criterion</th><th>Target</th><th>Measured</th></tr></thead><tbody id="gc"></tbody></table>
+  <h2 style="margin-top:30px">Four things only running the code could find</h2>
+  <p>Five analyze passes hardened the spec and the plan before a line was written, and two of them were load-bearing: the single-path ArchUnit rule as specified <b>could not be implemented</b>, and the turn record had no column for the question it exists to make reviewable. Then the code found four more that no amount of review would have:</p>
+  <ol class="read">
+    <li><b>Every tool call silently did nothing.</b> Spring AI binds <code>@Tool</code> arguments <em>by parameter name</em>, and <code>@ToolParam</code> has no name attribute — so without compiling with <code>-parameters</code> every argument arrives null. A tool asked for the disease table answered <code>"no such table: "</code> for an argument the model had supplied correctly. A real model would have looked merely stupid; the stub tier showed the cause.</li>
+    <li><b>The application would not have started.</b> <code>EntitlementProperties</code> carried <code>@ConfigurationProperties</code> and nothing registered it. A properties record is only a bean if something asks for it, and no unit test loads a context.</li>
+    <li><b>The schema did not validate, and the seed command was dead code.</b> A <code>@Lob String</code> with no length maps to <code>TINYTEXT</code> — 255 bytes — against a <code>LONGTEXT</code> column; had it matched, a turn's tool calls would have been truncated at 255 characters. And a nested <code>@Configuration</code> inside a <code>@Component</code> is not component-scanned, so the owner's birth-data seeder was never wired. Both surfaced the first time a container runtime was switched on — which also ran a <b>golden-chart test that had been failing since SPEC-010</b>, because the cache deliberately stopped stamping the chart's own engine version and nobody could see it without Docker.</li>
+    <li><b>The turn budget does not bound a turn.</b> With <code>turn-deadline: PT120S</code>, turns ran <b>24 minutes</b>. The deadline is checked <em>between</em> model calls and around tool rounds — but Spring AI retries inside a single call, and nothing interrupts a blocking inference. FR-010 requires a turn bounded in elapsed time; it is bounded in rounds and only nominally in time, and <b>SC-008's 30 seconds rests entirely on that difference</b>. A warm Scout would have hidden this until a slow day in production. It is <b>T045</b>, and it is buildable without a GPU.</li>
+  </ol>
+  <h2 style="margin-top:30px">One piece of scope is specified and not deliverable</h2>
+  <p>FR-011 and US1 scenario 4 describe answering about a second person from birth details given in the message. The plumbing is built and tested — a supplied chart is what the tools judge for that turn, it is never persisted, and the arguments that carried it are <b>redacted from the turn record</b>. What is missing is the step before all of it: resolving a place name to coordinates and a time zone. SPEC-007 defines the geocoder port and nothing implements it, and handing the model coordinates to supply itself is what Constitution V forbids. So the tool reports itself unavailable and the agent declines honestly. <b>It needs a decision — defer it to SPEC-017, or wire a geocoder — because Constitution I calls spec-versus-code drift a defect.</b></p>
+
+  <h2 style="margin-top:30px">What waits on you, not on code</h2>
+  <p><b>Rent the GPU VM.</b> Four SPEC-012 tasks sit behind it and nothing else moves them: exercise the prompt and the tool surface against Llama 4 Scout (<b>T044</b>) <em>before</em> asking a practitioner to judge anything, measure the 30-second budget warm (<b>T040</b>), and get the nine-of-ten verdict (<b>T041</b>) that is Stage A's exit criterion. ADR-0010 already decided what to rent; what is open is the provider and region, and v2.2.0 requires the region suit the personal data the host will see.</p>
+  <p><b>Decide the geocoder question</b> — defer supplied-person charts to SPEC-017, or wire a geocoder here. See above: it is the one place the spec and the code still disagree.</p>
+  <p><b>SPEC-010 T048</b> — the KP-practitioner review of 10 readings per golden chart (SC-005), generated and waiting in <code>core/target/promise-readings/</code>: 792 promised, 29 condition-to-check, 887 partly indicated.</p>
+  <p><b>SPEC-011 T043</b> — read the 15 in-scope questions in <code>corpus-in-scope.tsv</code> as a user would really type them. Still the only task in that feature code cannot do.</p>
+
+  <h2 style="margin-top:30px">What the import actually produced</h2>
+  <table class="stack"><thead><tr><th>Criterion</th><th>Target</th><th>Verified</th></tr></thead><tbody id="sc"></tbody></table>
+  <h2 style="margin-top:30px">The re-ordered roadmap</h2>
+  <table class="stack"><thead><tr><th>Stage</th><th>Specs</th><th>Outcome</th></tr></thead><tbody id="stages"></tbody></table>
+</div></section>
+
+<section class="band cols">
+  <div>
+    <h2>Code by module</h2>
+    <table class="stack">
+      <thead><tr><th>Module</th><th>What it does</th><th>Status</th><th class="n">Main / test lines</th></tr></thead>
+      <tbody id="mods"></tbody>
+    </table>
+  </div>
+  <div>
+    <h2>Read these five, in order</h2>
+    <ol class="read">
+      <li><b>.specify/memory/constitution.md</b> — v2.2.0; read Principles V and X first. X says plainly that the toolkit is internal, never named to the user (ADR-0025); and v2.2.0 defines "self-hosted" as <em>we run the weights</em>, which is what makes renting a GPU lawful rather than merely convenient (ADR-0010).</li>
+      <li><b>core/README.md</b> — one table listing every engine call. This is the part that works.</li>
+      <li><b>agent/…/channel/GuardedReplyHandler.java</b> — the reply path, in the order the requirement fixes: entitlement, permit, pre-fetch, gate, model, output stage, clamp, record. The order <em>is</em> the requirement.</li>
+      <li><b>core/src/main/java/com/celestia/core/toolkit/PromiseEvaluator.java</b> — the 40 lines that turn "the 7th sub lord connects to 2, 7, 11" into matched toolkit rules. This is why Constitution IV holds.</li>
+      <li><b>specs/012-owner-preview-agent/spec.md</b> — 33 requirements and 13 criteria; read FR-013a–d (why the model never sees a sheet id) and the Clarifications, which record a decision that was reversed the same day and what the discarded option proved. Then <b>research.md §12</b>, for the three SPEC-011 constants <code>agent</code> cannot name.</li>
+    </ol>
+    <h2 style="margin-top:28px">Decisions waiting on you</h2>
+    <table class="stack">
+      <thead><tr><th>ADR</th><th>Question</th><th>Blocks</th></tr></thead>
+      <tbody id="adrs"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="band foot">
+  <p>Sources: the repo at <code>~/celestia</code>, branch <code>012-owner-preview-agent</code> — commits <code>c3b56cd</code> (the feature: 35 paths, the echo deleted), <code>b03cf87</code> (the artifacts synced to what was built), <code>f9a7476</code> (three wiring bugs the integration tests found), <code>edfc7a8</code> (a golden test that had been failing since SPEC-010) and <code>2a714c8</code> (what the first tier-2 run measured). Measurements are from <code>./mvnw -pl agent -am verify</code> on this machine, with a container runtime up for the first time: <b>BUILD SUCCESS — 108 unit tests and 52 integration tests, zero failures</b>, Spotless and all four ArchUnit suites included, and the two single-path rules each proved to <em>fail</em> on a deliberate violation before being reverted. The model numbers are from one local run of the evaluation harness against <code>qwen2.5:0.5b</code> on a 2019 Intel CPU: four questions, ~24 minutes each, three faults and one withheld — which is why the rest waits on a rented GPU. Constitution v2.2.0. The licensed workbook is not in the repository; only its imported content is.</p>
+</section>
+
+<script>
+{
+const st=[
+ ["1","WhatsApp in","Webhook, signature check, de-dup, inbox queue, worker","done","009"],
+ ["2","Who is this?","Phone → user record exists; consent + birth-detail questions don't","todo","017"],
+ ["3","Place & time","Birth place → lat/lon, historical time zone → UTC","done","007"],
+ ["4","Allowed?","Entitlement before the gate: an allow-list of one, failing closed — paid plans later","done","012 · 018–020"],
+ ["5","On topic?","Injection/jailbreak rules, topic gate, advisory sentences, leak scan, crisis line — unchanged by SPEC-012, and re-proved against it","done","011"],
+ ["6","Agent (LLM)","Prompt + 11 tools + reference swap + turn record — built and tested on a stub; no machine can run it yet","done gap","012"],
+ ["7","KP engine","Chart, cusps, sub lords, significators, RPs, dasha, horary, daily","done","001–006"],
+ ["8","Toolkit","75 sheets, 2,001 rules matched to the chart in code, 11 keyed look-ups, 72 tests","done","010"],
+ ["9","Reply out","Outbox, Graph API sender, 24-h window templates — now clamped to one message at a sentence boundary","done","009"]];
+document.getElementById('line').innerHTML=st.map(([n,t,d,c,s])=>`<li class="st ${c}"><span class="o">${n}</span><b>${t}</b><small>${d}</small><span class="spec">SPEC-${s}</span></li>`).join('');
+
+const tag={done:['d-done','Done'],wired:['d-wired','Spec only'],todo:['d-todo','Empty']};
+const stages=[
+ ["Done","001–009 · 010","Engine, geo, database, WhatsApp plumbing (echo reply), and the toolkit knowledge base"],
+ ["A — the toolkit answers the owner","<s>010 toolkit</s> · <s>011 guardrail</s> · <s>012 agent — built</s> · <b>rent the GPU</b>","The owner gets a toolkit-grounded answer on WhatsApp, in the agent's own voice — the code is ready, the machine is not"],
+ ["B — grow the agent","013 natal · 014 timing &amp; methods · 015 horary &amp; others' charts · 016 remedies, Vastu, numerology","Each topic group passes a practitioner review (≥ 9/10)"],
+ ["C — open to the public","017 onboarding · 018–020 plans &amp; payments · 021 guardrail hardening · 022 ops · 023 daily push","Sign-up, payment, safe public launch"]];
+const sc=[
+ ["SC-001 every sheet stored","75 of 75","75 sheets, none empty"],
+ ["SC-002 structured promise rules","&ge; 2,000","<b>2,001</b>, each traceable to its sheet and row"],
+ ["SC-003 horary agrees with the engine","249 of 249","249/249, lord for lord"],
+ ["SC-004 star look-ups total","108 of 108","108/108 in both tables, no overlaps (+72 friendship pairs, 9 planets, 12 signs)"],
+ ["SC-005 practitioner review","&ge; 9 of 10 per chart","<b>waiting on you</b> — snapshots generated"],
+ ["SC-006 re-import is a no-op","zero differences","two runs byte-identical"],
+ ["SC-007 reading speed","well under 1 s","&lt; 50 ms mean for all 12 houses"]];
+const gc=[
+ ["SC-001 practitioner judges 9 of 10","&ge; 9 of 10 acceptable as astrology","<b>needs the GPU VM</b> — ten documents from a 0.5B model would waste a practitioner's time"],
+ ["SC-002 every judgement grounded","100% behind a toolkit call","asserted on a stub; the harness counts it per answer"],
+ ["SC-003 no reply names a source","zero, eval set + adversarial corpus","the corpus half follows from SC-006: no model is called"],
+ ["SC-004 nothing withheld","zero withheld replies","<b>1 of 4 withheld</b> on the local model — a prompt defect, counted not hidden"],
+ ["SC-005 strangers get nothing","100% fixed message, zero model calls","<b>verified</b> — entitlement runs before the gate"],
+ ["SC-006 the guardrail did not regress","zero invocations, real wiring","<b>verified</b> — SPEC-011's corpus replayed through the real path"],
+ ["SC-008 a reply within 30 seconds","9 of 10 end to end","<b>needs the warm VM</b>; and see T045 below"],
+ ["SC-009 one WhatsApp message","&le; 4,096 chars, never mid-sentence","<b>verified</b> — trimmed at a sentence boundary, advisory kept"],
+ ["SC-010 no toolkit string reaches the model","zero, checked on the request","<b>verified</b> — 73 sources behind references, asserted on what the model received"],
+ ["SC-013 \"forget me\" leaves nothing","zero turn records, purge on age","<b>verified</b> against a real MySQL"]];
+document.getElementById('gc').innerHTML=gc.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join('');
+document.getElementById('sc').innerHTML=sc.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join('');
+document.getElementById('stages').innerHTML=stages.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join('');
+const mods=[
+ ["ephemeris","Swiss Ephemeris wrapper: planet positions, houses, sunrise","done",1061,603],
+ ["core","KP rules: lords, chart, significators, dasha, horary, prediction, <b>toolkit</b>","done",4046,6603],
+ ["geo","Geocoding + time-zone resolution","done",937,1021],
+ ["agent","Spring Boot app: persistence, WhatsApp worker, <b>entitlement + the agent + the turn record</b>","done",5595,4762],
+ ["channel-whatsapp","WhatsApp payload types","done",659,463],
+ ["guardrail","Gate + output stage: 5 hostile families, 2,397 derived terms, 7 leak families — <b>unchanged by SPEC-012, as planned</b>","done",2166,1434],
+ ["billing","Plans & entitlements (placeholder)","todo",7,0],
+ ["payments-razorpay","Payment links & webhook (placeholder)","todo",7,0]];
+document.getElementById('mods').innerHTML=mods.map(([m,d,s,a,b])=>`<tr><td><code>${m}</code></td><td>${d}</td><td><span class="tag"><i class="dot ${tag[s][0]}"></i>${tag[s][1]}</span></td><td class="n">${a.toLocaleString()} / ${b.toLocaleString()}</td></tr>`).join('');
+
+const adrs=[
+ ["0009 · 0010","<b>Rent the GPU VM</b> — which provider and region (v2.2.0 requires the region suit the data)","T040, T041, T044 — and Stage A's exit criterion"],
+ ["—","T045: the turn deadline does not bound a turn — buildable now, no GPU needed","Trusting any latency number measured later"],
+ ["—","Supplied-person charts: defer to SPEC-017, or wire a geocoder?","FR-011 / US1 scenario 4 — specified, not deliverable"],
+ ["0024","Revisit: suicide-related rules shown like other rules (your Q2: B)","Public launch"],
+ ["—","T048: review 10 promise readings per golden chart (SC-005)","Calling SPEC-010 done"],
+ ["—","T043: read the 15 in-scope corpus questions as a user would type them","Trusting the gate not to refuse real questions"],
+ ["—","Re-enable Hindi/Hinglish (drafted work parked in <code>deferred-multilingual/</code>)","Public traffic — a Hinglish message is refused, and a Hinglish crisis message gets no helpline"],
+ ["0011 · 0012","Meta Business account, WhatsApp number, templates","Going live on WhatsApp"],
+ ["0013","Geocoder API key (OpenCage)","Real birth places"],
+ ["0017 · 0020","Billing model, grace period","Payments"],
+ ["0022","Terms / privacy / refund pages","Razorpay live, launch"],
+ ["0001","Swiss Ephemeris licence (buy at go-live)","Launch"]];
+document.getElementById('adrs').innerHTML=adrs.map(([a,q,b])=>`<tr><td style="white-space:nowrap">${a}</td><td>${q}</td><td>${b}</td></tr>`).join('');
+}
+</script>
+</body>
+</html>

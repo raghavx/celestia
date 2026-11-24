@@ -312,6 +312,23 @@ with no code change.
   MUST end with exactly one fixed advisory sentence — the one for the most
   severe class used. The wording MUST come from the product's own constants and
   MUST NOT be generated, reworded, or duplicated.
+  - **Amended 2026-11-24 — what "used" means.** Which results an answer *used*
+    is not knowable: the model is forbidden from citing its references (FR-012),
+    so no sentence can be tied back to a source. "Used" is therefore determined
+    by **what the question was about**: a sensitivity carried by a house's
+    matters counts when the model asked about that house by number, while
+    content with no house behind it — a knowledge-base topic it searched for, a
+    look-up table it read — always counts, because asking for it is itself the
+    evidence the answer is about it. Where no house was asked about, every class
+    seen counts; narrowing needs a target, and absent one the conservative
+    reading is the right one. **This clause exists because the gap was load-
+    bearing**: read as "the most severe class *returned*", FR-014 put a health
+    or longevity caution on eight of ten answers in SPEC-012 T041, most about a
+    house the question never touched — a question about school subjects ended
+    "please consult a doctor about any health concern", because
+    `getChartPromises` with no house returns all twelve and the 8th carries
+    longevity matters. An advisory that fires on nearly every reply stops being
+    read, which is the opposite of care.
 - **FR-015**: When the user's own message expresses an intent or wish to harm
   themselves, the reply MUST begin with a short support line naming a crisis
   helpline, before any astrological content. A message merely asking what the

@@ -11,6 +11,15 @@
     </parent>
 
     <artifactId>agent</artifactId>
+
+    <properties>
+        <!-- SPEC-012 (T011, T012): Spring AI binds @Tool arguments by parameter
+             name, and @ToolParam has no name attribute, so the names must survive
+             compilation. Without -parameters every tool argument arrives null and
+             the model's calls silently do nothing — which the stub-model tier
+             catches and a real model would not explain. -->
+        <maven.compiler.parameters>true</maven.compiler.parameters>
+    </properties>
     <name>Celestia Agent</name>
     <description>Spring Boot application: conversation orchestrator, FSMs, guarded LLM pipeline, persistence, wiring of all modules.</description>
 
@@ -86,9 +95,25 @@
             <artifactId>flyway-mysql</artifactId>
         </dependency>
 
+        <!-- SPEC-012 (T001): the chat model. Versions from the parent's
+             dependencyManagement (spring-ai-bom 2.0.1), so none here.
+             Both providers are on the classpath and celestia.llm.provider picks
+             one (ADR-0009, amended 2026-11-24): Ollama is the committed default
+             so a clone with no credentials still builds and tests; the Claude API
+             is the development story, because a small local model cannot drive
+             eleven tool definitions at all. -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-ollama</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-anthropic</artifactId>
+        </dependency>
+
         <!--
           Added per phase:
-            Phase 6+ spring-ai-starter-model-ollama, spring-boot-starter-security
+            Phase 7+ spring-boot-starter-security
         -->
 
         <dependency>
