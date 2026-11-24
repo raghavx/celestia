@@ -91,6 +91,25 @@ written.
       `agent/src/main/java/com/celestia/agent/llm/LlmConfig.java`.
       Keep-alive is the server's concern, not the client's — the VM stays warm
       (ADR-0010), so the client does not retry a cold start
+- [X] T005a **The provider seam** — one interface, because everything else in the
+      answering path was already provider-agnostic:
+      `agent/src/main/java/com/celestia/agent/llm/TurnOptions.java` with
+      `OllamaTurnOptions` (keep-alive) and `AnthropicTurnOptions` (adaptive
+      thinking plus `celestia.llm.effort` — **never `budget_tokens`**, which
+      Sonnet 5 rejects outright), selected by `celestia.llm.provider` in
+      `LlmConfig`'s two nested provider configurations.
+      **Neither branch defines a `ChatModel`**: Spring AI's own autoconfiguration
+      builds it and its factory takes a `ToolCallingManager`, so the model is
+      built around `TurnToolCallingManager` whichever provider serves and the turn
+      stays bounded and recorded. Ollama is the committed default so a clone with
+      no credentials still builds. Asserted in
+      `agent/src/test/java/com/celestia/agent/llm/LlmConfigContextTest.java`:
+      exactly one chat model, the bounded manager, and the provider-aware
+      validation. **This is what makes constitution v3.0.0's sixth condition —
+      the provider stays configuration, never code — structural rather than
+      promised** (ADR-0009 as amended 2026-11-24; depends on T002, T005)
+      → **Done 2026-11-24.** Built after the task list was written; recorded here
+      because work with no task is the drift Constitution I names
 - [X] T006 [P] The turn record, **in the layering SPEC-008 established and
       `PersistenceArchitectureTest` guards**: `OwnerTurnRecordEntity` in
       `agent/src/main/java/com/celestia/agent/persistence/entity/OwnerTurnRecordEntity.java`,
@@ -202,6 +221,21 @@ as astrology rather than as a system report (spec.md US1).
       **No method accepts a `userId`, a coordinate or a time** — all three are
       injected from the authenticated sender, so a model that tries to pass
       someone else's identity has nowhere to put it (FR-006, Constitution V)
+- [X] T011a [US1] **Gate `castChartFor` on the provider** (**FR-011a**), in
+      `agent/src/main/java/com/celestia/agent/llm/tools/EngineTools.java`.
+      ADR-0026 condition 2 — the condition constitution v3.0.0's exception rests
+      on — forbids processing any other living person's data while a deployment
+      uses a third-party inference API: the owner may consent for his own birth
+      details, never for a friend's that he types into a message.
+      The tool was already unavailable, but **for the wrong reason** — no geocoder
+      is wired — which made the condition true by accident and meant **wiring a
+      geocoder would have breached it silently**. Report the two reasons apart, so
+      "forbidden on this provider" stays distinguishable from "not built yet", and
+      assert both directions in
+      `agent/src/test/java/com/celestia/agent/llm/TurnContextTest.java`
+      (depends on T011)
+      → **Done 2026-11-24.** Enforced rather than trusted, which is ADR-0026's own
+      design principle — the same reason condition 1 is a startup invariant
 - [X] T012 [US1] `ToolkitTools`: `@Tool` methods over SPEC-010's five toolkit
       tools, **each result passed through `SourceReferences` before
       serialisation**, in
@@ -585,6 +619,23 @@ thing code cannot judge is sitting in a folder waiting for a person.
       a field of a Spring AI chat type to a class in `agent.channel` and confirm
       the build fails. Revert both. A rule that cannot be shown to fail is not
       known to work, and these two fail for different reasons
+- [ ] T039a **OWNER ONLY — settle ADR-0026 condition 3 before any real birth
+      details are sent.** The exception that lets the preview use a third-party
+      inference API rests on six conditions. Condition 1 (an allow-list of exactly
+      one) is enforced at startup by `OwnerOnlyAllowListGuard`; condition 2 is
+      enforced in the tool surface (T011a). **Condition 3 is not enforceable in
+      code and is not yet confirmed**: the provider account must not train on the
+      prompts, retention must be set to the minimum the provider offers, and a
+      data-processing agreement must be in place — the API equivalent of v2.2.0's
+      three obligations for a rented host, where a provider is a processor and not
+      part of the trust boundary.
+      **This blocks T040, T041 and T044**, because each of them sends the owner's
+      real birth details and real questions to the provider. It is first in order
+      for a reason that is not procedural: **once the data has been sent, it has
+      been sent.** Record the outcome — provider, retention setting, agreement
+      date — in `docs/adr/0026-owner-preview-on-a-third-party-api.md`, so a year
+      from now the answer to "under what terms were those ten questions answered?"
+      is written down
 - [ ] T040 Measure SC-008 **against whatever the preview is deployed on** — the
       Claude API under v3.0.0's exception, or a warm self-hosted VM — and never on
       a laptop-sized model. Record the figure. If 30 seconds does not hold, the honest
@@ -700,8 +751,18 @@ thing code cannot judge is sitting in a folder waiting for a person.
   - **T018 (the ArchUnit amendment) must land with T015**, not after. Between
     writing `OwnerAnswerer` and amending the rule, the build is red — which is
     correct, and is the rule working.
-- **Polish (Phase 9)**: T036–T039 after the stories; T040 needs the VM; T041 and
-  T042 are the owner's
+- **Polish (Phase 9)**: T036–T039 after the stories. Then an order that matters:
+  - **T039a before T040, T041 and T044** — ADR-0026 condition 3 gates every task
+    that sends real birth details, and it cannot be undone afterwards.
+  - **T045 before T040** — a latency figure measured against a turn that is not
+    actually bounded is a number with no guarantee behind it. Fix the bound, then
+    measure it.
+  - **T044 before T041** — exercise the prompt against the deployed model before
+    asking a practitioner to judge what it produces.
+  - **T041 and T039a are the owner's**; T042 and T043 are done. T040 no longer
+    needs a rented VM: v3.0.0's bounded exception makes the preview runnable on
+    the Claude API, and Principle III ties the verdict to whichever provider
+    actually serves
 
 ### Within Each User Story
 

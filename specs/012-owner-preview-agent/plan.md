@@ -210,9 +210,9 @@ any other living person's data while a deployment runs on a third-party API: the
 owner may consent for himself, never for a friend whose birth details he types in.
 
 So the requirement is not merely waiting on a geocoder — **wiring one would end
-the API permission** unless the tool is gated on the provider. It is gated: the
-tool reports itself unavailable whenever the provider is a third-party API, and
-says why. FR-011's plumbing remains built and tested (a supplied chart is what the
+the API permission** unless the tool is gated on the provider. It is gated, and the spec says so:
+**FR-011a** requires the tool to report itself unavailable whenever the provider
+is a third-party API, and to say which of the two reasons applies (T011a). FR-011's plumbing remains built and tested (a supplied chart is what the
 tools judge for that turn, is never persisted, and its arguments are redacted from
 the turn record); **US1 scenario 4 is deliverable only on a self-hosted
 deployment**, which spec.md now states rather than implying.
