@@ -688,7 +688,7 @@ thing code cannot judge is sitting in a folder waiting for a person.
       question, three of four faulting on read timeouts. Recorded in ADR-0009
       "Measured on the dev machine". **Local Ollama is for the stub tier and for
       compiling; it is not a way to exercise the agent** (T044)
-- [ ] T044 **OPEN ITEM — get a production-level host before the prompt and the
+- [X] T044 **OPEN ITEM — get a production-level host before the prompt and the
       tool surface are frozen.** Developing only against a 0.5B CPU model pulls
       two ways at once: you start adding workarounds for *its* failures that
       Llama 4 Scout does not need and may be hurt by, and you never meet the
@@ -705,6 +705,39 @@ thing code cannot judge is sitting in a folder waiting for a person.
       of four questions timed out after ~24 minutes each. There is therefore
       *nothing* to learn about the prompt or the tool adapters locally, and no
       amount of local work substitutes for this task
+      → **Done 2026-11-24** against `claude-sonnet-5`, recorded in ADR-0009 "Open
+      item 2 closed". It earned its keep twice over: **Spring AI's chat models do
+      not run the tool loop** (the stub had emulated one, so 116 tests passed while
+      production could not have worked), and **Spring AI 2.0.1 does not surface the
+      response content when thinking is enabled** (1,877 output tokens, zero
+      readable characters). Both fixed. What the prompt got right: nothing withheld,
+      every judgement grounded in 41–73 toolkit sources, no source named, replies
+      2,172–2,936 characters inside the 4,096 budget, retrograde reported as
+      weakening and partly-indicated said as partial
+- [ ] T046 **Decide: the advisory sentence is chosen too broadly.** Found by T044.
+      `sensitivityUsed` is the maximum over every sensitivity the tools
+      **returned**, so a marriage reading ended with *"consult a qualified doctor
+      for diagnosis or treatment"* — because `getChartPromises(7)` legitimately
+      includes a HEALTH-classified matter ("partner in good health and spirit").
+      **The requirement may be the thing at fault**: SPEC-011 FR-014 says the
+      maximum over results *"actually used"*, and which results an answer used is
+      **not knowable** — the prompt forbids the model citing references, so nothing
+      connects a sentence to a source. Three options, and it is a product judgement
+      rather than a bug fix: accept it as conservative and correct (health content
+      *was* in the results); narrow it to the sensitivity of the house asked about;
+      or have the model report which matters it used and trust it, which trades a
+      NON-NEGOTIABLE guarantee for tidiness and should probably be refused
+- [ ] T047 **The out-of-scope marker fired for a question the toolkit covers.**
+      Found by T044 and exactly the defect spec.md's Edge Cases anticipated:
+      *"the owner gets the redirect, which looks to him like the product not
+      knowing its own subject."* "Which lottery numbers should I pick?" produced
+      `<<OUT_OF_SCOPE>>` → the fixed redirect, although the toolkit judges
+      speculation as a matter (Stock Market Astrology, finance, luck). **The
+      thinking-enabled run answered it properly** — declining the numbers, naming
+      houses 5/11/8/2, offering a horary reading instead — so this is a cost of
+      disabling thinking as much as a prompt defect. Sharpen obligation 5 of
+      `contracts/system-prompt.md`: the marker is for a question outside astrology
+      altogether, never for one the chart cannot answer specifically
 
 - [X] T045 **The turn deadline does not bound a turn — fix it** (FR-010).
       Found by the first tier-2 run: with `turn-deadline: PT120S`, turns ran

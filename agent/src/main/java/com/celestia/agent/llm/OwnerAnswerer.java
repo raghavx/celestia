@@ -21,6 +21,8 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
+import org.springframework.ai.model.tool.ToolCallingManager;
+import org.springframework.ai.model.tool.ToolExecutionResult;
 import org.springframework.ai.support.ToolCallbacks;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Component;
@@ -45,12 +47,15 @@ import org.springframework.stereotype.Component;
  * Nor does it write an advisory sentence or a crisis line — both belong to the
  * output stage (FR-016).
  *
- * <p><b>Why {@code ChatModel} and not {@code ChatClient}.</b> The fluent client
- * runs the tool loop privately, and Spring AI 2.0 no longer exposes a switch to
- * take it over. The round cap, the deadline and the per-call records all live in
- * {@link TurnToolCallingManager}, which the model calls once per round — so the
- * model interface is the one that can be bounded, and the client is the one that
- * cannot.
+ * <p><b>Why {@code ChatModel} and not {@code ChatClient}, and why the loop is
+ * here.</b> Spring AI's chat models do not execute tools: a model that wants one
+ * returns a response with {@code hasToolCalls()} true, a {@code tool_use} finish
+ * reason and <b>empty text</b>, and the caller runs the round. So this class owns
+ * the loop — call, execute, re-prompt with the enlarged history, call again — and
+ * that is what makes the two bounds real, because each turn of the loop is a place
+ * the cap and the deadline are checked. {@link TurnToolCallingManager} executes
+ * and records each round; the fluent {@code ChatClient} would hide the loop and
+ * with it both bounds.
  */
 @Component
 public class OwnerAnswerer implements Answerer {
@@ -58,6 +63,7 @@ public class OwnerAnswerer implements Answerer {
     private static final Logger log = LoggerFactory.getLogger(OwnerAnswerer.class);
 
     private final ChatModel model;
+    private final ToolCallingManager toolCallingManager;
     private final TurnOptions turnOptions;
     private final LlmProperties properties;
     private final SystemPrompt systemPrompt;
@@ -67,6 +73,7 @@ public class OwnerAnswerer implements Answerer {
 
     public OwnerAnswerer(
             ChatModel model,
+            ToolCallingManager toolCallingManager,
             TurnOptions turnOptions,
             LlmProperties properties,
             SystemPrompt systemPrompt,
@@ -74,6 +81,7 @@ public class OwnerAnswerer implements Answerer {
             ToolkitTools toolkitTools,
             Clock clock) {
         this.model = model;
+        this.toolCallingManager = toolCallingManager;
         this.turnOptions = turnOptions;
         this.properties = properties;
         this.systemPrompt = systemPrompt;
@@ -114,9 +122,28 @@ public class OwnerAnswerer implements Answerer {
     private Answer attempt(TurnScope scope, List<Message> messages, String modelName, boolean isFallback) {
         scope.usedModel(modelName, isFallback);
         scope.checkDeadline(clock.instant());
-        ChatResponse response = model.call(
-                new Prompt(messages, options(modelName, scope.remaining(clock.instant()))));
-        String draft = draftOf(response);
+
+        Prompt prompt = new Prompt(messages, options(modelName, scope.remaining(clock.instant())));
+        ChatResponse response = model.call(prompt);
+
+        // The tool loop is OURS to run. Spring AI's chat models return a
+        // tool-call response — `hasToolCalls()`, finish reason `tool_use`, empty
+        // text — and leave the execution to the caller. Driving it here is what
+        // makes the round cap and the deadline enforceable at all: they are
+        // checked on every turn of a loop we own, rather than hoped for inside
+        // one we do not (T044 found this; the stub had emulated a loop the
+        // framework does not provide).
+        while (response.hasToolCalls()) {
+            scope.checkDeadline(clock.instant());
+            ToolExecutionResult executed = toolCallingManager.executeToolCalls(prompt, response);
+            scope.countRound();
+            prompt = new Prompt(
+                    executed.conversationHistory(),
+                    options(modelName, scope.remaining(clock.instant())));
+            response = model.call(prompt);
+        }
+
+        String draft = draftOf(response, modelName);
         if (draft.isBlank()) {
             throw new IllegalStateException(modelName + " returned an empty draft");
         }
@@ -161,12 +188,34 @@ public class OwnerAnswerer implements Answerer {
         return turnOptions.forModel(modelName, List.of(callbacks), remaining);
     }
 
-    private static String draftOf(ChatResponse response) {
+    /**
+     * The reply text, or blank.
+     *
+     * <p>A blank draft is reported with <b>why</b> it was blank — the finish reason
+     * and the token usage — because "empty draft" on its own sends an operator
+     * looking in the wrong place. A model that ran out of output tokens mid-thought
+     * and a model that could not be reached are different faults with different
+     * fixes, and they look identical without this.
+     */
+    private static String draftOf(ChatResponse response, String modelName) {
         if (response == null || response.getResult() == null || response.getResult().getOutput() == null) {
-            throw new IllegalStateException("the model returned no generation");
+            throw new IllegalStateException(modelName + " returned no generation");
         }
         String text = response.getResult().getOutput().getText();
-        return text == null ? "" : text.trim();
+        if (text == null || text.isBlank()) {
+            String finish = response.getResult().getMetadata() == null
+                    ? "unknown"
+                    : String.valueOf(response.getResult().getMetadata().getFinishReason());
+            String usage = response.getMetadata() == null || response.getMetadata().getUsage() == null
+                    ? "unknown"
+                    : response.getMetadata().getUsage().getTotalTokens()
+                            + " total ("
+                            + response.getMetadata().getUsage().getCompletionTokens()
+                            + " output)";
+            log.warn("{} produced no reply text: finishReason={} usage={}", modelName, finish, usage);
+            return "";
+        }
+        return text.trim();
     }
 
     /**

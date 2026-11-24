@@ -204,3 +204,39 @@ verdict that counts.
 - **No `budget_tokens`.** Sonnet 5 rejects the fixed thinking-budget parameter
   outright (HTTP 400). Adaptive thinking is the only on-mode; the configuration
   below uses it, and `celestia.llm.effort` carries the depth knob instead.
+
+## Open item 2 closed: the prompt exercised against the deployed model, 2026-11-24
+
+SPEC-012 T044, against `claude-sonnet-5` on the fixture chart (no personal data).
+Four questions, two or three tool rounds each, 13–17 seconds a turn.
+
+**Two integration defects, both found only by a real model:**
+
+1. **Spring AI 2.0.1 does not surface the response content when thinking is
+   enabled.** With `thinkingAdaptive()` the reply lands in a package-private
+   `AnthropicAssistantMessage` and both `getText()` and `getToolCalls()` return
+   empty — measured at `end_turn` with **1,877 output tokens and zero readable
+   characters**. The tool loop still ran, because `executeToolCalls` reads the raw
+   response; only the accessors are blind. With thinking disabled the same question
+   returned 2,183 characters and the tool calls became visible. There is no public
+   accessor to work around it, so thinking is off on this provider until a later
+   release fixes the mapping.
+2. **Spring AI's chat models do not run the tool loop.** They return a tool-call
+   response — `hasToolCalls()`, finish `tool_use`, empty text — and leave the round
+   to the caller. The stub had *emulated* a loop the framework does not provide, so
+   116 tests passed while production could not have worked at all. The loop now
+   lives in `OwnerAnswerer`, which is also where the round cap and the deadline can
+   actually be enforced.
+
+**What the prompt got right**, which is what this item was for: no reply was
+withheld by the leak scan, every KP judgement rested on toolkit calls (41–73
+sources behind references), no reply named a source, replies ran 2,172–2,936
+characters against a 4,096 budget, and the toolkit's answer obligations held — the
+retrograde sub lord was reported as weakening and delaying, and partly-indicated
+matters were said to be partial rather than promised.
+
+**Two product defects for the owner to judge** (recorded in SPEC-012's tasks):
+the advisory sentence is chosen from every sensitivity the tools *returned* rather
+than what the answer used, so a marriage reading ended with a medical disclaimer;
+and the out-of-scope marker fired for a speculation question the toolkit does
+cover, which the thinking-enabled run had answered better.

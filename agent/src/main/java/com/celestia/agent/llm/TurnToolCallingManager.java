@@ -14,11 +14,11 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * The seam that makes a turn <b>bounded</b> (FR-010) and <b>reviewable</b>
  * (FR-020).
  *
- * <p>Spring AI 2.0 runs the tool loop inside the chat model and calls a
- * {@link ToolCallingManager} once per round. That makes this the one place where
- * a round can be counted, a deadline checked, and every tool call recorded with
- * the arguments the model actually supplied — none of which is reachable through
- * the fluent {@code ChatClient}, whose loop is private.
+ * <p>Spring AI's chat models do not execute tools — they return a tool-call
+ * response and leave the round to the caller — so {@link OwnerAnswerer} owns the
+ * loop and <b>counts the rounds</b>. What belongs here is what only this seam
+ * sees: the arguments the model actually supplied, recorded as the call is
+ * executed, and a deadline check on each round.
  *
  * <p><b>The cap and the deadline are separate</b> on purpose: a round-cap hit is
  * a prompt defect and a timeout is a hosting one, so collapsing them into one
@@ -53,10 +53,6 @@ public final class TurnToolCallingManager implements ToolCallingManager {
         }
 
         ToolExecutionResult result = delegate.executeToolCalls(prompt, response);
-
-        // Counted after the round ran, so the cap is "rounds the model got", and
-        // the fault is raised before the next model call rather than after it.
-        scope.countRound();
         scope.checkDeadline(clock.instant());
         return result;
     }

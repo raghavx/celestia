@@ -57,9 +57,10 @@ public final class AnswererHarness {
 
         ToolCallingManager manager =
                 new TurnToolCallingManager(DefaultToolCallingManager.builder().build(), clock);
-        this.model = new StubChatModel(manager);
+        this.model = new StubChatModel();
         this.answerer = new OwnerAnswerer(
                 model,
+                manager,
                 new OllamaTurnOptions(properties),
                 properties,
                 new SystemPrompt(),

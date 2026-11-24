@@ -11,12 +11,28 @@ import org.springframework.ai.tool.ToolCallback;
 /**
  * Turn options for the Claude API (ADR-0009's 2026-11-24 amendment).
  *
- * <p><b>Adaptive thinking, never a token budget.</b> Sonnet 5 rejects the fixed
- * thinking-budget parameter outright — {@code budget_tokens} is a 400 — so depth
- * is controlled by {@code celestia.llm.effort} instead, which is the current API's
- * own knob. {@code thinkingAdaptive()} lets the model decide when to think, which
- * is what a turn of tool-driven KP judgement wants: some questions resolve in one
- * look-up and some need several.
+ * <p><b>Thinking is disabled, and it is a workaround rather than a preference.</b>
+ * Spring AI 2.0.1's Anthropic integration <b>does not surface the response content
+ * when thinking is enabled</b>: the reply lands in a package-private
+ * {@code AnthropicAssistantMessage} wrapper, and the standard accessors —
+ * {@code getText()} and {@code getToolCalls()} — both return empty. Measured on
+ * 2026-11-24 (T044): with adaptive thinking, two tool rounds ran correctly and the
+ * final response came back {@code end_turn} with <b>1,877 output tokens and zero
+ * readable characters</b>; with thinking disabled, the same question returned
+ * 2,183 characters of KP answer and the tool calls became visible. The tool loop
+ * works either way, because {@code executeToolCalls} reads the raw response — it
+ * is only the accessors that are blind.
+ *
+ * <p>There is no public accessor to work around it with, so the options are
+ * thinking-off or no reply. If a later Spring AI release fixes the mapping, this
+ * is a one-line change back to {@code thinkingAdaptive()} — and worth making, for
+ * a turn of tool-driven KP judgement where some questions resolve in one look-up
+ * and some need several.
+ *
+ * <p><b>Never a token budget</b> either way: Sonnet 5 rejects {@code budget_tokens}
+ * outright (HTTP 400). {@code celestia.llm.effort} is the current API's knob for
+ * depth, and it is left unset by default — it tunes thinking, so it has nothing to
+ * do while thinking is off.
  *
  * <p><b>The timeout is the turn's remaining budget.</b> This provider supports a
  * per-request timeout, which is what lets the deadline be a bound rather than a
@@ -54,7 +70,9 @@ public final class AnthropicTurnOptions implements TurnOptions {
                 // response to a failing primary; a retry underneath that competes
                 // with it, multiplies the latency and makes the budget a fiction.
                 .maxRetries(0)
-                .thinkingAdaptive();
+                // Thinking OFF, and not by preference — see the class note. Spring
+                // AI 2.0.1 does not surface the response content when it is on.
+                .thinkingDisabled();
         effort().ifPresent(builder::effort);
         return builder.build();
     }

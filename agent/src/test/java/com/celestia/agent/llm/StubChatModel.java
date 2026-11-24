@@ -11,8 +11,6 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
-import org.springframework.ai.model.tool.ToolCallingManager;
-import org.springframework.ai.model.tool.ToolExecutionResult;
 
 /**
  * A chat model that answers from a script, <b>and runs the tool loop the way the
@@ -22,13 +20,13 @@ import org.springframework.ai.model.tool.ToolExecutionResult;
  * reference swap, statelessness, the budgets and the leak scan are all provable
  * without Ollama, and a result from a real 0.5B model would prove none of them.
  *
- * <p><b>Why it emulates the loop.</b> In Spring AI 2.0 the tool loop is inside the
- * chat model, which calls a {@link ToolCallingManager} once per round. A stub that
- * merely returned a tool-call response would never exercise
- * {@code TurnToolCallingManager} — so the round cap, the deadline and the
- * per-call records would all go untested. Given a manager, this stub executes the
- * calls and re-enters itself with the enlarged history, exactly as
- * {@code OllamaChatModel} does.
+ * <p><b>It does not emulate a tool loop, and that is the point.</b> An earlier
+ * version did: it executed each round and re-entered itself, on the assumption
+ * that Spring AI's chat models run the loop internally. They do not — they return
+ * a tool-call response with empty text and leave the round to the caller — so the
+ * emulation encoded an assumption rather than the framework's behaviour, and every
+ * test passed while production could not have worked. A stub must be wrong in the
+ * same direction as reality or it is worse than no stub.
  *
  * <p>It <b>keeps every prompt it was given</b>, which is what lets a test assert
  * on what the model received rather than on what it replied — the only honest way
@@ -38,17 +36,8 @@ public final class StubChatModel implements ChatModel {
 
     private final Deque<Object> script = new ArrayDeque<>();
     private final List<Prompt> seen = new ArrayList<>();
-    private final ToolCallingManager toolCallingManager;
 
-    /** A model with no tools: it can only answer or fail. */
-    public StubChatModel() {
-        this(null);
-    }
-
-    /** A model that executes tool calls through {@code manager}, like the real one. */
-    public StubChatModel(ToolCallingManager manager) {
-        this.toolCallingManager = manager;
-    }
+    public StubChatModel() {}
 
     /** Reply with this text and stop. */
     public StubChatModel thenAnswer(String text) {
@@ -126,13 +115,12 @@ public final class StubChatModel implements ChatModel {
         List<AssistantMessage.ToolCall> calls = (List<AssistantMessage.ToolCall>) next;
         ChatResponse response = new ChatResponse(List.of(new Generation(
                 AssistantMessage.builder().content("").toolCalls(calls).build())));
-        if (toolCallingManager == null) {
-            return response;
-        }
-        // What OllamaChatModel does: execute the round, then go round again with the
-        // tool results appended to the conversation.
-        ToolExecutionResult executed = toolCallingManager.executeToolCalls(prompt, response);
-        return call(new Prompt(executed.conversationHistory(), prompt.getOptions()));
+        // Returned as the real models return it: tool calls present, text empty,
+        // and the ROUND NOT RUN. This stub used to execute the round and re-enter
+        // itself, emulating a loop Spring AI does not provide — which made the
+        // tests pass while production could not work at all (T044). The loop
+        // belongs to OwnerAnswerer, so the stub must not have one.
+        return response;
     }
 
     @Override
