@@ -45,13 +45,16 @@ Clarifications section):
 
 - **Q1 → B**: the model receives an opaque source reference, never the sheet id,
   title or row. FR-013a–d; the leak scan stays in force regardless.
-- **Q2 → C**: continuity is a server-side typed subject, not message history.
-  FR-018, FR-018a–c, and a new US7.
+- **Q2 → A** (revised from C the same day): stateless — each question answered
+  on its own, no state between turns, no prior message text in the model's
+  context. FR-018, FR-018a–b.
 
-Writing Q2 down surfaced a consequence worth recording: a chart cast from a
-second person's supplied birth data **cannot** be carried forward, because
-FR-011 forbids persisting that data. A follow-up about that person must ask
-again. Privacy wins over convenience, deliberately.
+Drafting the discarded option (server-side continuity) surfaced a conflict that
+is recorded in the spec's Clarifications for whoever builds continuity later: a
+chart cast from a second person's supplied birth data **cannot** be carried
+forward, because FR-011 forbids persisting that data. Any future continuity
+feature must ask again or reopen FR-011 — a Constitution VII conversation, not a
+design tweak.
 
 **A separate, non-blocking dependency**: ADR-0009 and ADR-0010 are both still
 *proposed*. The spec is deliberately independent of them; the plan cannot be,

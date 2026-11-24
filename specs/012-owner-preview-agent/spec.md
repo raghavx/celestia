@@ -198,41 +198,6 @@ form and have them marked.
 
 ---
 
-### User Story 7 - A follow-up does not start from scratch (Priority: P3)
-
-The owner asks "when will I get married?", reads the answer, and follows with
-"and what about my career?". The second question is answered against the same
-chart without him repeating himself — but the model is never shown the first
-exchange. What carries forward is what the system resolved: his chart, the
-houses, the matter.
-
-**Why this priority**: Below the first answer and below not answering strangers,
-because the owner can always repeat himself. Above nothing, because he will try
-a follow-up within the first five minutes and a product that cannot manage one
-feels broken.
-
-**Independent Test**: Ask a question, then a follow-up that depends on it, and
-confirm the follow-up is answered against the right chart and subject — with no
-prior message text in what the model received.
-
-**Acceptance Scenarios**:
-
-1. **Given** an answered question about marriage, **When** the owner asks "and
-   what about my career?", **Then** it is answered against his chart and the
-   career matter, without him restating anything.
-2. **Given** that follow-up, **When** the model is invoked, **Then** what it
-   receives contains no text from the earlier message.
-3. **Given** a turn that used a second person's supplied birth data, **When** the
-   owner asks a follow-up about that person, **Then** the agent asks for the
-   data again, because it was never kept (FR-011).
-4. **Given** a follow-up the subject cannot resolve — "what about her?" with no
-   prior person — **When** it is gated and answered, **Then** the agent asks who
-   is meant rather than guessing.
-5. **Given** a subject that has expired, **When** a follow-up arrives, **Then**
-   it is treated as a fresh question rather than answered against stale context.
-
----
-
 ### Edge Cases
 
 - The model is unreachable or times out. The owner gets a fixed message saying
@@ -257,19 +222,18 @@ prior message text in what the model received.
 - The owner's question is in Hindi or Hinglish. The gate refuses it (English
   only until that is re-enabled), so the agent never sees it. Acceptable only
   because the audience is one known person.
-- A follow-up arrives after the conversation subject has expired. It is answered
-  as a fresh question, which may mean asking for something the owner feels he
-  just said. Treated as the acceptable failure: a stale subject produces a
-  confidently wrong answer, and asking again produces mild annoyance.
-- A follow-up refers to a person whose birth data the owner supplied earlier.
-  The data was never persisted (FR-011), so the agent must ask for it again —
-  the one place where privacy and convenience genuinely conflict, resolved in
-  favour of privacy.
-- The gate allows a follow-up that reads as off-topic on its own ("and before
-  2027?"). Because the gate judges each message alone, such a message may be
-  refused as unmatched even though it is a legitimate continuation. Counted
-  under SPEC-011's unmatched refusals, and a reason to widen the vocabulary
-  rather than to weaken the gate.
+- The owner asks a follow-up that depends on the previous turn — "what about
+  her?", "and before 2027?". Nothing is remembered, so the agent asks what is
+  meant. The owner will experience this as the product having a short memory,
+  which is the accepted cost of answering every question on its own.
+- A question that names its own matter — "and what about my career?" — works
+  despite the previous point, because the owner's chart is already context and
+  the matter is in the message. The limitation is anaphora, not follow-ups as
+  such.
+- The gate refuses a bare continuation ("and before 2027?") as unmatched,
+  because it judges each message alone and that message carries no in-scope
+  vocabulary. Counted under SPEC-011's unmatched refusals — a reason to widen
+  the vocabulary, never to weaken the gate.
 
 ## Requirements *(mandatory)*
 
@@ -347,20 +311,17 @@ prior message text in what the model received.
 
 #### Memory and continuity
 
-- **FR-018**: A turn MUST NOT be shown the text of previous messages. Continuity
-  MUST instead be carried as a small, typed **conversation subject** resolved
-  server-side from the previous turn — which chart was judged, which house or
-  houses, which matter — so that a follow-up can be answered without the model
-  holding the conversation. *(Clarified 2026-11-24, Q2: C.)*
-- **FR-018a**: The conversation subject MUST be bounded and MUST expire, so a
-  question asked an hour later is not answered against a stale subject.
-- **FR-018b**: The subject MUST reference **the owner's own chart only**. A chart
-  cast from birth data the owner supplied for someone else MUST NOT be carried
-  past its turn, because FR-011 forbids persisting that data at all. A follow-up
-  about that person MUST ask for the data again rather than reuse it.
-- **FR-018c**: When a follow-up cannot be resolved against the subject, the agent
-  MUST ask what it needs rather than guess. Answering the wrong question
-  confidently is worse than one more exchange.
+- **FR-018**: Each question MUST be answered on its own. No conversation state
+  MUST be carried between turns, and the model MUST NOT be shown the text of any
+  previous message. *(Clarified 2026-11-24, Q2: A.)*
+- **FR-018a**: A question that names its own subject MUST still work without
+  restatement, because the owner's chart is already context (FR-009): "and what
+  about my career?" is answerable because it names the matter, not because
+  anything was remembered.
+- **FR-018b**: A question that cannot be understood on its own — "what about
+  her?", "and before 2027?" — MUST be answered by asking what is meant rather
+  than by guessing. Answering the wrong question confidently is worse than one
+  more exchange.
 
 #### Operating it
 
@@ -387,9 +348,9 @@ prior message text in what the model received.
 - **Source reference**: the opaque token a tool result carries in place of a
   sheet id, title and row, resolvable to the real source only in the turn's
   record.
-- **Conversation subject**: what the system resolved from the previous turn — the
-  chart judged, the houses, the matter — carried forward in place of message
-  text, bounded and expiring.
+- **Turn record**: what a single question produced — decision, tool calls,
+  sources, delivered reply. Written for review, never read back to answer the
+  next question.
 
 ## Success Criteria *(mandatory)*
 
@@ -426,10 +387,9 @@ prior message text in what the model received.
 - **SC-011**: Every recorded answer's references resolve to a real toolkit
   source, so a practitioner reviewing the evaluation set can see the basis for
   all of it and none is unaccounted for.
-- **SC-012**: A follow-up question that depends on the previous turn is answered
-  against the right chart and subject without the owner restating anything, in
-  at least 3 of the evaluation cases; and a follow-up the subject cannot resolve
-  asks rather than guesses in 100 % of cases.
+- **SC-012**: A question that cannot be understood on its own is answered with a
+  question rather than a guess in 100 % of cases, and no reply is composed
+  against context from an earlier turn, since none is kept.
 
 ## Clarifications
 
@@ -450,20 +410,27 @@ prior message text in what the model received.
   the same rule (SPEC-010 `agent-tools.md` rule 3). The scan stays anyway
   (FR-013d) — two controls on a NON-NEGOTIABLE duty is not redundancy.
 
-- Q: Does a turn see the conversation so far? → A: **Neither raw history nor
-  nothing: server-side continuity.** A small typed subject — the chart judged,
-  the houses, the matter — is carried forward and the model is never shown prior
-  message text.
+- Q: Does a turn see the conversation so far? → A (first answer): server-side
+  continuity — a typed subject carried between turns. **→ Revised the same day to
+  stateless: each question is answered on its own, nothing is carried, and the
+  model is shown no prior message text.**
 
-  **What this bought and what it cost.** It makes "and what about my career?"
-  work, which the owner will try immediately, without storing message bodies that
-  Constitution VII says should not be stored by default. The cost surfaced while
-  writing it down: **a supplied second person's chart cannot be carried
-  forward**, because FR-011 forbids persisting that data at all — so a follow-up
-  about that person must ask for the birth data again (FR-018b). That is privacy
-  and convenience in genuine conflict, resolved in favour of privacy. The other
-  cost is anaphora the subject cannot resolve, which FR-018c answers by asking
-  rather than guessing.
+  **What the preview actually needs.** The audience is one person who can repeat
+  himself, and the owner's chart is already context — so a follow-up that names
+  its own matter ("and what about my career?") works regardless. What statelessness
+  gives up is anaphora: "what about her?", "and before 2027?". FR-018b answers
+  those by asking rather than guessing, which costs one exchange and never
+  produces a confidently wrong answer. Shipping the first real answer is worth
+  more than the follow-ups, and continuity retrofits onto a stateless turn more
+  easily than a stale subject unwinds.
+
+  **What the discarded option established, kept for when continuity returns.**
+  Writing server-side continuity down surfaced a conflict that does not go away:
+  **a chart cast from a second person's supplied birth data cannot be carried
+  forward**, because FR-011 forbids persisting that data at all. Any future
+  continuity feature must either ask for that data again or change FR-011, which
+  is a Constitution VII conversation rather than a design tweak. Recorded here so
+  the next person to pick this up does not have to rediscover it.
 
 ## Assumptions
 
@@ -482,10 +449,11 @@ prior message text in what the model received.
   plan is not, and cannot be completed until those are accepted.
 - A reply is produced synchronously within one turn. Long-running or streamed
   answers are not in scope.
-- Continuity is server-side state, not model memory, in line with Constitution
-  VI. The conversation subject is assumed to expire after the shorter of a few
-  turns or about half an hour; the exact bound is a planning decision, and
-  getting it wrong costs an unnecessary question rather than a wrong answer.
+- Each question is answered on its own, with no state carried between turns.
+  This is assumed acceptable because the audience is one person who can repeat
+  himself, and because the owner's chart is already context — so a follow-up
+  that names its matter works anyway. Continuity is a later feature, and the
+  note under Clarifications records what it will have to resolve when it comes.
 - The opaque source reference is assumed to be per-turn rather than global. A
   reference that persisted across turns would be a small, long-lived mapping of
   the toolkit's structure, which is more to protect than the problem needs.
