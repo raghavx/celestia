@@ -71,3 +71,32 @@ configuration, which is what makes this possible without a code change.
 - Model ids being configuration means development can run a smaller model
   locally without a code change, which is what makes SPEC-012 buildable before
   the GPU VM exists.
+
+## Measured on the dev machine, 2026-11-24 (SPEC-012 T043, and what T044 is for)
+
+The development story above was tested rather than assumed, and it is **worse than
+this ADR expected**. Recorded so nobody repeats the experiment.
+
+- **T043 is answered: `qwen2.5:0.5b` does report the `tools` capability** —
+  494M parameters, 32k context, Q4_K_M. The pin stands; the model is not the
+  problem.
+- **But it cannot drive this tool surface at all.** Eleven tool definitions, a
+  hardened prompt and twelve cusps of pre-fetched context put the first token
+  far beyond the HTTP read timeout on a 2019 Intel CPU. Four questions of the
+  evaluation set took **~24 minutes each**: three ended in
+  `FAULT`/`MODEL_UNREACHABLE` after Spring AI retried the primary, then the
+  fallback, each to a `ReadTimeoutException`. The fourth answered and its draft
+  was **withheld by the leak scan**.
+- **So the prediction in "Development model" above was half right.** The failure
+  mode is not malformed tool JSON exercising the fallback as the normal path — it
+  is *no response at all* inside any sane timeout. The fallback cannot help,
+  because a second slow model is still slow.
+- **What the run did prove**, which is what tier 2 is for: the round trip works
+  end to end — client connects, prompt goes out, a draft comes back, the output
+  stage judges it, the turn is recorded, the document is written — and the turn
+  **budget does not bound a turn** (SPEC-012 tasks T045). That is a real defect,
+  found by a model too slow to hide it.
+- **Conclusion**: local Ollama is for compiling and for the stub-model tier, not
+  for exercising the agent. Everything about prompt and tool-surface behaviour
+  waits for the rented GPU VM (**T044**), which is this ADR's own advice taken
+  seriously rather than worked around.

@@ -610,7 +610,7 @@ thing code cannot judge is sitting in a folder waiting for a person.
       D9, technology summary) and `README.md`; ADR-0010 updated to record that
       its outstanding item is closed
 
-- [ ] T043 **Verify the dev model can tool-call before relying on it**: run
+- [X] T043 **Verify the dev model can tool-call before relying on it**: run
       `ollama show qwen2.5:0.5b` and look for `tools` among the capabilities. If
       it is absent, find the smallest model that has it — **it may not be a
       Qwen**, which is why plan.md names a capability rather than a family —
@@ -621,6 +621,12 @@ thing code cannot judge is sitting in a folder waiting for a person.
       debugging the wrong layer: a model with **no tool template** fails inside
       Ollama and tells you nothing about this code, while one that is merely too
       small emits malformed arguments, which is the fallback path working
+      → **Done 2026-11-24: `qwen2.5:0.5b` reports `tools`** (494M, 32k context,
+      Q4_K_M), so the pin stands. But the tier-2 run then showed the model cannot
+      drive eleven tool definitions on a 2019 Intel CPU at all — ~24 minutes per
+      question, three of four faulting on read timeouts. Recorded in ADR-0009
+      "Measured on the dev machine". **Local Ollama is for the stub tier and for
+      compiling; it is not a way to exercise the agent** (T044)
 - [ ] T044 **OPEN ITEM — get a production-level host before the prompt and the
       tool surface are frozen.** Developing only against a 0.5B CPU model pulls
       two ways at once: you start adding workarounds for *its* failures that
@@ -630,7 +636,34 @@ thing code cannot judge is sitting in a folder waiting for a person.
       not fluent enough to generate. Both surface late and expensively. Exercise
       `system-prompt.md` (T013) and the tool adapters (T011, T012) against Scout
       on the VM **before** T041 asks a practitioner to judge them, and record the
-      date it happened in `docs/adr/0009-llm-runtime-and-model.md` (open item 2)
+      date it happened in `docs/adr/0009-llm-runtime-and-model.md` (open item 2).
+      **This is no longer hypothetical.** The 2026-11-24 tier-2 run showed the dev
+      model cannot answer this tool surface at all — not slowly, not badly: three
+      of four questions timed out after ~24 minutes each. There is therefore
+      *nothing* to learn about the prompt or the tool adapters locally, and no
+      amount of local work substitutes for this task
+
+- [ ] T045 **The turn deadline does not bound a turn — fix it** (FR-010).
+      Found by the first tier-2 run: with `turn-deadline: PT120S`, turns ran
+      **24 minutes**. The deadline is checked *between* model calls and around
+      tool rounds (`TurnScope.checkDeadline`), but Spring AI's `RetryUtils`
+      retries inside a single `ChatModel.call`, and nothing interrupts a blocking
+      inference. FR-010 says a turn MUST be bounded in elapsed time; it is bounded
+      in rounds and only nominally in time, and SC-008's 30 seconds rests on the
+      difference. Three parts:
+      **(a)** set an explicit read timeout on the Ollama `RestClient` derived from
+      `turn-deadline` in
+      `agent/src/main/java/com/celestia/agent/llm/LlmConfig.java`, so a slow host
+      fails fast rather than slowly;
+      **(b)** replace Spring AI's default retry with one that **defers to the
+      fallback** (`OllamaChatModel.builder().retryTemplate(...)`) — ADR-0009 makes
+      the fallback model the designed answer to a failing primary, and retrying
+      underneath it multiplies the latency and makes the budget meaningless;
+      **(c)** if the deadline is to be a guarantee rather than a checkpoint, run
+      the call where the handler can abandon it and record `faultKind=TIMEOUT`
+      when it does.
+      Assert the bound end to end in `OwnerAnswererTest`: a model that blocks past
+      the deadline must produce the fixed message **within** it, not after it
 
 ---
 
