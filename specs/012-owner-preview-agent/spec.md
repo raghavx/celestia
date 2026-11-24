@@ -217,8 +217,9 @@ form and have them marked.
 - The answer is longer than one WhatsApp message. It is kept within the reply
   budget rather than truncated mid-sentence.
 - The owner sends a second message while the first is still being answered.
-  Each turn is answered on its own; no state from an in-flight turn leaks into
-  the next.
+  Only one turn runs at a time (FR-010a), so the second is told to try again
+  shortly rather than queued behind the first. Nothing of an in-flight turn
+  leaks into the next, because no turn carries state anyway (FR-018).
 - The owner's question is in Hindi or Hinglish. The gate refuses it (English
   only until that is re-enabled), so the agent never sees it. Acceptable only
   because the audience is one known person.
@@ -273,6 +274,10 @@ form and have them marked.
 - **FR-010**: A turn MUST be bounded in both tool calls and elapsed time. When a
   bound is exceeded, or the model is unreachable, the owner MUST receive a fixed
   message and the turn MUST be recorded as a fault.
+- **FR-010a**: The system MUST serve a bounded number of turns at once —
+  **one** for the preview — and MUST tell a sender to try again shortly rather
+  than queue them behind a turn in progress. An unbounded queue in front of a
+  single model is how a slow reply becomes an outage.
 - **FR-011**: Birth data the owner supplies for a second person MUST be used for
   that reply only and MUST NOT be persisted.
 
@@ -306,8 +311,9 @@ form and have them marked.
   a retrograde sub lord or star lord is reported as weakening or delaying.
 - **FR-016**: The advisory sentence and the crisis support line MUST continue to
   come from the output stage. The model MUST NOT write either.
-- **FR-017**: A reply MUST fit within the messaging channel's reply budget
-  without being truncated mid-sentence.
+- **FR-017**: A reply MUST fit within **4,096 characters** — WhatsApp's own
+  limit for a text body, and the same bound SPEC-011 applies to inbound messages
+  — without being truncated mid-sentence.
 
 #### Memory and continuity
 
@@ -330,6 +336,14 @@ form and have them marked.
 - **FR-020**: Every turn MUST be recorded with its decision, its tool calls and
   their sources, sufficient for a practitioner to review the answer and for an
   operator to tell a fault from a refusal.
+- **FR-020a**: A turn record holds the owner's question, which is a message
+  body and therefore personal data. It MUST be covered by the "forget me" hard
+  delete, alongside the rows SPEC-008 FR-010 already enumerates. A deletion
+  request that leaves every question a user ever asked is not a deletion.
+- **FR-020b**: Turn records MUST be purged once they pass a configurable
+  retention age, **defaulting to 90 days**. A retention of `0` MUST mean *never
+  purge on age* — and MUST NOT be read as disabling FR-020a, which is a standing
+  obligation no setting may switch off.
 - **FR-021**: The system MUST carry an evaluation set of at least ten of the
   owner's own questions, run on demand, producing answers with their sources in
   a form a practitioner can mark without reading code.
@@ -379,8 +393,10 @@ form and have them marked.
   silence on WhatsApp. Whether it is achievable depends on where the model runs
   — ADR-0010 — which is why that decision blocks planning rather than this
   spec.)
-- **SC-009**: No reply is truncated mid-sentence or exceeds the channel's
-  message budget.
+- **SC-009**: No reply exceeds 4,096 characters or is truncated mid-sentence.
+- **SC-013**: A "forget me" request for a user leaves **zero** turn records for
+  that user, and a record past the retention age is gone on the next purge —
+  both checked rather than assumed.
 - **SC-010**: Zero tool results presented to the model contain a sheet id, a
   sheet title or a row number, across the whole evaluation run — checked on what
   the model received, not on what it replied.
@@ -449,6 +465,12 @@ form and have them marked.
   plan is not, and cannot be completed until those are accepted.
 - A reply is produced synchronously within one turn. Long-running or streamed
   answers are not in scope.
+- **Two requirements can only be checked by a person, and that is not an
+  oversight.** Nothing can prove from the outside that the model did no
+  arithmetic (FR-008) or that it honoured the toolkit's answer obligations
+  (FR-015) — a stub model proves the wiring, not the behaviour. Both are gated by
+  the practitioner's read of the evaluation set (SC-001), which is why that read
+  is a task rather than a courtesy.
 - Each question is answered on its own, with no state carried between turns.
   This is assumed acceptable because the audience is one person who can repeat
   himself, and because the owner's chart is already context — so a follow-up

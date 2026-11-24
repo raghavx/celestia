@@ -250,7 +250,11 @@ validated in CI.
   `chart`, `dasha_period`, `horary_query`, and `prediction` rows and anonymise
   `app_user` (clear `display_name` / `wa_id`, retain a non-reversible phone
   hash, set `deleted_at`). Payment/tax records are out of scope here and exempt
-  (ADR-0016). The *scheduling* of the job is SPEC-012. Deleting the user's
+  (ADR-0016). The *scheduling* of the job is SPEC-012 **in the 2026-09 numbering
+  this spec was written against — not the SPEC-012 that exists today.** See
+  PROJECT_PLAN.md "Renumbering from the 2026-09 plan"; every SPEC-0NN reference
+  in this document uses the old scheme (onboarding is "SPEC-010" here and 017
+  now, Q&A is "SPEC-015" here and 012 now). Deleting the user's
   `inbound_event` / `outbox_message` payload rows (which can contain a phone
   number or message text — "message bodies" in ADR-0016) is **SPEC-009's**
   "forget me" extension: SPEC-009 owns those tables' payload semantics and the

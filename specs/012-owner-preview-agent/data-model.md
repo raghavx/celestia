@@ -26,8 +26,12 @@ context (FR-013a–d).
 
 | Field | Type | Rule |
 |-------|------|------|
-| references | ordered list of `{sheetId, sheetTitle, row}` | the real sources, in first-seen order |
-| label(i) | text | what the model sees: `s1`, `s2`, … — an **index, not an encoding** |
+| sources | ordered list of `{sheetId, sheetTitle, row}` | the real sources, in first-seen order |
+| reference(i) | text | what the model sees: `s1`, `s2`, … — an **index, not an encoding** |
+
+**One name for it: "reference".** The spec, this document, the contracts and the
+research all mean the same thing by reference, label and handle; "reference" is
+the word FR-013a uses, so it is the word used everywhere.
 
 **Rules**:
 
@@ -61,6 +65,14 @@ application — not read out of the draft text, and not decided by the model
 One row per turn, written for the operator and the practitioner (FR-020). The
 only new table.
 
+**Where it lives.** SPEC-008 established the layering and
+`PersistenceArchitectureTest` guards it: the JPA entity belongs in
+`agent.persistence.entity`, its repository in `agent.persistence.repository`,
+and a `TurnRecordStore` in `agent.persistence.store` is what the rest of the
+application talks to. `agent.llm` holds only the value it hands over — it does
+not write persistence directly, for the same reason nothing else in this
+codebase does.
+
 | Field | Type | Rule |
 |-------|------|------|
 | id | surrogate key | |
@@ -79,6 +91,18 @@ only new table.
 (SPEC-011 keeps that true), and this record does not add it back. The question is
 stored because a practitioner cannot review an answer without it; nothing else
 about the message body is.
+
+**It is personal data, and it is deleted.** The question is a message body, so a
+turn record falls under Constitution VII. Two rules, and the second must not be
+mistaken for a way round the first:
+
+1. **"Forget me" removes it** (FR-020a). SPEC-008 FR-010 enumerates the rows a
+   deletion covers; `owner_turn_record` joins that list. A deletion that leaves
+   every question a user ever asked is not a deletion.
+2. **Age purges it** (FR-020b): records older than
+   `celestia.turn-record.retention-days` are purged, default **90**. A value of
+   **`0` means never purge on age** — not "never delete", because rule 1 is a
+   standing obligation that no setting switches off.
 
 ### ToolCallRecord
 

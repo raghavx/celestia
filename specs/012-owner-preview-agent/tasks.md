@@ -47,10 +47,12 @@ Dependencies section says so plainly rather than pretending otherwise.
 
 **Purpose**: the dependency and the configuration surface, before any behaviour.
 
-- [ ] T001 Add `spring-ai-starter-model-ollama` and the `guardrail` module
-      dependency to `agent/pom.xml`, replacing the "Phase 6+" comment that
-      anticipates them. Spring AI's version comes from the parent's
-      `dependencyManagement` (2.0.1), so no version here
+- [ ] T001 Add `spring-ai-starter-model-ollama` to `agent/pom.xml`, replacing
+      the "Phase 6+" comment that anticipates it. Its version comes from the
+      parent's `dependencyManagement` (2.0.1), so no version here.
+      **`core`, `guardrail` and `channel-whatsapp` are already dependencies** —
+      verified, so the `Answerer` seam is reachable today and this is the only
+      new one
 - [ ] T002 [P] `LlmProperties` record bound to `celestia.llm.*` — `base-url`,
       `model`, `fallback-model`, `max-tool-rounds`, `turn-deadline`,
       `max-concurrent-turns` — in
@@ -82,16 +84,26 @@ written.
       `agent/src/main/java/com/celestia/agent/llm/LlmConfig.java`.
       Keep-alive is the server's concern, not the client's — the VM stays warm
       (ADR-0010), so the client does not retry a cold start
-- [ ] T006 [P] `TurnRecord` and `ToolCallRecord` per data-model.md, with the
-      Flyway migration, in
-      `agent/src/main/java/com/celestia/agent/llm/TurnRecord.java`,
-      `.../ToolCallRecord.java` and
-      `agent/src/main/resources/db/migration/V__owner_turn_record.sql`.
-      The record holds the question (a practitioner cannot review an answer
-      without it) and **nothing else about the message body** — SPEC-011 kept the
-      gate's decisions free of message text and this must not add it back
+- [ ] T006 [P] The turn record, **in the layering SPEC-008 established and
+      `PersistenceArchitectureTest` guards**: `OwnerTurnRecordEntity` in
+      `agent/src/main/java/com/celestia/agent/persistence/entity/OwnerTurnRecordEntity.java`,
+      `OwnerTurnRecordRepository` in
+      `agent/src/main/java/com/celestia/agent/persistence/repository/OwnerTurnRecordRepository.java`,
+      `TurnRecordStore` in
+      `agent/src/main/java/com/celestia/agent/persistence/store/TurnRecordStore.java`,
+      the `TurnDetail` value in
+      `agent/src/main/java/com/celestia/agent/llm/TurnDetail.java`, and the
+      migration in
+      `agent/src/main/resources/db/migration/V6__owner_turn_record.sql`
+      (**`V6`** — the existing migrations run `V1`…`V5`, and a version-less
+      `V__` name does not parse). `llm/` and `channel/` talk to the store, never
+      to the entity. The record holds the question (a practitioner cannot review
+      an answer without it) and **nothing else about the message body** —
+      SPEC-011 kept the gate's decisions free of message text and this must not
+      add it back (FR-020)
 - [ ] T007 [P] `SourceReferences`: the per-turn mapping from
-      `{sheetId, sheetTitle, row}` to `s1`, `s2`, … in
+      `{sheetId, sheetTitle, row}` to the **references** `s1`, `s2`, … — one
+      word for this throughout, the one FR-013a uses, not label or handle — in
       `agent/src/main/java/com/celestia/agent/llm/SourceReferences.java`.
       **An index, never an encoding** — no hash, no slug, no base64, because a
       reversible label puts the sheet id back in the model's context by another
@@ -102,6 +114,26 @@ written.
       dasha, optional supplied chart — in
       `agent/src/main/java/com/celestia/agent/llm/TurnContext.java`. The supplied
       chart field is documented as **dying with the turn** (FR-011)
+- [ ] T006a `TurnRecordStore.deleteForUser(userId)`, wired into SPEC-008's
+      "forget me" hard delete so `owner_turn_record` joins the rows FR-010 of
+      that spec already removes (**FR-020a**), in
+      `agent/src/main/java/com/celestia/agent/persistence/store/TurnRecordStore.java`
+      and `.../UserAccountService.java`. **A deletion that leaves every question
+      a user ever asked is not a deletion** — Constitution VII makes the hard
+      delete a MUST, and a new table holding message bodies does not get to opt
+      out (depends on T006)
+- [ ] T006b `TurnRecordStore.purgeOlderThan(...)` plus a scheduled job and
+      `celestia.turn-record.retention-days` (**default 90**) in
+      `agent/src/main/java/com/celestia/agent/persistence/store/TurnRecordStore.java`
+      and `agent/src/main/resources/application.yaml`. **`0` means never purge
+      on age** — implemented so it cannot be mistaken for disabling T006a, which
+      no setting may switch off (**FR-020b**) (depends on T006)
+- [ ] T006c `TurnRecordRetentionTest`: a "forget me" request leaves **zero**
+      turn records for that user; a record past the retention age is gone after a
+      purge; one inside it survives; and with `retention-days: 0` **nothing is
+      purged on age while forget-me still deletes everything** (**SC-013**), in
+      `agent/src/test/java/com/celestia/agent/persistence/store/TurnRecordRetentionTest.java`
+      (depends on T006a, T006b)
 - [ ] T009 `EntitlementService` + `EntitlementDecision` (`OWNER_ALLOW_LIST`,
       `DENIED_NOT_LISTED`, `DENIED_UNAVAILABLE`) in
       `agent/src/main/java/com/celestia/agent/entitlement/EntitlementService.java`.
@@ -149,6 +181,11 @@ as astrology rather than as a system report (spec.md US1).
       model, so this adapter returns the group, the kind and the matching rows
       with the identity behind a label. One careless tool defeats the swap in a
       single call (contracts/llm-tools.md) (depends on T007)
+- [ ] T012a [US1] `ToolSetClosedTest`: the registered tool names equal an
+      expected list exactly, so an accidentally-added `@Tool` fails the build
+      rather than quietly widening what the model can reach (FR-007), in
+      `agent/src/test/java/com/celestia/agent/llm/tools/ToolSetClosedTest.java`
+      (depends on T011, T012)
 - [ ] T013 [US1] `system-prompt.md` — all nine obligations of
       contracts/system-prompt.md, each traceable to its requirement — in
       `agent/src/main/resources/com/celestia/agent/llm/system-prompt.md`.
@@ -274,7 +311,11 @@ delivered reply names a source and nothing was withheld (spec.md US3).
       not on what it replied — serialise the full request for a turn that used
       every toolkit tool and confirm it contains no sheet id, no sheet title and
       no row number (SC-010). This is the mechanical half of Constitution X and
-      the reason the reference swap exists, in
+      the reason the reference swap exists. **Also assert statelessness on the
+      same evidence** (**FR-018**): run two turns for the same user and confirm
+      the second request contains no substring of the first message. A US7
+      scenario asserted that until Q2 was revised to stateless and the story went
+      with it — leaving the decision's central claim untested, in
       `agent/src/test/java/com/celestia/agent/llm/ModelContextLeakTest.java`
       (depends on T012, T015)
 - [ ] T026 [US3] `SystemPromptTest`: every one of the nine obligations of
@@ -312,6 +353,14 @@ them and confirm the agent declines rather than improvising (spec.md US4).
       written; and **a reply asserting astrological content with zero tool calls
       behind it is a defect** that the turn record makes visible (SC-002), in
       `agent/src/test/java/com/celestia/agent/llm/NoBasisTest.java`
+      (depends on T015, T016)
+- [ ] T028a [US4] `AsksRatherThanGuessesTest`: a message that cannot be
+      understood on its own — "what about her?", "and before 2027?" — produces a
+      reply that **asks what is meant**, and no reply is composed against
+      context from an earlier turn, since none is kept (FR-018b, SC-012), in
+      `agent/src/test/java/com/celestia/agent/llm/AsksRatherThanGuessesTest.java`.
+      SC-012 had no task at all until the first analysis pass, and quickstart
+      step 3b claimed `GuardrailRegressionTest` covered it, which it does not
       (depends on T015, T016)
 - [ ] T029 [US4] Record the two directions separately on the turn: a decline and
       a false decline are different failures, and SC-007 counts both — a product
@@ -476,7 +525,7 @@ thing code cannot judge is sitting in a folder waiting for a person.
 - US6: T033 (the question file) is independent of T034's harness
 - **Not parallel**: anything touching `GuardedReplyHandler.java` (T016, T022,
   T027, T031, T032), `system-prompt.md` (T013, and T026 reads it), or
-  `TurnRecord.java` (T006, T029)
+  the turn record (T006, T006a, T006b, T029)
 
 ---
 

@@ -27,6 +27,24 @@ budgets and the reference swap without any inference. In particular
 id, title or row reaches what the model is given** (SC-010), checked on the
 serialised request rather than on the reply.
 
+## 1b. Personal data is deleted when it should be
+
+```bash
+./mvnw -pl agent -am test -Dtest=TurnRecordRetentionTest
+```
+
+Expected: a "forget me" request leaves **zero** turn records for that user; a
+record past the retention age is purged; one inside it survives; and with
+`celestia.turn-record.retention-days: 0` nothing is purged on age **while
+forget-me still deletes everything** (SC-013).
+
+The turn record holds the owner's question, which is a message body and so
+personal data under Constitution VII. The first analysis pass found it stored
+unconditionally with nothing deleting it — a new table quietly outside the hard
+delete that SPEC-008 enumerates. `0` meaning "never purge on age" is a
+convenience; it is not a way to switch off deletion, and the test pins that
+distinction.
+
 ## 2. Entitlement, and that it fails closed
 
 ```bash
@@ -81,12 +99,23 @@ a model existed, and says nothing about whether a real one introduced a bypass.
 This feature adds two things in front of the gate and one behind it; any of them
 could have.
 
-The same run covers two more criteria:
+The same run covers one more criterion:
 
 | Check | Criterion |
 |-------|-----------|
 | an unentitled sender gets the fixed message and causes zero invocations | SC-005 |
-| a question that cannot stand alone is answered with a question, not a guess | SC-012 |
+
+**SC-012 is not covered here**, despite an earlier draft of this file saying so.
+A question that cannot stand alone is tested by `AsksRatherThanGuessesTest`
+(T028a), which runs with a stub model:
+
+```bash
+./mvnw -pl agent -am test -Dtest='AsksRatherThanGuessesTest,ModelContextLeakTest'
+```
+
+`ModelContextLeakTest` is in the same command because it carries the other
+property of the stateless decision: the second turn's request contains no
+substring of the first message (FR-018).
 
 ## 4. A real answer, end to end
 

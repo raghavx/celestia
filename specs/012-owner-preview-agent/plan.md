@@ -38,16 +38,23 @@ Wire the model in, between two halves of a path that already exist.
 
 **Primary Dependencies**: `spring-ai-starter-model-ollama` (Spring AI 2.0.1,
 already in the parent pom's `dependencyManagement`; `agent/pom.xml` anticipates
-it in a comment). `agent` already depends on `core`; it gains a dependency on
-`guardrail` for the `Answerer` seam and `GuardedPipeline`. No new third-party
-library beyond the Spring AI starter.
+it in a comment). **`agent` already depends on `core`, `guardrail` and
+`channel-whatsapp`** — verified, so the `Answerer` seam is reachable today and
+the only new dependency is the Spring AI starter.
 
 **Storage**: MySQL via the existing stores — `BirthDataStore` for the owner's
 seeded birth data, `ChartCacheService.natalChart(userId)` for the pre-fetched
-chart. One new table for the turn record (Flyway migration), holding the
-decision, the tool calls and the resolved sources. Message bodies are stored only
-as far as the turn record needs for review, consistent with Constitution VII;
-the reference→source mapping is per-turn and dies with it.
+chart. One new table, `owner_turn_record` (Flyway `V6__`), holding the decision,
+the tool calls and the resolved sources, reached through a new `TurnRecordStore`
+in `agent.persistence.store` with its entity in `agent.persistence.entity` —
+the layering SPEC-008 established and `PersistenceArchitectureTest` guards.
+
+**It holds a message body, so it is deleted.** The question is personal data
+under Constitution VII: `owner_turn_record` joins the rows SPEC-008 FR-010's
+"forget me" removes (FR-020a), and records are purged past a configurable
+retention age, default 90 days, where `0` means never purge on age without ever
+disabling the deletion obligation (FR-020b). The reference→source mapping is
+per-turn and dies with the turn.
 
 **Testing**: JUnit 5 + AssertJ + Mockito, as `agent` already uses. The guarded
 path is tested with a stub `ChatModel` so the wiring, the reference swap and the
@@ -101,7 +108,7 @@ table, ten eval questions, one amended ArchUnit rule, one deleted class
 | IV LLM never calculates | Every number comes from a tool result (FR-008). `userId`, coordinates and clock are injected server-side and never read from tool arguments (FR-006) | ✅ |
 | V Guarded single path (NON-NEGOTIABLE) | Entitlement → gate → model → output stage, in that order. `GuardedPipeline` is the only caller of `Answerer`; the ArchUnit rule is amended to name `OwnerAnswerer` explicitly rather than widened to a package (research §2) | ✅ |
 | VI Deterministic flows | Not touched — onboarding is SPEC-017. Statelessness here means no flow state exists to keep in the model (FR-018) | n/a |
-| VII Data protection | Birth data is seeded, not collected; a supplied second person's data is used for the turn and not persisted (FR-011). **New exposure**: personal data now reaches a rented inference host, which ADR-0010 records with its open obligations | ⚠️ see note |
+| VII Data protection | Birth data is seeded, not collected; a supplied second person's data is used for the turn and not persisted (FR-011). The new turn record holds a message body, so it joins the "forget me" delete and carries a 90-day default retention (FR-020a, FR-020b) — the gap the first analysis pass caught. **Remaining exposure**: personal data now reaches a rented inference host, which ADR-0010 records with its open obligations | ⚠️ see note |
 | VIII Payments | Not touched. Entitlement is an allow-list, and the interface is what SPEC-018 plugs into | n/a |
 | IX Adapters at the edge | `ReplyHandler` is unchanged as an interface; the webhook, worker and sender are untouched. Spring AI is a provider type and stays inside `agent.llm` | ✅ |
 | X Toolkit is the judgement (NON-NEGOTIABLE) | Interpretation comes only from tool results (FR-014); the answer obligations of `agent-tools.md` are prompt requirements (FR-015); and the toolkit's strings never enter the model's context (FR-013a) while the leak scan still runs | ✅ |
@@ -130,6 +137,7 @@ specs/012-owner-preview-agent/
 ├── quickstart.md        # Phase 1
 ├── contracts/
 │   ├── answerer-api.md  # what agent implements for guardrail, and the turn budget
+│   ├── entitlement-api.md # the seam SPEC-018 replaces, and what it must preserve
 │   ├── llm-tools.md     # the tool surface the model sees, including the reference swap
 │   └── system-prompt.md # the prompt as a contract: what it must say, and why each line
 ├── checklists/requirements.md
@@ -150,7 +158,7 @@ agent/src/main/java/com/celestia/agent/
 │   ├── SystemPrompt.java            # loads system-prompt.md once
 │   ├── TurnContext.java             # chart + running dasha, pre-fetched
 │   ├── SourceReferences.java        # per-turn {sheetId,sheetTitle,row} -> s1, s2 …
-│   ├── TurnRecord.java              # decision, tool calls, resolved sources
+│   ├── TurnDetail.java              # the value handed to the store: decision, tool calls, sources
 │   └── tools/
 │       ├── EngineTools.java         # @Tool over core: chart, lords, dasha, horary
 │       └── ToolkitTools.java        # @Tool over the five toolkit tools of SPEC-010
@@ -161,9 +169,13 @@ agent/src/main/java/com/celestia/agent/
 └── eval/
     └── OwnerEvalHarness.java        # ten questions -> reviewable documents
 
+├── persistence/
+│   ├── entity/OwnerTurnRecordEntity.java   # the JPA entity, where SPEC-008 says entities live
+│   ├── repository/OwnerTurnRecordRepository.java
+│   └── store/TurnRecordStore.java          # what llm/ and channel/ talk to; also the purge
 agent/src/main/resources/
 ├── com/celestia/agent/llm/system-prompt.md
-└── db/migration/V__owner_turn_record.sql
+└── db/migration/V6__owner_turn_record.sql
 
 agent/src/test/java/com/celestia/agent/
 ├── entitlement/EntitlementServiceTest.java      # FR-001..FR-003, fail closed
