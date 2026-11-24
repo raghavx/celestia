@@ -13,6 +13,8 @@ import com.celestia.agent.persistence.store.AppUserRef;
 import com.celestia.agent.persistence.store.BirthDataStore;
 import com.celestia.agent.persistence.store.UserAccountService;
 import com.celestia.agent.TestcontainersConfiguration;
+import com.celestia.agent.admin.SeedOwnerBirthDataCommand;
+import com.celestia.agent.admin.SeedOwnerBirthDataCommand.OwnerSeed;
 import com.celestia.channel.whatsapp.InboundMessage;
 import com.celestia.channel.whatsapp.MessageContent;
 import com.celestia.channel.whatsapp.OutboundMessage;
@@ -93,6 +95,12 @@ class OwnerEvalHarness {
 
     @Autowired
     LlmProperties llm;
+
+    @Autowired
+    SeedOwnerBirthDataCommand seedCommand;
+
+    @Autowired
+    OwnerSeed ownerSeed;
 
     @Value("${celestia.eval.owner-phone:${celestia.seed-owner.phone-e164:}}")
     String ownerPhone;
@@ -242,8 +250,16 @@ class OwnerEvalHarness {
                 .isEqualTo(EntitlementDecision.OWNER_ALLOW_LIST);
 
         AppUserRef owner = users.findOrCreate(ownerPhone);
+        if (births.load(owner.id()).isEmpty() && ownerSeed.enabled()) {
+            // An ApplicationRunner does not fire under @SpringBootTest, so the
+            // startup seed never happens here. Seeding through the same command
+            // (T030) keeps this runnable without a separate manual step, and
+            // without a second way to write birth data.
+            seedCommand.seed(ownerSeed);
+        }
         assertThat(births.load(owner.id()))
-                .as("the owner's birth data must be seeded (T030), or every question returns \"%s\"",
+                .as("the owner's birth data must be seeded — set celestia.seed-owner.* with "
+                        + "enabled=true, or every question returns \"%s\"",
                         AgentMessages.BIRTH_DETAILS_MISSING)
                 .isPresent();
 
@@ -252,9 +268,10 @@ class OwnerEvalHarness {
                 + "answer quality — do not put its output in front of a practitioner (ADR-0009).");
     }
 
-    private static InboundMessage inbound(EvalQuestion question) {
+    /** The owner's own number — the same one entitlement was checked against. */
+    private InboundMessage inbound(EvalQuestion question) {
         return new InboundMessage(
-                "eval." + question.id(), System.getProperty("celestia.eval.phone", ""),
+                "eval." + question.id(), ownerPhone,
                 Instant.now(), new MessageContent.TextContent(question.question()));
     }
 
@@ -291,6 +308,8 @@ class OwnerEvalHarness {
                 | model | `%s`%s |
                 | reply length | %d characters%s |
                 | advisory class | `%s` |
+                | withheld by | %s |
+                | toolkit calls behind it | %d |
 
                 ### Tool calls, in order
 
@@ -316,7 +335,28 @@ class OwnerEvalHarness {
                         record.getDeliveredLength(),
                         record.isReplyTrimmed() ? " — TRIMMED to the channel budget, a prompt defect" : "",
                         record.getSensitivityUsed(),
+                        // Which disclosure family the scan caught. A withheld reply is a
+                        // lost answer and a prompt defect (SC-004), and the family is the
+                        // only thing that says which line of the prompt to fix.
+                        record.getWithheldFamily() == null
+                                ? "— (nothing withheld)"
+                                : "`" + record.getWithheldFamily() + "`",
+                        toolkitCallsIn(record.getToolCallsJson()),
                         record.getToolCallsJson(),
                         record.getResolvedSourcesJson());
+    }
+
+    /** How many of the five toolkit tools this turn actually reached (SC-002). */
+    private static int toolkitCallsIn(String toolCallsJson) {
+        int found = 0;
+        for (String tool : List.of("getChartPromises", "findToolkitRules", "lookupToolkit",
+                "getToolkitLookup", "getHoraryMindset")) {
+            int from = 0;
+            while ((from = toolCallsJson.indexOf(tool, from)) >= 0) {
+                found++;
+                from += tool.length();
+            }
+        }
+        return found;
     }
 }
