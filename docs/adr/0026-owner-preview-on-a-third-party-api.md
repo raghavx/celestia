@@ -146,19 +146,27 @@ easy to mistake for a confirmed one.
 | Requirement | Status | Date | Source |
 |---|---|---|---|
 | Provider does not train on the prompts | **confirmed off** | 2026-11-24 | owner, from the account settings |
-| Retention at the provider's minimum | **outstanding** | — | zero data retention is available to API customers **on request** — it is not a toggle, so it has to be asked for and takes longer than the other two |
-| Data-processing agreement in place | **outstanding** | — | accepting the published DPA is what makes the provider a processor rather than part of the trust boundary — the same logic v2.2.0 applied to a rented host |
+| Retention at the provider's minimum | **zero data retention** | 2026-11-24 | owner. Stronger than this condition asked for: the requirement was the minimum the provider offers, and zero retention means the prompts are not kept at all |
+| Data-processing agreement in place | **accepted** | 2026-11-24 (date of confirmation) | owner. The date recorded is when it was confirmed here, not a separately supplied signing date — correct it if the console shows a different one |
 
-**Condition 3 is therefore not yet satisfied, and SPEC-012 T039a stays open.** One
-of three is not a pass: the condition exists to bound what happens to the owner's
-birth details at rest and in the provider's hands, and training is only the first
-of those. T044, T040 and T041 remain gated — not procedurally, but because once
-the data has been sent it has been sent.
+**Condition 3 is satisfied as of 2026-11-24**, and with it all six conditions of
+this ADR: 1 and 2 are enforced in code (`OwnerOnlyAllowListGuard`, the
+provider gate on `castChartFor`), 6 is structural (the `TurnOptions` seam), and
+3, 4 and 5 are recorded here. **SPEC-012 T039a is complete and T044, T040 and
+T041 are unblocked.**
 
-**If retention cannot be brought below the standard period** and that is not
-acceptable for the owner's own birth details, the honest move is to rent the GPU
-VM after all. This ADR was written so that a failing condition 3 falls back to
-self-hosting rather than to relaxing the condition.
+**What zero retention changes about the exposure.** Constitution VII's concern was
+the owner's birth details and questions resting on infrastructure we do not
+administer. With no training and no retention, what the provider holds is the
+request for the duration of the request. That is a materially smaller exposure
+than v2.2.0 contemplated for a rented host, where the data sits on a disk we
+chose the region for — and it is the reason this exception is defensible for one
+consenting person rather than merely convenient.
+
+**The fallback this ADR was written to have remains available**: if any of the
+three ever lapses — a changed retention policy, a withdrawn agreement — the
+deployment rule applies again with no further decision, and the answer is
+ADR-0010's rented VM rather than a relaxed condition.
 
 ## Consequences
 

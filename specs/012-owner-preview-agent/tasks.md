@@ -619,7 +619,7 @@ thing code cannot judge is sitting in a folder waiting for a person.
       a field of a Spring AI chat type to a class in `agent.channel` and confirm
       the build fails. Revert both. A rule that cannot be shown to fail is not
       known to work, and these two fail for different reasons
-- [ ] T039a **OWNER ONLY — settle ADR-0026 condition 3 before any real birth
+- [X] T039a **OWNER ONLY — settle ADR-0026 condition 3 before any real birth
       details are sent.** The exception that lets the preview use a third-party
       inference API rests on six conditions. Condition 1 (an allow-list of exactly
       one) is enforced at startup by `OwnerOnlyAllowListGuard`; condition 2 is
@@ -636,13 +636,12 @@ thing code cannot judge is sitting in a folder waiting for a person.
       date — in `docs/adr/0026-owner-preview-on-a-third-party-api.md`, so a year
       from now the answer to "under what terms were those ten questions answered?"
       is written down
-      → **Partially settled 2026-11-24**: the provider **does not train on the
-      prompts** (confirmed by the owner from the account settings, recorded in
-      ADR-0026 "Condition 3 — status"). **Two outstanding**: retention at the
-      provider's minimum — zero data retention is available to API customers *on
-      request* rather than as a setting, so it has to be asked for — and the
-      data-processing agreement. **The task stays open**: one of three is not a
-      pass, and T044/T040/T041 remain gated until all three are recorded
+      → **Done 2026-11-24.** All three recorded in ADR-0026 "Condition 3 —
+      status": no training on the prompts, **zero data retention** — stronger than
+      this condition asked for, since the requirement was merely the provider's
+      minimum — and the data-processing agreement accepted. With it, **all six of
+      ADR-0026's conditions now hold**: 1 and 2 enforced in code, 6 structural,
+      3/4/5 recorded. **T044, T040 and T041 are unblocked.**
 - [ ] T040 Measure SC-008 **against whatever the preview is deployed on** — the
       Claude API under v3.0.0's exception, or a warm self-hosted VM — and never on
       a laptop-sized model. Record the figure. If 30 seconds does not hold, the honest
