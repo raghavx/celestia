@@ -161,49 +161,70 @@ give the stub tier a real chart, a real toolkit and a real tool loop.
 
 ## Constitution Check
 
-*GATE: checked before Phase 0 and re-checked after Phase 1. Against **v2.2.0**,
-whose amendment of the "self-hosted" constraint is what makes this feature's own
-hosting decision lawful rather than merely recorded — see ADR-0010 and the Sync
-Impact Report for 2026-11-24.*
+*GATE: checked before Phase 0, re-checked after Phase 1, and **re-run against
+v3.0.0 on 2026-11-24** after the constitution was amended twice in one day. The
+earlier runs cited v2.2.0; a gate that names a superseded version has not been
+performed, so this is the authoritative one.*
+
+*What changed under this feature's feet:* **v2.3.0** separated deployment from
+development and defined a deployment as any run an inbound message can reach from
+outside a developer's machine — naming the owner preview as one. **v3.0.0**
+(ADR-0026) then added a single bounded exception: a deployment whose allow-list
+holds exactly one number may use a third-party inference API, under six
+conditions, enforced at startup. Rows III and VII and the Technology Constraints
+all move as a result.*
 
 | Principle | How this plan complies | Status |
 |-----------|------------------------|--------|
 | I Spec-driven | spec → clarified (2 questions, both answered) → this plan → tasks. ADR-0009 and ADR-0010 accepted before planning, because the plan cannot name where the model runs without them | ✅ |
 | II Deterministic core | Nothing is added to `ephemeris`, `core`, `geo` or `guardrail`. Spring AI lives in `agent` alone, as the Technology Constraints require | ✅ |
-| III Correctness gated | The guarded path is covered with a stub model; the eval harness gates the prompt against a real one. A model or prompt change that drops below SC-001's bar is a regression | ✅ |
+| III Correctness gated | The guarded path is covered with a stub model (114 unit tests); the eval harness gates the prompt against a real one. A model or prompt change that drops below SC-001's bar is a regression. **v3.0.0 added that a correctness verdict is tied to the model that produced it** — so T041's verdict is valid for the model the preview is deployed on, and nothing else. That makes running development and the preview on one model a correctness argument rather than a convenience: judge once, on what serves | ⚠️ see note |
 | IV LLM never calculates | Every number comes from a tool result (FR-008). `userId`, coordinates and clock are injected server-side and never read from tool arguments (FR-006) | ✅ |
 | V Guarded single path (NON-NEGOTIABLE) | Entitlement → gate → model → output stage, in that order. `GuardedPipeline` is the only caller of `Answerer`; the single rule becomes two — inference named at `GuardedPipeline` and `OwnerAnswerer`, containment at `agent.llm` — rather than widened to a package (research §2) | ✅ |
 | VI Deterministic flows | Not touched — onboarding is SPEC-017. Statelessness here means no flow state exists to keep in the model (FR-018) | n/a |
-| VII Data protection | Birth data is seeded, not collected; a supplied second person's data is used for the turn and not persisted (FR-011). The new turn record holds a message body, so it joins the "forget me" delete and carries a 90-day default retention (FR-020a, FR-020b) — the gap the first analysis pass caught. **Remaining exposure**: personal data now reaches a rented inference host, which ADR-0010 records with its open obligations | ⚠️ see note |
+| VII Data protection | Birth data is seeded, not collected. The turn record holds two message bodies, so it joins the "forget me" delete and carries a 90-day retention, both verified against a real MySQL (FR-020a/b, SC-013). **Remaining exposure, now of a different kind**: under v3.0.0 the owner's birth details and questions may reach a third-party inference API rather than a rented host we administer. The exception is bounded to an allow-list of one and **enforced at startup** (`OwnerOnlyAllowListGuard`), so the exposure is one consenting person's own data — his, and he decides | ⚠️ see note |
 | VIII Payments | **Deliberately deviated, and tracked below.** VIII's last clause — every Q&A turn first checks an active subscription with remaining quota — is not satisfied: this feature answers an allow-listed owner with no subscription at all. Payment reconciliation itself is untouched, and `EntitlementService.check` is the seam SPEC-018 fills | ⚠️ tracked |
-| IX Adapters at the edge | `ReplyHandler` is unchanged as an interface; the webhook, worker and sender are untouched. Spring AI is a provider type and stays inside `agent.llm` | ✅ |
+| IX Adapters at the edge | `ReplyHandler` is unchanged as an interface; the webhook, worker and sender are untouched. Spring AI stays inside `agent.llm`, and **the provider itself is now behind a port** (`TurnOptions`) with two implementations, which is what makes v3.0.0's condition 6 — the provider stays configuration, never code — structural rather than promised | ✅ |
 | X Toolkit is the judgement (NON-NEGOTIABLE) | Interpretation comes only from tool results (FR-014); the answer obligations of `agent-tools.md` are prompt requirements (FR-015); and the toolkit's strings never enter the model's context (FR-013a) while the leak scan still runs | ✅ |
 
-**One piece of scope is specified and not deliverable.** `castChartFor` needs a
-place name resolved to coordinates and a zone, and **no geocoder is wired into
-this application**: `geo` defines the port (SPEC-007) but nothing implements it,
-and handing the model coordinates to supply itself is what FR-006 forbids. The
-tool therefore returns "unavailable" so the agent declines rather than inventing
-another person's chart. FR-011's plumbing is built and tested — a supplied chart
-is used for the turn and never persisted, and `castChartFor`'s arguments are
-redacted from the turn record — but **US1 scenario 4 cannot be demonstrated until
-a geocoder exists**. Constitution I makes this a defect to resolve rather than
-leave: either the spec defers supplied-person charts to SPEC-017, or a task wires
-a geocoder. **Open, and owed a decision.**
+**One piece of scope is now constitutionally bounded, not just unbuilt.**
+`castChartFor` was unavailable for a technical reason — no geocoder is wired, and
+handing the model coordinates to supply itself is what FR-006 forbids. **v3.0.0
+turned that accident into a condition.** ADR-0026 condition 2 forbids processing
+any other living person's data while a deployment runs on a third-party API: the
+owner may consent for himself, never for a friend whose birth details he types in.
 
-**Note on VII.** This is the one principle this feature makes materially harder to
-satisfy, and the plan does not pretend otherwise. Accepting ADR-0010 option 3
-moved inference off the premises, so birth data, names and question text now
-travel to a machine in someone else's datacentre. For an owner preview of one
-known person that is a defensible exposure; for public traffic it is not.
+So the requirement is not merely waiting on a geocoder — **wiring one would end
+the API permission** unless the tool is gated on the provider. It is gated: the
+tool reports itself unavailable whenever the provider is a third-party API, and
+says why. FR-011's plumbing remains built and tested (a supplied chart is what the
+tools judge for that turn, is never persisted, and its arguments are redacted from
+the turn record); **US1 scenario 4 is deliverable only on a self-hosted
+deployment**, which spec.md now states rather than implying.
 
-**Three of those obligations are now constitutional, not aspirational.**
-Constitution v2.2.0 defines "self-hosted" as *we run the weights* and, where the
-host is rented, requires encrypted transport, a region chosen for the personal
-data it will see, and no prompt logging on the host. What remains open in
-ADR-0010 is the choice of provider and region — a decision, not a question of
-whether it matters. **No violation to track here, but it is the reason this feature must
-not quietly become the public launch.**
+**Note on III.** The verdict clause is the sharpest of the new constraints,
+because it is easy to satisfy accidentally and expensive to breach. SC-001's bar
+is a practitioner's judgement of answer quality, and v3.0.0 says that judgement
+holds for the model judged and transfers to no other. Two consequences: T041 must
+run on whatever the preview is deployed on, and **the move to a self-hosted model
+at public launch re-opens SC-001** rather than inheriting it. That is a scheduled
+cost, not a surprise, and T044 is where it is paid.
+
+**Note on VII.** This remains the principle this feature makes hardest to satisfy,
+but the shape of the exposure changed on 2026-11-24. Under ADR-0010 it was a
+rented host we administer, with v2.2.0's three obligations — encrypted transport,
+a region chosen for the data, no prompt logging. Under v3.0.0's exception it may
+instead be a third-party API, where the analogous obligations are ADR-0026's:
+no training on prompts, minimum retention, a processing agreement. **Condition 3
+is not yet confirmed** — it must be, before real birth details are sent rather
+than after.
+
+**What stops this becoming the public launch.** Not a promise: the allow-list
+condition is a startup invariant (`OwnerOnlyAllowListGuard`), so admitting a
+second person requires either a self-hosted model or another amendment. The
+permission lapses automatically when sign-up opens, and a lapsed permission with
+a running service is a defect rather than a grace period. ADR-0010's VM is
+deferred, not superseded.
 
 One tracked deviation (Constitution VIII), recorded under Complexity Tracking.
 
@@ -324,8 +345,9 @@ SC-006 is proved against the real wiring rather than a fake answerer (§11).
 
 ### Post-design Constitution re-check
 
-Re-checked against v2.2.0 after the design above. All gates still pass, with
-four points worth stating explicitly:
+Re-checked against v3.0.0 (2026-11-24) after the design above and after the
+feature was built. All gates pass, two with notes above, with five points worth
+stating explicitly:
 
 - **V:** the amended rule is **two rules**, because "reaches the model" and
   "imports Spring AI" are different claims and the single rule conflated them.
