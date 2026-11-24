@@ -63,10 +63,14 @@ Dependencies section says so plainly rather than pretending otherwise.
 - [ ] T003 [P] `EntitlementProperties` bound to `celestia.entitlement.allow-list`
       in `agent/src/main/java/com/celestia/agent/entitlement/EntitlementProperties.java`
 - [ ] T004 Add the `celestia.llm.*` and `celestia.entitlement.*` keys to
-      `agent/src/main/resources/application.yaml` with development defaults: a
-      small local model as `model`, the configured fallback, and an **empty**
-      allow-list — empty denies everyone (FR-003), which is the safe default for
-      a key someone will forget to set
+      `agent/src/main/resources/application.yaml` with **development** defaults
+      (ADR-0009, ADR-0010): `base-url` a local `ollama serve`, `model` the
+      smallest Qwen that `ollama show` reports as supporting `tools`, the
+      configured fallback, a **short** keep-alive because the dev machine is a
+      16 GB laptop rather than a dedicated VM, and an **empty** allow-list —
+      empty denies everyone (FR-003), the safe default for a key someone will
+      forget to set. Production values are supplied per environment, not
+      committed
 
 ---
 
@@ -494,9 +498,13 @@ thing code cannot judge is sitting in a folder waiting for a person.
       criterion the product misses. Record the figure in
       `specs/012-owner-preview-agent/spec.md` (SC-008) so the claim and the
       measurement live together
-- [ ] T041 **MANUAL — owner only**: run the eval harness against the real model
-      and read the ten documents in `agent/target/owner-eval/`, marking each
-      answer acceptable or not **as astrology** (SC-001, bar is 9 of 10). Watch
+- [ ] T041 **MANUAL — owner only**: run the eval harness **against the
+      production VM and Llama 4 Scout — not the dev machine's Qwen** (ADR-0009:
+      a 0.5B model on a 2019 Intel CPU proves the round trip and nothing about
+      answer quality, and ten documents from it would waste a practitioner's time
+      and discredit the product) and read the ten documents in
+      `agent/target/owner-eval/`, marking each answer acceptable or not **as
+      astrology** (SC-001, bar is 9 of 10). Watch
       for the two failure modes quickstart.md names: a confident answer resting
       on a thin basis, and a decline that should have been an answer. No test can
       do this, and the verdict is the precedent for every Stage B topic group

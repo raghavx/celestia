@@ -97,6 +97,27 @@ purchase. Concurrency for the preview is one user.
   smaller local model serves until the VM is provisioned, exercising the fallback
   path as the primary path.
 
+### Development host (decided 2026-11-24)
+
+**Production as above; development runs `ollama serve` on the dev machine** — a
+2019 Intel MacBook Pro (i7-9750H, 16 GB). Three things follow from that hardware,
+and they are the reason development and production are described separately
+rather than as one setup with a smaller model:
+
+- **It is CPU-only.** Metal acceleration is Apple Silicon, and the Radeon Pro in
+  a 2019 MacBook Pro is not a target Ollama supports. Inference runs on six cores
+  of a mobile i7, which is why the model has to be tiny (ADR-0009).
+- **`OLLAMA_KEEP_ALIVE` should be short here, not long.** The production reason
+  for a long keep-alive — never pay the cold load — is a laptop's reason to keep
+  a model resident in RAM it needs for everything else. The settings are
+  deliberately opposite at the two ends.
+- **SPEC-012 SC-008's 30-second budget does not apply to this machine and must
+  not be "fixed" against it.** Latency here will be far worse and means nothing;
+  SC-008 is measured on the warm VM (SPEC-012 T040).
+
+16 GB is ample for a sub-1B model, so memory is not the constraint. Throughput
+is, and the answer to it is the production VM rather than a bigger local model.
+
 ### Revisit when
 
 Public traffic arrives. At that point concurrency stops being one, the recurring

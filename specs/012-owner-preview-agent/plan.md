@@ -64,13 +64,34 @@ deferred column-encryption pass can reach it without a schema change (FR-020c),
 the position SPEC-008 took for its own PII columns. The reference→source mapping
 is per-turn and dies with the turn.
 
-**Testing**: JUnit 5 + AssertJ + Mockito, as `agent` already uses. The guarded
-path is tested with a stub `ChatModel` so the wiring, the reference swap and the
-budgets are covered without a model. The eval harness needs a real reachable
-model and is excluded from the default build, like the Testcontainers tests.
+**Testing**: JUnit 5 + AssertJ + Mockito, as `agent` already uses. **Three tiers,
+and knowing which proves what is the point:**
 
-**Target Platform**: JVM. The model runs on a warm rented cloud GPU VM
-(ADR-0010, option 3) reached over `celestia.llm.base-url`.
+1. **Stub `ChatModel`, default build** — the wiring, the reference swap,
+   statelessness, the budgets, the permit, the leak scan. **This is where
+   correctness lives**, and it needs no Ollama at all.
+2. **Local Ollama + smallest Qwen, by hand** — the round trip only: the client
+   connects, a tool call is parsed, the output stage decorates, a reply comes
+   back. A model this small will emit malformed tool JSON often, which exercises
+   ADR-0009's fallback path as the normal path.
+3. **Production VM + Llama 4 Scout, `-Dgroups=eval`** — the only tier where
+   SC-001's practitioner verdict and SC-008's latency mean anything.
+
+Tier 2 cannot fail in a way that condemns the product and tier 3 cannot run on
+the dev machine, so a result from the wrong tier is worse than no result.
+
+**Target Platform**: JVM. **Two model environments, by decision rather than by
+accident** (ADR-0009, ADR-0010):
+
+| | Production | Development |
+|---|---|---|
+| Host | warm rented GPU VM (AWS or OCI), `ollama serve` we administer | `ollama serve` on the dev machine — 2019 Intel MacBook Pro, **CPU-only** |
+| Model | Llama 4 Scout + fallback | the smallest Qwen that reports the `tools` capability |
+| Keep-alive | long — never pay the cold load | short — it is a laptop's RAM |
+| Proves | the answers (SC-001, SC-008) | the round trip, and nothing about answer quality |
+
+Both are reached over `celestia.llm.base-url`, and model ids are configuration,
+so neither needs a code change.
 
 **Project Type**: Spring Boot application code in the existing `agent` module.
 

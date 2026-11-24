@@ -13,8 +13,10 @@ need no model. Step 4 needs a reachable one. Step 5 needs a human.
 - **For step 4 only**, three things, and the harness refuses to run without
   them:
   - `celestia.llm.base-url` pointing at a reachable Ollama with the configured
-    model pulled. Until the GPU VM exists, a small local model is fine and is the
-    point — it exercises ADR-0009's fallback path as the primary path.
+    model pulled. **On the dev machine that is a local `ollama serve` with the
+    smallest Qwen** (ADR-0009) — which proves the round trip and **nothing about
+    answer quality**. See "Which tier proves what" below before drawing any
+    conclusion from its output.
   - **the owner's number on `celestia.entitlement.allow-list`** — otherwise
     entitlement turns every question away before the gate and you get ten copies
     of the not-open message;
@@ -148,6 +150,24 @@ Mechanically asserted in this run:
 **A withheld reply is a failure here, not a success.** The leak scan catching
 something means the prompt let the model name a source, and the owner lost an
 answer. SC-004 is zero for that reason.
+
+## Which tier proves what
+
+Three environments, and a result from the wrong one is worse than no result:
+
+| Tier | How to run it | Proves | Does **not** prove |
+|---|---|---|---|
+| **Stub model** | steps 1–3b, default build | wiring, reference swap, statelessness, budgets, permit, leak scan — **correctness lives here** | that any real model behaves |
+| **Local Ollama + smallest Qwen** | `ollama serve` on the dev machine, then step 4 | the round trip: client connects, a tool call is parsed, the output stage decorates, a reply returns | **anything about answer quality**; a 0.5B model on a 2019 Intel CPU will emit malformed tool JSON often, exercising ADR-0009's fallback as the normal path |
+| **Production VM + Llama 4 Scout** | step 4 against `celestia.llm.base-url` on the warm VM | SC-001's practitioner verdict, SC-008's latency | — |
+
+Two things follow that are easy to get wrong:
+
+- **Do not run step 5's practitioner review against the local model.** Ten
+  documents produced by a 0.5B model would waste a practitioner's time and
+  discredit a product that has not been shown yet.
+- **Do not tune anything to SC-008 on the laptop.** Latency there is CPU-bound
+  and means nothing; SC-008 is measured on the warm VM (T040).
 
 ## 5. What only you can judge
 
