@@ -14,12 +14,7 @@ import java.time.ZoneOffset;
 import java.util.EnumSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 /**
@@ -122,21 +117,5 @@ public class SeedOwnerBirthDataCommand {
             }
         }
 
-    }
-
-    /** Runs the seed at startup, only when explicitly asked for. */
-    @Configuration(proxyBeanMethods = false)
-    @EnableConfigurationProperties(OwnerSeed.class)
-    static class SeedRunnerConfig {
-
-        @Bean
-        ApplicationRunner seedOwnerBirthData(SeedOwnerBirthDataCommand command, OwnerSeed seed) {
-            return (ApplicationArguments args) -> {
-                if (!seed.enabled()) {
-                    return;
-                }
-                command.seed(seed);
-            };
-        }
     }
 }

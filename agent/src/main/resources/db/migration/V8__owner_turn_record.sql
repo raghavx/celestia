@@ -32,8 +32,10 @@ CREATE TABLE owner_turn_record (
     fallback_switched     TINYINT(1)    NOT NULL DEFAULT 0,
     withheld_family       VARCHAR(32)       NULL,
     reply_trimmed         TINYINT(1)    NOT NULL DEFAULT 0,
-    tool_calls_json       LONGTEXT      NOT NULL,
-    resolved_sources_json LONGTEXT      NOT NULL,
+    -- JSON, as chart.computed_json and geocode_cache.results_json are: a record
+    -- for review, never a query surface.
+    tool_calls_json       JSON          NOT NULL,
+    resolved_sources_json JSON          NOT NULL,
     PRIMARY KEY (id),
     KEY ix_owner_turn_record_user (user_id),
     KEY ix_owner_turn_record_received (received_at),

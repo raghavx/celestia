@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import java.time.Instant;
 
@@ -80,12 +79,15 @@ public class OwnerTurnRecordEntity {
     @Column(name = "reply_trimmed", nullable = false)
     private boolean replyTrimmed;
 
-    @Lob
-    @Column(name = "tool_calls_json", nullable = false)
+    // columnDefinition = "json", as every other JSON column in this schema does
+    // (chart.computed_json, geocode_cache.results_json). NOT @Lob: a @Lob String
+    // with no length maps to TINYTEXT — 255 bytes — in Hibernate's MySQL dialect,
+    // which fails schema validation against a wider column and would silently be
+    // far too small for a turn's tool calls if it ever matched.
+    @Column(name = "tool_calls_json", nullable = false, columnDefinition = "json")
     private String toolCallsJson;
 
-    @Lob
-    @Column(name = "resolved_sources_json", nullable = false)
+    @Column(name = "resolved_sources_json", nullable = false, columnDefinition = "json")
     private String resolvedSourcesJson;
 
     protected OwnerTurnRecordEntity() {}
