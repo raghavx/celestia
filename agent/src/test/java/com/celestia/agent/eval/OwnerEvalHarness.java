@@ -2,6 +2,8 @@ package com.celestia.agent.eval;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.SoftAssertions;
+
 import com.celestia.agent.AgentMessages;
 import com.celestia.agent.channel.ReplyHandler;
 import com.celestia.agent.entitlement.EntitlementDecision;
@@ -77,6 +79,10 @@ class OwnerEvalHarness {
             "src", "test", "resources", "com", "celestia", "agent", "eval", "owner-questions.tsv");
 
     private static final Path OUTPUT = Path.of("target", "owner-eval");
+
+    /** SC-003's row check, as a whole word — see the call site. */
+    private static final java.util.regex.Pattern DOCUMENT_ROW =
+            java.util.regex.Pattern.compile("\\brow(s)?\\b");
 
     @Autowired
     ReplyHandler handler;
@@ -166,8 +172,11 @@ class OwnerEvalHarness {
         }
 
         assertMechanicalCriteria(produced);
-        System.out.println("Ten documents written to " + OUTPUT.toAbsolutePath()
-                + " — read them and mark each answer acceptable or not AS ASTROLOGY (SC-001, bar 9 of 10).");
+        long answerable = questions.stream().filter(EvalQuestion::answerable).count();
+        System.out.println(produced.size() + " documents written to " + OUTPUT.toAbsolutePath()
+                + " — read them and mark each answer acceptable or not AS ASTROLOGY (SC-001, bar 9 of "
+                + answerable + "). The other " + (produced.size() - answerable)
+                + " are the no-basis cases: there the decline IS the right answer.");
     }
 
     /**
@@ -211,7 +220,11 @@ class OwnerEvalHarness {
                     namedASource.add(row.question().id() + " named " + id);
                 }
             }
-            if (lowered.contains("sheet") || lowered.contains("workbook") || lowered.contains("row ")) {
+            // "row" needs word boundaries: "narrow specialization" is ordinary
+            // prose, and matching it as a document reference failed a run that
+            // had in fact named nothing.
+            if (lowered.contains("sheet") || lowered.contains("workbook")
+                    || DOCUMENT_ROW.matcher(lowered).find()) {
                 namedASource.add(row.question().id() + " used the vocabulary of a document");
             }
             // SC-011: every reference resolves to a real source.
@@ -228,12 +241,18 @@ class OwnerEvalHarness {
             }
         }
 
-        assertThat(withheld).as("SC-004 — withheld replies (a lost answer and a prompt defect)").isEmpty();
-        assertThat(namedASource).as("SC-003 — replies naming a source").isEmpty();
-        assertThat(ungrounded).as("SC-002 — answers with no toolkit call behind them").isEmpty();
-        assertThat(unresolvedReferences).as("SC-011 — references that resolve to nothing").isEmpty();
-        assertThat(falseDeclines).as("SC-007 — answerable questions that were declined").isEmpty();
-        assertThat(falseAnswers).as("SC-007 — no-basis questions that were answered anyway").isEmpty();
+        // Softly, and deliberately: each question above cost a model call, so a
+        // run must report every criterion it broke. Failing hard on the first
+        // hid a false decline behind a false positive and cost a whole run.
+        SoftAssertions criteria = new SoftAssertions();
+        criteria.assertThat(withheld)
+                .as("SC-004 — withheld replies (a lost answer and a prompt defect)").isEmpty();
+        criteria.assertThat(namedASource).as("SC-003 — replies naming a source").isEmpty();
+        criteria.assertThat(ungrounded).as("SC-002 — answers with no toolkit call behind them").isEmpty();
+        criteria.assertThat(unresolvedReferences).as("SC-011 — references that resolve to nothing").isEmpty();
+        criteria.assertThat(falseDeclines).as("SC-007 — answerable questions that were declined").isEmpty();
+        criteria.assertThat(falseAnswers).as("SC-007 — no-basis questions that were answered anyway").isEmpty();
+        criteria.assertAll();
     }
 
     /**
@@ -263,7 +282,8 @@ class OwnerEvalHarness {
                         AgentMessages.BIRTH_DETAILS_MISSING)
                 .isPresent();
 
-        System.out.println("Running the evaluation set against " + llm.baseUrl() + " model " + llm.model()
+        String target = LlmProperties.OLLAMA.equals(llm.provider()) ? llm.baseUrl() : "the " + llm.provider() + " API";
+        System.out.println("Running the evaluation set against " + target + " model " + llm.model()
                 + ". If that is a small local model, this proves the round trip and NOTHING about "
                 + "answer quality — do not put its output in front of a practitioner (ADR-0009).");
     }

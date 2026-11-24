@@ -662,6 +662,18 @@ thing code cannot judge is sitting in a folder waiting for a person.
       for the two failure modes quickstart.md names: a confident answer resting
       on a thin basis, and a decline that should have been an answer. No test can
       do this, and the verdict is the precedent for every Stage B topic group
+
+      **Run 2026-11-24 on `claude-sonnet-5`, against the owner's own chart**
+      (1982-04-02 18:35, Ghazipur UP — coordinates supplied by hand at 25.58N
+      83.58E, since no geocoder is wired, so the chart is accurate to roughly a
+      town's width). Mechanical criteria all pass: SC-002 every answer grounded,
+      SC-003 no source named, SC-004 nothing withheld, SC-011 every reference
+      resolvable, SC-007 both directions clean, SC-009 longest reply 2,828 of
+      4,096 characters, ~12.7s a question. **Three defects were found by running
+      it** — see the three bullets below; two are fixed, one is the owner's to
+      judge. **The thirteen documents are in `agent/target/owner-eval/` and the
+      SC-001 verdict is still outstanding**: it is a human reading, and nothing
+      above substitutes for it
 - [X] T042 **DECISION — owner only**: amend the constitution's "Ollama,
       self-hosted" wording, which ADR-0010 option 3 strained and left
       outstanding. **Done 2026-11-24: constitution v2.1.0 → v2.2.0** defines the
@@ -727,6 +739,16 @@ thing code cannot judge is sitting in a folder waiting for a person.
       *was* in the results); narrow it to the sensitivity of the house asked about;
       or have the model report which matters it used and trust it, which trades a
       NON-NEGOTIABLE guarantee for tidiness and should probably be refused
+
+      **T041 makes this much worse than one marriage reading.** Across the ten
+      answered questions, **five carried a HEALTH or LONGEVITY tail**, and the
+      classes are mostly unrelated to what was asked: `LONGEVITY` on *"what
+      subject was I best suited to study?"*, `LONGEVITY` on *"will I buy a
+      house?"*, `HEALTH` on *"what kind of career suits my chart?"*. The
+      education answer — good KP, 4th and 9th cusps, retrograde Saturn and Mars
+      read as delay — ends *"please consult a doctor about any health concern."*
+      This is not a conservative edge case; it is the common case, and a
+      practitioner judging SC-001 will see it on half the set
 - [ ] T047 **The out-of-scope marker fired for a question the toolkit covers.**
       Found by T044 and exactly the defect spec.md's Edge Cases anticipated:
       *"the owner gets the redirect, which looks to him like the product not
@@ -738,6 +760,24 @@ thing code cannot judge is sitting in a folder waiting for a person.
       disabling thinking as much as a prompt defect. Sharpen obligation 5 of
       `contracts/system-prompt.md`: the marker is for a question outside astrology
       altogether, never for one the chart cannot answer specifically
+
+      **Partly addressed, and not by obligation 5.** T041 found the same defect
+      twice more — "is there a gemstone that would help me?" and a horary number
+      — both declined with **zero tool calls**, though `gems-remedies` (manifest
+      row 45, answerable) and `getHoraryMindset` cover them. The cause was not
+      the marker's wording but a gap in obligation 3: it told the model to
+      decline when *"the tools give you nothing"* and never said to look first,
+      so a decline could be an opening assumption. Obligation 3 now carries
+      **"Earn the decline"** and both answered properly on re-run.
+
+      **Still open, and now a contradiction between two artifacts.**
+      `lottery-numbers` still takes the redirect — but `owner-questions.tsv`
+      marks it `NO_BASIS`, meaning *answering it is the defect*, while this task
+      says the toolkit covers speculation, meaning *declining it is*. Both
+      cannot hold. The resolution is probably a third outcome neither artifact
+      has: engage the matter (speculative gain, houses 5/11/8/2) and decline the
+      specific numbers. Deciding that changes the eval set's expectation as well
+      as the prompt, so it is recorded here rather than quietly settled
 
 - [X] T045 **The turn deadline does not bound a turn — fix it** (FR-010).
       Found by the first tier-2 run: with `turn-deadline: PT120S`, turns ran

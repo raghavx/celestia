@@ -49,6 +49,16 @@ class SystemPromptTest {
     }
 
     @Test
+    @DisplayName("3 — a decline must be earned by a search, not assumed (FR-014)")
+    void obligationThreeEarnsTheDecline() {
+        // T041 found the model declining matters the toolkit covers after zero
+        // tool calls. Obligation 3 read as licence to judge its own reach, so
+        // the prompt now requires the search first and this is the guard.
+        assertThat(prompt).contains("earn the decline");
+        assertThat(prompt).contains("have not searched");
+    }
+
+    @Test
     @DisplayName("4 — the toolkit's answer obligations (FR-015)")
     void obligationFour() {
         assertThat(prompt).contains("condition_to_check").contains("condition to check");
