@@ -118,6 +118,21 @@ this.
   nobody has to touch it when the toolkit changes. FR-006 is about not
   maintaining the *taxonomy* by hand, and the taxonomy still comes entirely from
   the toolkit.
+- **How big the stopword list actually had to be** *(added 2026-11-24, measured
+  during implementation)*: the ten words named above were the visible tip. The
+  derivation yields **1,544 single-word matter terms**, and replaying fifteen
+  plainly off-topic messages showed **6 of 15 allowed** by generic English the
+  toolkit happens to use — `script`, `last`, `change`, `buy`, `function`, `news`,
+  `draft`. A reviewed pass over the derived list brought the stopword file to
+  **546 words** and the false allows to 3. The list is therefore larger than this
+  section implied, and is expected to keep growing with real traffic; it is still
+  generic English rather than taxonomy, so FR-006 holds.
+- **The three that stopwords cannot fix**: "where can i buy cheap shoes",
+  "latest news on the election result" and "draft a cover letter for a job
+  application" are allowed by `buy`, `election` and `job` — all three genuine
+  toolkit subject matter. Stopwording `job` would refuse the in-scope corpus's
+  own "will I get a government job?". These are **sense collisions, not leakage**,
+  and §5 already accepts them.
 - **Built at load, not committed**: sources 1 and 2 are computed once per JVM
   from the already-loaded toolkit rather than written out as a generated
   resource. A second generated artifact would need its own import step and could
@@ -149,6 +164,17 @@ this.
   already protects against everything the gate does not recognise at all; this
   choice is only about how strictly to read vocabulary it does recognise.
   The hardened prompt and the output stage remain in force either way.
+- **What the asymmetry costs, measured** *(added 2026-11-24)*: of fifteen plainly
+  off-topic probes, three are allowed after the stopword pass, each by a word
+  that is real toolkit subject matter in another sense — `buy`, `election`,
+  `job`. That is this decision working as designed, not a defect. The reply is
+  then the model's to decline, as Constitution X requires.
+- **The gap this leaves in the instruments**: SC-007 counts `UNMATCHED`, so the
+  cost of refusing a real question is visible. **Nothing counts an allowed
+  off-topic message**, so the cost of this permissiveness is not. The gate cannot
+  measure it alone — only the answer can tell whether the toolkit had a basis —
+  so the instrument belongs with SPEC-012's eval harness or SPEC-021's
+  classifier. Recorded here so it is a known hole rather than a surprise.
 - **Alternatives**: requiring two or more terms (refuses short real questions,
   which are the common case on WhatsApp); weighting terms and thresholding
   (a tuning parameter with no data yet to tune it against — revisit with the
@@ -195,6 +221,19 @@ this.
   the multilingual work. spec.md Assumptions now records that a Hinglish
   expression of intent fires nothing in the first cut, and these are the first
   cases to restore when the register comes back.)*
+- **An opening interrogative is not intent** *(added 2026-11-24 during
+  implementation; the rule above is necessary but not sufficient)*. "When will I
+  die?" satisfies it — first-person subject, the modal "will", a harm term — and
+  it is one of the commonest astrology questions there is. Answering it with a
+  crisis line is wrong, and doing it often would train the user to ignore the
+  line: exactly the harm this section rejected "any harm word triggers it" to
+  avoid. So a message that opens with an interrogative (*when, will, does, is,
+  what, how, should, why…*) is read as a question about the future, not a
+  statement of intent.
+- **Reflexive harm overrides that.** "Should I kill myself" opens with an
+  interrogative but carries its own first-person object, and no longevity
+  question contains it. The reflexive phrases — *kill myself, end my life, hurt
+  myself, end it all* — mean intent wherever they appear.
 - **When both appear, intent wins.** A message carrying both an intent
   construction and a chart referent ("my chart says I should die") gets the
   support line. A support line shown to someone who only wanted a reading is a
@@ -215,9 +254,26 @@ this.
 
 - **Decision**: the scan keys on six signals, none of which is a bare word.
 
-  1. **Sheet ids** — the slugs `1500-rules`, `ready-reckoner`,
-     `horary-249-mindsets`. These are not natural English and never appear in a
-     legitimate answer.
+  1. **Sheet ids, keyed by prose class.** *(Corrected 2026-11-24 during
+     implementation. This item originally read: "the slugs `1500-rules`,
+     `ready-reckoner`, `horary-249-mindsets`. These are not natural English and
+     never appear in a legitimate answer." **That is false for 16 of the 75
+     ids.**)*
+     - **Hyphenated or numbered ids are keyed bare** — `1500-rules`,
+       `ready-reckoner`, `horary-249-mindsets`, `health-chart`. The original
+       claim holds for these: they cannot occur in English prose.
+     - **Single-word ids need the citation frame** — `numerology`, `death`,
+       `luck`, `property`, `relationship`, `romance`, `finance`, `aspects`,
+       `difficulty`, `inheritance`, `profession`, `fortuna`, `vimshottari`,
+       `punarpoo`, `btr`, `index`: 16 of the 75. Keying these bare blocks
+       ordinary English, which the implementation proved immediately — the
+       product's own refusal copy names "numerology", so **every refusal was
+       withheld and replaced by the safe message** until the split was applied.
+       It was caught by the invariant that the fixed copy must survive its own
+       scan, asserted in `GuardedPipelineTest`.
+     A slug is non-prose when it carries a hyphen, an underscore or a digit —
+     the same principle as the title rule in (3), with the test adapted to the
+     form.
   2. **Row references** — `row 1349`, `r1349`, `<slug>:r<n>`.
   3. **Sheet titles, keyed by prose class.** The ids and titles of **all 75
      sheets** come from `KpToolkit.sheets()` — housekeeping included, since

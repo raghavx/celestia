@@ -215,11 +215,11 @@ with no code change.
   still refused, for the same reason as above.
 - A toolkit sheet title that is also an ordinary English phrase (for example
   "Relationship", "Aspects", "Death") must not make an innocent reply look like
-  a toolkit leak. Leak detection therefore splits the titles: one that cannot
-  occur in ordinary English (`ReadyReckoner`, `MarriageMatching`) is detected on
-  its own, while a prose-colliding one is detected only inside a citation frame.
-  Ids and row references are always detected; a bare common word never is
-  (FR-017).
+  a toolkit leak. Leak detection therefore splits **both titles and ids** by
+  whether they could occur in English: `ReadyReckoner` and `1500-rules` are
+  detected on their own, while `Relationship` and the id `numerology` are
+  detected only inside a citation frame. Row references are always detected; a
+  bare common word never is (FR-017).
 - The toolkit cannot be loaded (it has not been imported). The topic gate has no
   taxonomy to work from, so it refuses everything rather than failing open, and
   the condition is reported as a fault rather than as user error.
@@ -316,22 +316,33 @@ with no code change.
   themselves, the reply MUST begin with a short support line naming a crisis
   helpline, before any astrological content. A message merely asking what the
   chart indicates about self-harm MUST NOT trigger this, and MUST be answered as
-  ordinary health-class content.
+  ordinary health-class content. Detection MUST key on the grammatical
+  construction and not on the presence of harm words. In particular a message
+  framed as a **question about the future** — "when will I die?", one of the
+  commonest astrology questions there is — MUST NOT trigger the support line,
+  unless it carries a **reflexive** self-harm phrase ("should I kill myself"),
+  which means intent wherever it appears. Showing the line on ordinary longevity
+  questions would train users to ignore it, which costs more than the line buys.
 - **FR-016**: A reply carrying the out-of-scope marker `<<OUT_OF_SCOPE>>` MUST be
   replaced in full by the fixed redirect of FR-008.
 - **FR-017**: The output stage MUST NOT deliver a reply that discloses the system
   prompt, the tool definitions, internal reasoning, another user's data, or the
   identity of the licensed toolkit — its name, a sheet id or title, or a row
   number. Detection MUST key on toolkit sheet ids, row references, sheet titles
-  and explicit source-citation phrasing rather than on bare common words. A
-  sheet title that cannot occur in ordinary English MUST be detected on its own,
-  since that is the likeliest form of an accidental disclosure; a title that is
-  also ordinary English or KP vocabulary MUST be detected only inside a citation
-  frame, so that an innocent reply using such a word is not blocked. The default
-  classification MUST be mechanical, so that a sheet added by a later toolkit
-  release is classified without anyone having to remember to, and every departure
-  from that default MUST be recorded in a reviewed table rather than decided in
-  code. Another user's data MUST be detected by identifier shape — a phone
+  and explicit source-citation phrasing rather than on bare common words. **Both
+  ids and titles split by prose class**: one that cannot occur in ordinary
+  English MUST be detected on its own, since that is the likeliest form of an
+  accidental disclosure, while one that is also ordinary English or KP vocabulary
+  MUST be detected only inside a citation frame, so that an innocent reply using
+  such a word is not blocked. The split applies to ids as well as titles because
+  16 of the toolkit's 75 ids are themselves single ordinary English words
+  (`numerology`, `death`, `relationship`); keying those bare withholds innocent
+  replies — including the product's own refusal copy. The default classification
+  MUST be mechanical, so that a sheet added by a later toolkit release is
+  classified without anyone having to remember to, and every departure from that
+  default MUST be recorded in a reviewed table rather than decided in code. The
+  product's own fixed copy MUST survive this scan unchanged; a copy edit that
+  trips it would silently replace every refusal with the safe message. Another user's data MUST be detected by identifier shape — a phone
   number or user id that is not the recipient's own — and MUST NOT be triggered
   by a horary number or by birth data the user supplied in the conversation,
   which FR-012 of SPEC-010 deliberately permits. Because every one of these
@@ -465,6 +476,15 @@ into a matcher built for ASCII is the expensive version of this work.
   message too — the strongest single reason the English-only position cannot
   survive first contact with public traffic. The drafted Hindi work and what was
   learned from it are in `deferred-multilingual/`.
+- The gate leans permissive **inside** recognised vocabulary, and that is
+  deliberate (research §5). A message carrying a word that is genuine toolkit
+  subject matter in another sense — "draft a cover letter for a **job**
+  application" — is allowed and reaches the model, which answers from the toolkit
+  or says it has no basis. Three of fifteen off-topic probes behave this way, and
+  stopwording the words would refuse real questions instead. **No success
+  criterion measures this class of error**: SC-007 counts refusals of real
+  questions, nothing counts admissions of unreal ones. That instrument needs the
+  answer, not the gate, so it belongs with SPEC-012's eval harness or SPEC-021.
 - The hostile phrase list is assumed to stay predominantly English: attacks are
   copied from English-language sources, and an obfuscated attack still has to
   survive normalisation to match anything. Worth revisiting with real traffic,

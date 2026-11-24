@@ -88,7 +88,14 @@ substrings (research §12, finding 4).
 | `INTENT` | a first-person volitional construction with a harm term — the support line is owed (FR-015) |
 | `CHART_INQUIRY` | a question about what the chart indicates — ordinary health-class content, no support line |
 
-**Rule**: `INTENT` wins when both are present (research §7).
+**Rules** (research §7, refined during implementation):
+
+1. Harm words alone are never enough — the Difficulty sheet is full of them.
+2. `INTENT` needs a first-person volitional construction **and** the message must
+   not be framed as a question about the future ("when will I die?").
+3. A **reflexive** phrase (*kill myself, end my life, end it all*) means `INTENT`
+   wherever it appears, interrogative or not.
+4. `INTENT` wins when both it and a chart referent are present.
 
 ### OutputRequest
 
@@ -142,10 +149,19 @@ slug — which points at tool-result plumbing — from a parroted title, which p
 at the prompt. `CITATION_FRAME` stays for a prose-colliding title caught inside a
 frame. The three differ in what you fix, not in how severe they are.
 
-**Title prose class** — every sheet title is `NON_PROSE` (keyed bare) or
-`PROSE_COLLIDING` (keyed only inside a citation frame). The class is derived
-mechanically from the title's own shape, with `title-prose-classes.tsv` recording
-every reviewed departure from that default (FR-017, research §8).
+**Prose class** — every sheet **title** and every sheet **id** is `NON_PROSE`
+(keyed bare) or `PROSE_COLLIDING` (keyed only inside a citation frame). The class
+is derived mechanically from the form's own shape — an internal capital, a digit
+or a `+` for a title; a hyphen, an underscore or a digit for an id — with
+`title-prose-classes.tsv` recording every reviewed departure from that default
+(FR-017, research §8).
+
+Ids are split for the same reason titles are: 16 of the 75 are single ordinary
+English words (`numerology`, `death`, `relationship`), so keying every id bare
+withholds innocent replies. **Invariant**: the product's own fixed messages must
+themselves survive the scan, or every refusal becomes the safe message — which is
+what happened on the first implementation run, because the refusal copy names
+"numerology".
 
 ### FixedMessage
 
