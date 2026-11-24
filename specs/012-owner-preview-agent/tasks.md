@@ -700,7 +700,7 @@ thing code cannot judge is sitting in a folder waiting for a person.
       *nothing* to learn about the prompt or the tool adapters locally, and no
       amount of local work substitutes for this task
 
-- [ ] T045 **The turn deadline does not bound a turn — fix it** (FR-010).
+- [X] T045 **The turn deadline does not bound a turn — fix it** (FR-010).
       Found by the first tier-2 run: with `turn-deadline: PT120S`, turns ran
       **24 minutes**. The deadline is checked *between* model calls and around
       tool rounds (`TurnScope.checkDeadline`), but Spring AI's `RetryUtils`
@@ -721,6 +721,30 @@ thing code cannot judge is sitting in a folder waiting for a person.
       when it does.
       Assert the bound end to end in `OwnerAnswererTest`: a model that blocks past
       the deadline must produce the fixed message **within** it, not after it
+      → **Done 2026-11-24**, and the root cause was not what this task guessed.
+      **(b) was the whole 24 minutes**: `spring.ai.retry.max-attempts` defaults to
+      **ten**, backing off from 2s with a multiplier of **5** and **no maximum
+      interval** — 2s, 10s, 50s, 250s, 1250s. Nobody chose that, and it alone
+      exceeds any budget. Now 1 attempt with a 5s ceiling, and ADR-0009's fallback
+      model is the retry policy, as it was always meant to be.
+      **(a) became better than planned.** `AnthropicChatOptions` carries a
+      *per-request* timeout, so instead of one fixed read timeout the provider is
+      given **the turn's remaining budget** (`TurnScope.remaining`) on every call:
+      however many rounds a turn takes, their timeouts cannot sum past the
+      deadline. Ollama has no per-request timeout and is bounded by
+      `spring.http.clients.read-timeout` instead — so a turn there is bounded by
+      *deadline + one read timeout*, which `OllamaTurnOptions` documents rather
+      than hides.
+      **(c) was deliberately not done.** Running the call on an abandonable thread
+      would have been the third part, and it is unnecessary once each call is
+      bounded by what is left — and it would have been actively harmful: the tool
+      adapters read their identity from a thread-bound `TurnScope`, so a second
+      thread means propagating it and then racing the handler for the tool-call
+      list the moment a turn is abandoned. A concurrency hazard to enforce a bound
+      that arithmetic already enforces. Recorded as a decision, not an omission.
+      Asserted in `agent/src/test/java/com/celestia/agent/llm/TurnBudgetTest.java`
+      (7 tests): the budget shrinks, never goes negative, reaches the request, and
+      an expired turn never touches the model
 
 ---
 

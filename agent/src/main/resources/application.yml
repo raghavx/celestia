@@ -27,7 +27,27 @@ spring:
   # selected, the autoconfigured chat model is built around TurnToolCallingManager
   # — its factory takes a ToolCallingManager — so the turn stays bounded and
   # recorded either way (ADR-0009, amended 2026-11-24).
+  # SPEC-012 T045: the HTTP read timeout is what bounds a single Ollama call —
+  # its options carry no per-request timeout, unlike Anthropic's. Keep it at or
+  # below celestia.llm.turn-deadline, or a turn is bounded by this instead.
+  http:
+    clients:
+      connect-timeout: ${CELESTIA_HTTP_CONNECT_TIMEOUT:PT5S}
+      read-timeout: ${CELESTIA_HTTP_READ_TIMEOUT:PT60S}
+
   ai:
+    # SPEC-012 T045 — THE DEFAULTS HERE CAUSED A 24-MINUTE TURN.
+    # Spring AI retries ten times by default, backing off from 2s with a
+    # multiplier of 5 and no maximum interval: 2s, 10s, 50s, 250s, 1250s…
+    # Nobody chose that, and it makes any turn budget a fiction.
+    # ADR-0009 makes the FALLBACK MODEL the response to a failing primary, so a
+    # retry underneath it competes with the design rather than supporting it.
+    retry:
+      max-attempts: ${CELESTIA_LLM_RETRY_ATTEMPTS:1}
+      backoff:
+        initial-interval: 1s
+        multiplier: 2
+        max-interval: 5s
     model:
       chat: ${CELESTIA_LLM_PROVIDER:ollama}
     ollama:

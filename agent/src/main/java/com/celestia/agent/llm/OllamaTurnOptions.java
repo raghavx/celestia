@@ -1,5 +1,6 @@
 package com.celestia.agent.llm;
 
+import java.time.Duration;
 import java.util.List;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.ollama.api.OllamaChatOptions;
@@ -20,8 +21,17 @@ public final class OllamaTurnOptions implements TurnOptions {
         this.properties = properties;
     }
 
+    /**
+     * {@code remaining} is unused: Ollama's options carry no per-request timeout,
+     * so this provider is bounded by the HTTP client's read timeout instead —
+     * {@code spring.http.clients.read-timeout}, set from configuration. The
+     * difference is real and worth knowing: a turn here is bounded by
+     * {@code deadline + one read timeout} rather than by the deadline exactly,
+     * because the deadline can only be checked between calls (T045, FR-010).
+     */
     @Override
-    public ToolCallingChatOptions forModel(String modelName, List<ToolCallback> callbacks) {
+    public ToolCallingChatOptions forModel(
+            String modelName, List<ToolCallback> callbacks, Duration remaining) {
         return OllamaChatOptions.builder()
                 .model(modelName)
                 .keepAlive(properties.keepAlive())

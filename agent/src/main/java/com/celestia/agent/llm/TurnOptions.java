@@ -1,5 +1,6 @@
 package com.celestia.agent.llm;
 
+import java.time.Duration;
 import java.util.List;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.tool.ToolCallback;
@@ -28,8 +29,11 @@ public interface TurnOptions {
      * @param modelName the primary or the fallback model — the answerer decides
      *     which, so this must not be read from the provider's defaults
      * @param callbacks the fixed tool set (FR-007)
+     * @param remaining what is left of the turn's budget. A provider that
+     *     supports a per-request timeout <b>must</b> use this rather than a fixed
+     *     value, so that rounds cannot sum past the deadline (T045, FR-010)
      */
-    ToolCallingChatOptions forModel(String modelName, List<ToolCallback> callbacks);
+    ToolCallingChatOptions forModel(String modelName, List<ToolCallback> callbacks, Duration remaining);
 
     /** Which provider built these, for the turn record and the logs. */
     String providerName();

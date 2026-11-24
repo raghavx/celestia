@@ -114,7 +114,8 @@ public class OwnerAnswerer implements Answerer {
     private Answer attempt(TurnScope scope, List<Message> messages, String modelName, boolean isFallback) {
         scope.usedModel(modelName, isFallback);
         scope.checkDeadline(clock.instant());
-        ChatResponse response = model.call(new Prompt(messages, options(modelName)));
+        ChatResponse response = model.call(
+                new Prompt(messages, options(modelName, scope.remaining(clock.instant()))));
         String draft = draftOf(response);
         if (draft.isBlank()) {
             throw new IllegalStateException(modelName + " returned an empty draft");
@@ -155,9 +156,9 @@ public class OwnerAnswerer implements Answerer {
      * request, which is what makes a fallback switch an option set rather than a
      * second client.
      */
-    private ToolCallingChatOptions options(String modelName) {
+    private ToolCallingChatOptions options(String modelName, java.time.Duration remaining) {
         ToolCallback[] callbacks = ToolCallbacks.from(engineTools, toolkitTools);
-        return turnOptions.forModel(modelName, List.of(callbacks));
+        return turnOptions.forModel(modelName, List.of(callbacks), remaining);
     }
 
     private static String draftOf(ChatResponse response) {

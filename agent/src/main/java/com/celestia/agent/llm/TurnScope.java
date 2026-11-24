@@ -184,6 +184,24 @@ public final class TurnScope {
         return deadline;
     }
 
+    /**
+     * How much of the turn's budget is left (T045, FR-010).
+     *
+     * <p>This is what makes the deadline a <b>bound</b> rather than a checkpoint.
+     * Each model call is given only the time remaining, so however many rounds a
+     * turn takes, their timeouts cannot sum past the deadline — the budget is
+     * spent down, not handed out afresh. Checking between calls could never do
+     * that on its own: a single blocking call can outlive any number of checks
+     * that happen before and after it.
+     *
+     * @return the time left, never negative — zero means the turn is already over
+     *     and the caller should not start another call
+     */
+    public Duration remaining(Instant now) {
+        Duration left = Duration.between(now, deadline);
+        return left.isNegative() ? Duration.ZERO : left;
+    }
+
     public Optional<String> modelUsed() {
         return Optional.ofNullable(modelUsed);
     }
