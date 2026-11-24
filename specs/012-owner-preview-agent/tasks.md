@@ -649,7 +649,7 @@ thing code cannot judge is sitting in a folder waiting for a person.
       criterion the product misses. Record the figure in
       `specs/012-owner-preview-agent/spec.md` (SC-008) so the claim and the
       measurement live together
-- [ ] T041 **MANUAL — owner only**: run the eval harness **against whatever the
+- [X] T041 **MANUAL — owner only**: run the eval harness **against whatever the
       preview is deployed on** — reachable today on the Claude API under v3.0.0's
       bounded exception, no procurement needed — and **never** against a
       laptop-sized model (measured: ~24 minutes a question, three faults in four,
@@ -673,7 +673,24 @@ thing code cannot judge is sitting in a folder waiting for a person.
       it** — see the three bullets below; two are fixed, one is the owner's to
       judge. **The thirteen documents are in `agent/target/owner-eval/` and the
       SC-001 verdict is still outstanding**: it is a human reading, and nothing
-      above substitutes for it
+      above substitutes for it.
+
+      **VERDICT, 2026-11-24: SC-001 MET — 10 of 10 acceptable as astrology, none
+      rejected.** Given by the owner on the thirteen-document set produced by
+      the run above (`claude-sonnet-5`, his own chart, the set in which all ten
+      answerable questions were answered). Marked acceptable: marriage-timing,
+      marriage-partner, career-direction, career-change, money-prospects,
+      health-general, property-purchase, education-stream, remedy-gem,
+      horary-number.
+
+      **What this verdict does and does not license.** It is the precedent for
+      every Stage B topic group — the prompt, the eleven-tool surface and the
+      reference swap produce astrology a practitioner accepts. It is **bound to
+      `claude-sonnet-5`**: Principle III (v3.0.0) says a correctness verdict
+      does not transfer, so moving the preview to a self-hosted model at launch
+      requires running this again and getting the verdict again. It says nothing
+      about the advisory tail, which eight of the ten carried and which the
+      owner was asked to read past (T046)
 - [X] T042 **DECISION — owner only**: amend the constitution's "Ollama,
       self-hosted" wording, which ADR-0010 option 3 strained and left
       outstanding. **Done 2026-11-24: constitution v2.1.0 → v2.2.0** defines the
@@ -972,6 +989,7 @@ Foundational:
   exists
 - Commit after each task or logical group; stop at any checkpoint to validate a
   story independently
-- T041 and T042 are the only tasks blocked on a human. Everything else is
+- T041 and T042 are both now given (SC-001 met, 10 of 10). T046 is the one
+  open decision left to a human. Everything else is
   buildable today — T034's harness needs a model, but a small local one serves,
   which is ADR-0010's own development story
