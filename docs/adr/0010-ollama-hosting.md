@@ -26,6 +26,22 @@ the application enforces a hard concurrency cap (semaphore) and returns a
 "busy, try again shortly" message rather than queueing unboundedly; a health
 check trips the fallback model (ADR-0009).
 
+**This is IaaS, and the distinction is the whole reason the constitution's
+amendment works.** We rent the GPU and **we administer the Ollama server
+ourselves** — the instance, the model weights, the version, the configuration.
+We are not buying inference from anyone. A managed model API would put prompts
+and user data in a vendor's hands and would be forbidden by Technology
+Constraints as amended in v2.2.0; renting the metal under our own server is not,
+because the thing the constraint protects — that no prompt reaches a third-party
+inference API — still holds.
+
+**Provider: AWS or Oracle Cloud** (decided 2026-11-24, narrowed from "a rented
+cloud GPU VM"). Which of the two, and in which region, is still open — but the
+region is no longer a free choice: v2.2.0 requires it be chosen for the personal
+data the host will see, and the users are in India, so the realistic candidates
+are the Mumbai regions (AWS `ap-south-1`, OCI Mumbai or Hyderabad). Picking a US
+or EU region would need a reason beyond price.
+
 Chosen over options 1 and 2 because it needs no procurement and so does not gate
 Phase 6: the owner preview can run on real hardware now rather than waiting on a
 purchase. Concurrency for the preview is one user.
@@ -55,12 +71,14 @@ purchase. Concurrency for the preview is one user.
 
 - **Personal data now leaves the premises.** Birth data, names and message text
   travel over the public internet to a machine in someone else's datacentre.
-  Constitution VII governs that data, so this decision carries obligations it
-  did not before: transport encryption to the inference host, a provider and
-  **region** chosen with Indian users' data in mind, no prompt logging on the
-  host, and the host treated as a processor rather than as part of the trust
-  boundary. **These are open sub-decisions**, and they should be settled before
-  real user traffic rather than before the owner preview.
+  Constitution VII governs that data, and **v2.2.0 turned three of these from
+  intentions into requirements**: encrypted transport to the inference host, a
+  region chosen for the personal data it will see, and no prompt logging on the
+  host — which, since we administer the server, is ours to configure rather than
+  a vendor's to promise. The host is a processor, not part of the trust boundary.
+  **What remains open is the choice between AWS and Oracle Cloud and the exact
+  region**, and that is a decision to make before real user traffic rather than
+  before the owner preview.
 - **The VM stays warm. Decided 2026-11-24.** Cost and cold starts pull against
   each other: stopping the VM between sessions saves most of the money but adds
   boot plus the "tens of seconds" of model load named in the Context above, which
