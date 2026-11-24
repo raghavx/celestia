@@ -89,6 +89,9 @@ public class ToolkitTools {
         int before = scope.references().size();
         boolean partial = Boolean.TRUE.equals(includePartial);
         NatalChart chart = scope.context().chartToJudge();
+        if (house != null) {
+            scope.askedAboutHouse(house); // what the question is about (FR-014)
+        }
 
         List<HousePromise> promises = house == null
                 ? evaluator.evaluate(chart, scope.context().chart().significators(), partial)
@@ -120,7 +123,10 @@ public class ToolkitTools {
                 Sensitivity worst = group.stream()
                         .map(h -> h.rule().sensitivity())
                         .reduce(Sensitivity.NONE, Sensitivity::max);
-                scope.sawSensitivity(worst);
+                // Attributed to the house it belongs to, not to the turn: a sweep of
+                // all twelve must not put the 8th house's longevity caution on a
+                // question about the 4th (SPEC-011 FR-014; TurnScope#sensitivityUsed).
+                scope.sawSensitivity(promise.house(), worst);
                 matters.add(new MatterView(
                         first.rule().matter(),
                         first.status().name(),
@@ -157,7 +163,7 @@ public class ToolkitTools {
         List<RuleView> views = found.stream()
                 .limit(MAX_HITS)
                 .map(rule -> {
-                    scope.sawSensitivity(rule.sensitivity());
+                    scope.sawSensitivity(rule.judgedHouse(), rule.sensitivity());
                     return new RuleView(
                             rule.matter(),
                             rule.judgedHouse(),

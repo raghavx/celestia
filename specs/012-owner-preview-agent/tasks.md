@@ -748,7 +748,34 @@ thing code cannot judge is sitting in a folder waiting for a person.
       education answer — good KP, 4th and 9th cusps, retrograde Saturn and Mars
       read as delay — ends *"please consult a doctor about any health concern."*
       This is not a conservative edge case; it is the common case, and a
-      practitioner judging SC-001 will see it on half the set
+      practitioner judging SC-001 will see it on **eight of the ten**, not half
+
+      **Narrowing by house was implemented and does not fix it** (2026-11-24).
+      SPEC-011 FR-014 says the most severe class *used*, and the code read that
+      as the class *returned*, so a sweep of all twelve houses put the 8th
+      house's longevity matters on any question. That is now attributed per
+      house and counts only for houses the model asked about by number
+      (`TurnScope#sensitivityUsed`, `AdvisoryNarrowingTest`, FR-014 amended).
+      **Re-run: still eight of ten.** The reason is structural to KP — the Lagna
+      is part of every judgement, and house 1 alone carries **12 LONGEVITY and
+      35 HEALTH rules**, so the model asks about it in nearly every reading.
+
+      **The remaining cause is classification, not plumbing, and it is in the
+      workbook.** Of house 1's twelve LONGEVITY rules, at least five are benign
+      reassurances — *Strong Lagna*, *Long life (over 65 Yrs) for normal
+      people*, *Longevity more than 66 years* — as are both of house 11's *Good
+      longevity*. A chart that promises a long life therefore triggers
+      *"not a prediction of any certain event; please consult a doctor"*. The
+      advisory is for *Danger to life*, *Suicide*, *Fatal Disease*; it should
+      not fire on *Strong Lagna*.
+
+      **Still the owner's decision, now a narrower one**: either reclassify the
+      benign longevity matters at the import (`tools/toolkit-import`, since
+      `promise-rules.tsv` is generated and not hand-editable), or accept the
+      tail. Two options previously listed are now closed — narrowing by house is
+      done and insufficient, and the gate's `topicGroup` cannot carry it: its
+      own contract calls it *"best-effort diagnostic only ... often absent or
+      generic even for a clearly on-topic question"*
 - [ ] T047 **The out-of-scope marker fired for a question the toolkit covers.**
       Found by T044 and exactly the defect spec.md's Edge Cases anticipated:
       *"the owner gets the redirect, which looks to him like the product not

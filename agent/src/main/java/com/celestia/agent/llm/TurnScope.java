@@ -4,9 +4,13 @@ import com.celestia.core.toolkit.Sensitivity;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Everything one turn accumulates, and the reason no {@code @Tool} method needs a
@@ -39,7 +43,9 @@ public final class TurnScope {
     private final Instant deadline;
     private final int maxToolRounds;
 
-    private Sensitivity sensitivityUsed = Sensitivity.NONE;
+    private final Map<Integer, Sensitivity> byHouse = new LinkedHashMap<>();
+    private final Set<Integer> askedAbout = new LinkedHashSet<>();
+    private Sensitivity untargeted = Sensitivity.NONE;
     private int rounds;
     private String modelUsed;
     private boolean fallbackSwitched;
@@ -104,17 +110,69 @@ public final class TurnScope {
         return toolCalls.stream().filter(c -> ToolNames.TOOLKIT.contains(c.tool())).count();
     }
 
+    /**
+     * The class whose advisory sentence this reply ends with: the most severe one
+     * the answer <b>used</b> (SPEC-011 FR-014).
+     *
+     * <p><b>Why this is not simply the maximum over every result returned.</b>
+     * It was, and the advisory was then wrong far more often than right: asked
+     * what subject he was suited to study, the owner was told to see a doctor,
+     * because {@code getChartPromises} with no house returns all twelve and the
+     * 8th house carries longevity matters. Eight of ten answers in T041 ended in
+     * a health or longevity caution, most about a house the question never
+     * touched.
+     *
+     * <p>Which results an answer <i>used</i> cannot be known — the model is
+     * forbidden from citing its references, so no sentence is tied to a source.
+     * What can be known is what the question was <b>about</b>: the houses the
+     * model asked for by number. So a sensitivity carried by a house's matters
+     * counts only when the model asked about that house, while content with no
+     * house behind it — a knowledge-base topic the model searched for, the
+     * disease table — always counts, because searching for it <i>is</i> the
+     * evidence that the answer is about it.
+     *
+     * <p>With no house asked about at all, every house-borne sensitivity counts.
+     * A turn that named no house gives nothing to narrow by, and there the old
+     * conservative reading is the right one.
+     */
     public Sensitivity sensitivityUsed() {
-        return sensitivityUsed;
+        Sensitivity worst = untargeted;
+        for (Map.Entry<Integer, Sensitivity> entry : byHouse.entrySet()) {
+            if (askedAbout.isEmpty() || askedAbout.contains(entry.getKey())) {
+                worst = worst.max(entry.getValue());
+            }
+        }
+        return worst;
     }
 
     /**
-     * Raises the turn's sensitivity to cover {@code sensitivity}. Called by the
-     * toolkit adapters for every result the model is actually shown, so the
-     * advisory sentence follows content rather than wording.
+     * Raises the turn's sensitivity to cover {@code sensitivity}, for content that
+     * belongs to no particular house — a sheet the model searched for, a look-up
+     * table it read. Always counts: see {@link #sensitivityUsed()}.
      */
     public void sawSensitivity(Sensitivity sensitivity) {
-        sensitivityUsed = sensitivityUsed.max(sensitivity);
+        untargeted = untargeted.max(sensitivity);
+    }
+
+    /**
+     * Raises the sensitivity attributed to {@code house}. Counts only if the model
+     * asked about that house — see {@link #sensitivityUsed()}.
+     */
+    public void sawSensitivity(int house, Sensitivity sensitivity) {
+        byHouse.merge(house, sensitivity, Sensitivity::max);
+    }
+
+    /**
+     * Records that the model asked about {@code house} by number, which is the
+     * only signal available for what the question is about.
+     */
+    public void askedAboutHouse(int house) {
+        askedAbout.add(house);
+    }
+
+    /** The houses the model asked about by number, in the order it asked. */
+    public Set<Integer> housesAskedAbout() {
+        return Set.copyOf(askedAbout);
     }
 
     /**

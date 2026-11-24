@@ -91,6 +91,7 @@ public class EngineTools {
             @ToolParam(description = "house number, 1 to 12") int house) {
         TurnScope scope = TurnScope.current();
         requireHouse(house);
+        scope.askedAboutHouse(house); // what the question is about (FR-014)
         SignificatorTable table = scope.context().chart().significators();
         List<SignificatorView> view = table.houseSignificators(house).significators().stream()
                 .sorted(Significator.BY_STRENGTH)
