@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.celestia.agent.persistence.json.PersistenceJson;
+import com.celestia.agent.llm.tools.EngineTools;
 import com.celestia.core.chart.NatalChart;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -89,6 +90,61 @@ class TurnContextTest {
         TurnScope scope = TurnFixtures.scope("when will I get married?");
         scope.beginCall("getChartPromises", "{\"house\":7}");
         assertThat(scope.toolCalls().getFirst().arguments()).isEqualTo("{\"house\":7}");
+    }
+
+    @Test
+    @DisplayName("on a third-party provider, another person's chart is refused by the condition")
+    void suppliedChartsAreShutWhileOnAThirdPartyProvider() {
+        // Constitution v3.0.0 / ADR-0026 condition 2: the owner may consent for his
+        // own data, never for a friend whose birth details he types in. The tool
+        // stays shut while the provider is a third party — geocoder or no geocoder,
+        // which is what stops a future geocoder from silently breaching it.
+        EngineTools onApi = engineTools(TurnFixtures.anthropicProperties());
+        TurnScope scope = TurnFixtures.scope("will she marry a doctor?");
+        try {
+            scope.open();
+            var result = onApi.castChartFor("1991-02-03", "06:15", "Nagpur, India");
+            assertThat(result.available()).isFalse();
+            assertThat(result.note())
+                    .contains("third-party model provider")
+                    .doesNotContain("no place lookup");
+        } finally {
+            scope.close();
+        }
+    }
+
+    @Test
+    @DisplayName("on a self-hosted deployment it is simply not built yet, and says so")
+    void suppliedChartsAwaitAGeocoderWhenSelfHosted() {
+        // The other half: a future task can close this one. The two reasons are
+        // kept apart so a reader can tell "forbidden" from "unbuilt".
+        EngineTools selfHosted = engineTools(TurnFixtures.ollamaProperties());
+        TurnScope scope = TurnFixtures.scope("will she marry a doctor?");
+        try {
+            scope.open();
+            var result = selfHosted.castChartFor("1991-02-03", "06:15", "Nagpur, India");
+            assertThat(result.available()).isFalse();
+            assertThat(result.note())
+                    .contains("no place lookup")
+                    .doesNotContain("third-party");
+        } finally {
+            scope.close();
+        }
+    }
+
+    private static EngineTools engineTools(com.celestia.agent.llm.LlmProperties properties) {
+        var config = com.celestia.ephemeris.swisseph.SwissEphemerisConfig.resolve();
+        var positions = new com.celestia.ephemeris.swisseph.SwissEphemerisPositionProvider(config);
+        var houses = new com.celestia.ephemeris.swisseph.SwissEphemerisHouseProvider(config);
+        return new EngineTools(
+                new com.celestia.core.judgement.RulingPlanetsFactory(
+                        positions, houses,
+                        new com.celestia.ephemeris.swisseph.SwissEphemerisSunriseProvider(config)),
+                new com.celestia.core.horary.HoraryChartFactory(
+                        positions,
+                        new com.celestia.ephemeris.swisseph.SwissEphemerisHoraryHouseProvider(config)),
+                TurnFixtures.clock(),
+                properties);
     }
 
     @Test

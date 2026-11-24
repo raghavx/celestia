@@ -77,6 +77,20 @@ public final class TurnFixtures {
         return TurnContext.of(1L, OWNER, question, bundle());
     }
 
+    /** Properties naming the self-hosted provider — the default a clone builds with. */
+    public static LlmProperties ollamaProperties() {
+        return new LlmProperties(
+                LlmProperties.OLLAMA, "http://localhost:11434", "primary-model", "fallback-model",
+                "5m", 6, Duration.ofMinutes(5), 1, 16000, "", "");
+    }
+
+    /** Properties naming a third-party provider, where ADR-0026 condition 2 bites. */
+    public static LlmProperties anthropicProperties() {
+        return new LlmProperties(
+                LlmProperties.ANTHROPIC, "", "claude-sonnet-5", "claude-sonnet-5",
+                "5m", 6, Duration.ofMinutes(5), 1, 16000, "", "test-key");
+    }
+
     /** A clock inside the chart's dasha timeline, so "running now" always resolves. */
     public static Clock clock() {
         return Clock.fixed(Instant.parse("2026-11-24T08:00:00Z"), ZoneOffset.UTC);

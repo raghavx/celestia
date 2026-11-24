@@ -61,7 +61,9 @@ must read as astrology rather than as a system report.
    stage rather than written by the model.
 4. **Given** the owner supplies a second person's birth data for a matching
    question, **When** the agent answers, **Then** it uses that data for that
-   reply only and does not store it.
+   reply only and does not store it. **Deliverable on a self-hosted deployment
+   only** (FR-011a): on a third-party inference API the agent declines, because
+   the owner cannot consent on another person's behalf.
 
 ---
 
@@ -289,6 +291,14 @@ form and have them marked.
   failure mode is its least visible one.
 - **FR-011**: Birth data the owner supplies for a second person MUST be used for
   that reply only and MUST NOT be persisted.
+- **FR-011a**: A second person's chart MUST NOT be cast at all while the
+  deployment uses a **third-party inference API**. Constitution v3.0.0's bounded
+  exception (ADR-0026 condition 2) permits such a provider only while no other
+  living person's data is processed: the owner may consent for his own birth
+  details, never for a friend's that he types into a message. The tool MUST
+  report itself unavailable and say which of the two reasons applies, so
+  "forbidden" is distinguishable from "not built yet" — and so that wiring a
+  geocoder later cannot silently breach the condition.
 
 #### What the answer must and must not say
 
@@ -513,17 +523,20 @@ form and have them marked.
 - Nothing here weakens SPEC-011's leak scan. Keeping the toolkit's strings out of
   the model's context and scanning the draft anyway are two controls on the same
   duty, and Constitution X is NON-NEGOTIABLE enough to want both.
-- **A chart for a second person cannot actually be cast yet, and this is an open
-  item rather than a silent omission.** FR-011 and US1 scenario 4 describe it, and
-  the plumbing for it is built: a supplied chart is what the tools judge for that
-  turn, it is never persisted, and the arguments that carried it are redacted from
-  the turn record. What is missing is the step before all of that — resolving a
-  place name to coordinates and a zone. SPEC-007 defines the geocoder port and no
-  implementation is wired into the application, and handing the model coordinates
-  to supply itself is exactly what FR-006 forbids. The tool therefore reports
-  itself unavailable and the agent declines. **This needs a decision: defer
-  supplied-person charts to SPEC-017, or wire a geocoder here.** Recorded so the
-  next reader does not mistake a known limit for a bug.
+- **A chart for a second person is shut for two reasons, and the decision it was
+  waiting on has been taken.** The plumbing is built: a supplied chart is what the
+  tools judge for that turn, it is never persisted, and the arguments that carried
+  it are redacted from the turn record. Two things keep it shut.
+  **Constitutionally** (FR-011a): while the deployment uses a third-party
+  inference API, another living person's data may not be processed at all, and the
+  owner cannot consent for them. **Technically**: SPEC-007 defines a geocoder port
+  that nothing implements, so a place *name* cannot be resolved — and handing the
+  model coordinates to supply itself is what FR-006 forbids.
+  So the earlier framing — "defer it or wire a geocoder" — was incomplete, because
+  **wiring a geocoder would have ended the API permission** rather than completing
+  the requirement. The resolution is both: the requirement is scoped to
+  self-hosted deployments, and the tool is gated on the provider so the condition
+  cannot be breached by building the missing half.
 - Repeated-abuse handling, rate limiting and model failover are SPEC-021 and
   SPEC-022, not here.
 - Onboarding — collecting name, birth date, time and place conversationally — is

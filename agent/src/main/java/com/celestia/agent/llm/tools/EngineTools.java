@@ -1,5 +1,6 @@
 package com.celestia.agent.llm.tools;
 
+import com.celestia.agent.llm.LlmProperties;
 import com.celestia.agent.llm.TurnScope;
 import com.celestia.core.chart.Cusp;
 import com.celestia.core.chart.NatalChart;
@@ -51,11 +52,17 @@ public class EngineTools {
     private final RulingPlanetsFactory rulingPlanets;
     private final HoraryChartFactory horaryCharts;
     private final Clock clock;
+    private final String provider;
 
-    public EngineTools(RulingPlanetsFactory rulingPlanets, HoraryChartFactory horaryCharts, Clock clock) {
+    public EngineTools(
+            RulingPlanetsFactory rulingPlanets,
+            HoraryChartFactory horaryCharts,
+            Clock clock,
+            LlmProperties properties) {
         this.rulingPlanets = rulingPlanets;
         this.horaryCharts = horaryCharts;
         this.clock = clock;
+        this.provider = properties.provider();
     }
 
     @Tool(description = "The querent's natal chart: the twelve house cusps with their KP lordage, "
@@ -128,12 +135,24 @@ public class EngineTools {
     /**
      * A second person's chart, from birth details given in this message (FR-011).
      *
-     * <p><b>Not available yet, and it says so rather than guessing.</b> Casting a
-     * chart from a place name needs a live geocoder and a timezone resolution;
-     * {@code geo} defines the port (SPEC-007) but no geocoder is wired into this
-     * application, and the model must never be handed coordinates to supply
-     * itself (FR-006). Until one exists this returns a refusal the model can read,
-     * so it declines in its own voice instead of inventing a chart.
+     * <p><b>Unavailable, for two different reasons, and the difference matters.</b>
+     *
+     * <p><b>1. On a third-party inference API it is forbidden, not merely
+     * unbuilt.</b> Constitution v3.0.0's bounded exception (ADR-0026 condition 2)
+     * permits such a provider only while no other living person's data is
+     * processed: the owner may consent for himself, never for a friend whose birth
+     * details he types into a message. This check is why wiring a geocoder cannot
+     * silently breach that condition — the tool stays shut while the provider is a
+     * third party, geocoder or no geocoder.
+     *
+     * <p><b>2. On a self-hosted deployment it is simply not built.</b> Casting a
+     * chart from a place <em>name</em> needs a live geocoder and a timezone
+     * resolution; {@code geo} defines the port (SPEC-007) and nothing implements
+     * it, and the model must never be handed coordinates to supply itself
+     * (FR-006). That is the half a future task can close.
+     *
+     * <p>Either way the model is told it cannot, in words it can act on, so the
+     * agent declines in its own voice instead of inventing a chart.
      */
     @Tool(description = "Cast a chart for another person from birth details the querent gave in "
             + "this message. If this returns unavailable, say you cannot read another person's "
@@ -144,10 +163,17 @@ public class EngineTools {
             @ToolParam(description = "birth place as the querent gave it, e.g. Nagpur, India") String birthPlace) {
         TurnScope scope = TurnScope.current();
         scope.finishCall("castChartFor", List.of(), false);
-        return new SuppliedChartResult(
-                false,
-                "Casting another person's chart is not available yet — no place lookup is "
-                        + "configured. Tell the querent you cannot read that chart at the moment.");
+        return new SuppliedChartResult(false, unavailableBecause());
+    }
+
+    /** Which of the two reasons applies, so a log or a turn record says which. */
+    private String unavailableBecause() {
+        return LlmProperties.OLLAMA.equals(provider)
+                ? "Casting another person's chart is not available yet — no place lookup is "
+                        + "configured. Tell the querent you cannot read that chart at the moment."
+                : "Another person's chart cannot be read while this deployment uses a third-party "
+                        + "model provider. Tell the querent you can only read their own chart at "
+                        + "the moment.";
     }
 
     // ---- views: flat, readable, and free of anything the reply must not contain ----

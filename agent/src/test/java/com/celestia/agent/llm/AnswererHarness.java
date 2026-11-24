@@ -40,22 +40,24 @@ public final class AnswererHarness {
         this.maxRounds = maxRounds;
         this.clock = clock;
 
+        LlmProperties properties = new LlmProperties(
+                LlmProperties.OLLAMA, "http://localhost:11434", "primary-model", "fallback-model",
+                "5m", maxRounds, deadline, 1, 16000, "", "");
+
         SwissEphemerisConfig config = SwissEphemerisConfig.resolve();
         var positions = new SwissEphemerisPositionProvider(config);
         var houses = new SwissEphemerisHouseProvider(config);
         EngineTools engineTools = new EngineTools(
                 new RulingPlanetsFactory(positions, houses, new SwissEphemerisSunriseProvider(config)),
                 new HoraryChartFactory(positions, new SwissEphemerisHoraryHouseProvider(config)),
-                clock);
+                clock,
+                properties);
         KpToolkit toolkit = KpToolkit.bundled();
         ToolkitTools toolkitTools = new ToolkitTools(toolkit, new PromiseEvaluator(toolkit));
 
         ToolCallingManager manager =
                 new TurnToolCallingManager(DefaultToolCallingManager.builder().build(), clock);
         this.model = new StubChatModel(manager);
-        LlmProperties properties = new LlmProperties(
-                LlmProperties.OLLAMA, "http://localhost:11434", "primary-model", "fallback-model",
-                "5m", maxRounds, deadline, 1, 16000, "", "");
         this.answerer = new OwnerAnswerer(
                 model,
                 new OllamaTurnOptions(properties),

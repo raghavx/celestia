@@ -36,7 +36,8 @@ class ToolSetClosedTest {
         EngineTools engine = new EngineTools(
                 new RulingPlanetsFactory(positions, houses, new SwissEphemerisSunriseProvider(config)),
                 new HoraryChartFactory(positions, new SwissEphemerisHoraryHouseProvider(config)),
-                TurnFixtures.clock());
+                TurnFixtures.clock(),
+                TurnFixtures.ollamaProperties());
         KpToolkit toolkit = KpToolkit.bundled();
         ToolkitTools toolkitTools = new ToolkitTools(toolkit, new PromiseEvaluator(toolkit));
 
