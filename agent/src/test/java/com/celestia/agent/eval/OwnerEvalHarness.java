@@ -27,6 +27,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +145,8 @@ class OwnerEvalHarness {
     }
 
     /** What one question produced, so the assertions can read it back. */
-    private record Produced(EvalQuestion question, String reply, OwnerTurnRecordEntity record) {}
+    private record Produced(
+            EvalQuestion question, String reply, OwnerTurnRecordEntity record, Duration elapsed) {}
 
     @Test
     @DisplayName("ten answers with their resolved sources, for a practitioner to mark (SC-001)")
@@ -160,23 +162,62 @@ class OwnerEvalHarness {
         List<Produced> produced = new ArrayList<>();
 
         for (EvalQuestion question : questions) {
+            // SC-008 is "message received to reply sent", so the clock goes round
+            // the whole guarded path — gate, turn, output stage — not round the
+            // model call. Measured here because nothing persists a duration (T040).
+            long startedNanos = System.nanoTime();
             OutboundMessage reply = handler.reply(owner, inbound(question));
+            Duration elapsed = Duration.ofNanos(System.nanoTime() - startedNanos);
             String body = ((OutboundMessage.TextMessage) reply).body();
             OwnerTurnRecordEntity record = turnRecords.findByUserIdOrderByReceivedAtAsc(owner.id()).stream()
                     .reduce((first, last) -> last)
                     .orElseThrow(() -> new AssertionError(
                             "no turn record for " + question.id() + " — a turn that ran must be reviewable"));
-            produced.add(new Produced(question, body, record));
-            Files.writeString(OUTPUT.resolve(question.id() + ".md"), document(question, body, record),
+            produced.add(new Produced(question, body, record, elapsed));
+            Files.writeString(OUTPUT.resolve(question.id() + ".md"), document(question, body, record, elapsed),
                     StandardCharsets.UTF_8);
         }
 
         assertMechanicalCriteria(produced);
+        reportLatency(produced);
         long answerable = questions.stream().filter(EvalQuestion::answerable).count();
         System.out.println(produced.size() + " documents written to " + OUTPUT.toAbsolutePath()
                 + " — read them and mark each answer acceptable or not AS ASTROLOGY (SC-001, bar 9 of "
                 + answerable + "). The other " + (produced.size() - answerable)
                 + " are the no-basis cases: there the decline IS the right answer.");
+    }
+
+    /**
+     * SC-008 (T040): the owner gets a reply inside 30 seconds for 9 of 10 typical
+     * questions, end to end.
+     *
+     * <p><b>Printed, not asserted.</b> This is a latency measurement on a shared
+     * API over a home connection, and a slow afternoon is not a product defect
+     * the way a leaked source is. Failing the build on it would teach everyone to
+     * ignore a red bar; the figure belongs in spec.md next to the claim instead.
+     * Only the answered questions count — a gate refusal returns a fixed string
+     * without a model call and would flatter the number.
+     */
+    private void reportLatency(List<Produced> produced) {
+        List<Produced> answered = produced.stream()
+                .filter(row -> "ANSWERED".equals(row.record().getOutcome()))
+                .sorted(java.util.Comparator.comparing(Produced::elapsed))
+                .toList();
+        if (answered.isEmpty()) {
+            System.out.println("SC-008: nothing was answered, so there is nothing to measure.");
+            return;
+        }
+        long inside = answered.stream().filter(row -> row.elapsed().getSeconds() < 30).count();
+        Duration median = answered.get(answered.size() / 2).elapsed();
+        Duration worst = answered.getLast().elapsed();
+        System.out.printf(
+                "SC-008 — %d of %d answers inside 30s. median %.1fs, fastest %.1fs, slowest %.1fs.%n",
+                inside, answered.size(), median.toMillis() / 1000.0,
+                answered.getFirst().elapsed().toMillis() / 1000.0, worst.toMillis() / 1000.0);
+        for (Produced row : answered) {
+            System.out.printf("    %6.1fs  %-20s %s%n", row.elapsed().toMillis() / 1000.0,
+                    row.question().id(), row.elapsed().getSeconds() < 30 ? "" : "OVER");
+        }
     }
 
     /**
@@ -296,7 +337,8 @@ class OwnerEvalHarness {
     }
 
     /** One reviewable document: the question, the reply, and the basis behind it. */
-    private String document(EvalQuestion question, String reply, OwnerTurnRecordEntity record) {
+    private String document(
+            EvalQuestion question, String reply, OwnerTurnRecordEntity record, Duration elapsed) {
         return """
                 # %s
 
@@ -327,6 +369,7 @@ class OwnerEvalHarness {
                 | outcome | `%s` |
                 | model | `%s`%s |
                 | reply length | %d characters%s |
+                | end to end | %.1f seconds (SC-008 bar: 30) |
                 | advisory class | `%s` |
                 | withheld by | %s |
                 | toolkit calls behind it | %d |
@@ -354,6 +397,7 @@ class OwnerEvalHarness {
                         record.isFallbackSwitched() ? " (switched to the fallback)" : "",
                         record.getDeliveredLength(),
                         record.isReplyTrimmed() ? " — TRIMMED to the channel budget, a prompt defect" : "",
+                        elapsed.toMillis() / 1000.0,
                         record.getSensitivityUsed(),
                         // Which disclosure family the scan caught. A withheld reply is a
                         // lost answer and a prompt defect (SC-004), and the family is the

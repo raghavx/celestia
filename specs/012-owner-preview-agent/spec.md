@@ -430,6 +430,20 @@ form and have them marked.
   silence on WhatsApp. Whether it is achievable depends on where the model runs
   — ADR-0010 — which is why that decision blocks planning rather than this
   spec.)
+  - **MEASURED 2026-11-25 (T040): met, with headroom. 10 of 10 answers inside
+    30 seconds — median 14.3s, slowest 15.3s, fastest 3.9s.** End to end through
+    the guarded path (gate, turn, output stage), `claude-sonnet-5` on the Claude
+    API from the dev machine, the owner's own chart, the thirteen-question eval
+    set; the three refusals are excluded because they return a fixed string
+    without a model call and would flatter the figure. The two fastest answers
+    are the one-tool ones (a gemstone look-up, a horary mindset); a full reading
+    costs three to eight tool calls and lands near 14s, so **half the budget is
+    spare at a typical five rounds.**
+  - **The figure binds to this deployment, as SC-001's verdict does.** It was
+    measured against a hosted API, not the self-hosted VM of ADR-0010; moving
+    there changes every term in it. Before T045 the turn deadline did not bound
+    a turn at all (a single question took ~24 minutes), so no figure recorded
+    earlier than that fix means anything.
 - **SC-009**: No reply exceeds 4,096 characters or is truncated mid-sentence, and
   the count of replies that had to be trimmed to fit is reported rather than
   assumed to be zero.

@@ -642,13 +642,21 @@ thing code cannot judge is sitting in a folder waiting for a person.
       minimum — and the data-processing agreement accepted. With it, **all six of
       ADR-0026's conditions now hold**: 1 and 2 enforced in code, 6 structural,
       3/4/5 recorded. **T044, T040 and T041 are unblocked.**
-- [ ] T040 Measure SC-008 **against whatever the preview is deployed on** — the
+- [X] T040 Measure SC-008 **against whatever the preview is deployed on** — the
       Claude API under v3.0.0's exception, or a warm self-hosted VM — and never on
       a laptop-sized model. Record the figure. If 30 seconds does not hold, the honest
       move is to amend SC-008 with the measured number rather than to leave a
       criterion the product misses. Record the figure in
       `specs/012-owner-preview-agent/spec.md` (SC-008) so the claim and the
-      measurement live together
+      measurement live together.
+
+      **DONE 2026-11-25: 30 seconds holds — 10 of 10 inside it, median 14.3s,
+      slowest 15.3s.** No amendment needed. Recorded against SC-008 in spec.md
+      with its conditions. The harness now times each question itself
+      (`reportLatency`), so the figure is reproducible rather than a stopwatch
+      reading — **printed, not asserted**: this is a shared API over a home
+      connection, and failing a build on a slow afternoon would only teach
+      everyone to ignore a red bar
 - [X] T041 **MANUAL — owner only**: run the eval harness **against whatever the
       preview is deployed on** — reachable today on the Claude API under v3.0.0's
       bounded exception, no procurement needed — and **never** against a
@@ -743,7 +751,7 @@ thing code cannot judge is sitting in a folder waiting for a person.
       every judgement grounded in 41–73 toolkit sources, no source named, replies
       2,172–2,936 characters inside the 4,096 budget, retrograde reported as
       weakening and partly-indicated said as partial
-- [ ] T046 **Decide: the advisory sentence is chosen too broadly.** Found by T044.
+- [X] T046 **Decide: the advisory sentence is chosen too broadly.** Found by T044.
       `sensitivityUsed` is the maximum over every sensitivity the tools
       **returned**, so a marriage reading ended with *"consult a qualified doctor
       for diagnosis or treatment"* — because `getChartPromises(7)` legitimately
@@ -792,8 +800,26 @@ thing code cannot judge is sitting in a folder waiting for a person.
       tail. Two options previously listed are now closed — narrowing by house is
       done and insufficient, and the gate's `topicGroup` cannot carry it: its
       own contract calls it *"best-effort diagnostic only ... often absent or
-      generic even for a clearly on-topic question"*
-- [ ] T047 **The out-of-scope marker fired for a question the toolkit covers.**
+      generic even for a clearly on-topic question".
+
+      **DECIDED 2026-11-24 — the owner accepts the tail.** The advisory stays as
+      it is: conservative, and correct in the narrow sense that the content it
+      names really was among the results. No change to `Sensitivity`, to the
+      workbook, or to the import.
+
+      **What "accepted" does not mean.** The plumbing fix stands — attributing
+      sensitivity per house and counting only the houses asked about was a
+      divergence from FR-014's own word *"used"*, is amended into SPEC-011 and
+      pinned by `AdvisoryNarrowingTest`. Accepting the tail accepts the
+      *residue*: that house 1 is read in every KP judgement and carries benign
+      longevity matters (*Strong Lagna*, *Long life (over 65 Yrs) for normal
+      people*), so most replies end in a caution about something the querent did
+      not ask. **This is a known, measured, accepted cost** — eight of ten on
+      T041's set — not an open defect. Anyone reconsidering it should start at
+      the classification in `tools/toolkit-import`, which is where the remaining
+      cause lives*
+- [ ] T047 **DEFERRED to post-launch (owner, 2026-11-24).** **The out-of-scope
+      marker fired for a question the toolkit covers.**
       Found by T044 and exactly the defect spec.md's Edge Cases anticipated:
       *"the owner gets the redirect, which looks to him like the product not
       knowing its own subject."* "Which lottery numbers should I pick?" produced
@@ -821,7 +847,15 @@ thing code cannot judge is sitting in a folder waiting for a person.
       cannot hold. The resolution is probably a third outcome neither artifact
       has: engage the matter (speculative gain, houses 5/11/8/2) and decline the
       specific numbers. Deciding that changes the eval set's expectation as well
-      as the prompt, so it is recorded here rather than quietly settled
+      as the prompt, so it is recorded here rather than quietly settled.
+
+      **Left open deliberately, not overlooked.** The owner's call: the preview
+      serves one allow-listed person who knows the product's subject, so a
+      redirect he can read past costs nothing yet. It becomes real when the
+      preview widens, because then the reader has no way to tell "outside
+      astrology" from "we did not look". Resolve it with the eval set and the
+      prompt together — changing one without the other just moves which artifact
+      is wrong
 
 - [X] T045 **The turn deadline does not bound a turn — fix it** (FR-010).
       Found by the first tier-2 run: with `turn-deadline: PT120S`, turns ran
@@ -989,7 +1023,8 @@ Foundational:
   exists
 - Commit after each task or logical group; stop at any checkpoint to validate a
   story independently
-- T041 and T042 are both now given (SC-001 met, 10 of 10). T046 is the one
-  open decision left to a human. Everything else is
+- T041, T042 and T046 are all now given (SC-001 met, 10 of 10; the advisory
+  tail accepted as a measured cost). T047 is open by decision, not by omission,
+  and is scheduled after launch. Everything else is
   buildable today — T034's harness needs a model, but a small local one serves,
   which is ADR-0010's own development story
