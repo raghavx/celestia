@@ -29,18 +29,18 @@ context (FR-013a–d).
 | sources | ordered list of `{sheetId, sheetTitle, row}` | the real sources, in first-seen order |
 | reference(i) | text | what the model sees: `s1`, `s2`, … — an **index, not an encoding** |
 
-**One name for it: "reference".** The spec, this document, the contracts and the
-research all mean the same thing by reference, label and handle; "reference" is
-the word FR-013a uses, so it is the word used everywhere.
+**One name for it: "reference".** Earlier drafts also said "label" and "handle"
+for the same thing; FR-013a says *reference*, so that is the word used
+throughout, and the others are gone.
 
 **Rules**:
 
-1. A source seen twice in one turn gets the **same** label, so the model can
+1. A source seen twice in one turn gets the **same** reference, so the model can
    still recognise that two findings rest on the same rule — SPEC-010
    `agent-tools.md` obligation 3 survives the swap.
-2. A label MUST NOT be derived from its source. No hash, no slug, no base64: a
-   reversible label puts the string back in the model's context by another route.
-3. Labels are scoped to one turn and are not persisted as a reusable map. The
+2. A reference MUST NOT be derived from its source. No hash, no slug, no base64: a
+   reversible reference puts the string back in the model's context by another route.
+3. References are scoped to one turn and are not persisted as a reusable map. The
    resolved pairs go into the turn record for review; the mapping itself is not
    a durable index of the toolkit's structure.
 4. Nothing that reaches the model — tool result, prompt, or error text — may
@@ -104,6 +104,12 @@ mistaken for a way round the first:
    **`0` means never purge on age** — not "never delete", because rule 1 is a
    standing obligation that no setting switches off.
 
+**The purge takes its "now" from an injected `Clock`**, not from the system
+clock. Otherwise SC-013's "a record past the retention age is gone" can only be
+tested by waiting ninety days. `agent` is a Spring module so Constitution II's
+no-ambient-clock rule does not bind it, but the test needs time to be a parameter
+all the same.
+
 ### ToolCallRecord
 
 | Field | Type | Rule |
@@ -111,7 +117,7 @@ mistaken for a way round the first:
 | ordinal | int | which round, so a loop is visible |
 | tool | text | the tool name |
 | arguments | text | as the model supplied them — **never containing a userId, coordinate or clock**, because those are injected (FR-006) |
-| referenceLabels | list of text | the labels this call produced |
+| references | list of text | the references this call produced |
 | resolvedSources | list of `{sheetId, sheetTitle, row}` | the real sources, resolvable here and nowhere the model can see |
 | truncated | bool | SPEC-010 caps results; this says when more existed |
 
@@ -144,18 +150,33 @@ directions, because a product that declines everything passes an
 The sequence is fixed, and the order is the requirement (FR-001, FR-005):
 
 ```
-1. entitlement     → denied? fixed message. No gate, no chart, no model.
-2. non-text        → fixed message. No gate, no model.
-3. pre-fetch       → chart + running dasha (FR-009)
-4. GuardedPipeline → gate (SPEC-011)
+1. entitlement     → denied? fixed message. No permit, no gate, no chart, no model.
+2. non-text        → fixed message. No permit taken: a "text only" reply must not
+                     consume the one the owner is waiting for.
+3. acquire permit  → unavailable? "busy, try again shortly". NO TURN RECORD —
+                     no turn began (FR-010b, FR-010c).
+   ── a turn starts here ──
+4. pre-fetch       → chart + running dasha (FR-009)
+5. GuardedPipeline → gate (SPEC-011)
                    → OwnerAnswerer, only if allowed
                        → prompt + tools, references swapped on every result
                    → output stage (SPEC-011): marker, leak scan, support line, advisory
-5. turn record     → written whatever happened, including faults
+6. turn record     → written whatever happened from step 3 on, faults included
+7. release permit  → in a finally, or one fault locks the product permanently
 ```
 
-Steps 1 and 2 are before the gate on purpose: work done for someone not entitled
-to it is work that should not have been done.
+**Why the permit sits at 3.** After entitlement, so a sender who may not be
+answered cannot take the only permit and lock the owner out — a
+denial-of-service that costs the attacker nothing. Before the gate and the
+pre-fetch, so no chart work or gate decision is done for a message that is about
+to be turned away. Steps 1–3 are all before the gate on purpose: work done for
+someone not entitled to it, or not about to be served, is work that should not
+have been done.
+
+**Why a busy rejection has no turn record.** A turn begins when the permit is
+acquired (FR-010c), so there is nothing yet to record — no decision, no tool
+calls. It must still be **counted**, or the busiest failure mode is the least
+visible one.
 
 ## Validation at load (fail fast)
 

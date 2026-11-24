@@ -37,7 +37,7 @@ scanning for, and only `agent` knows it.
 |-------|-------------------------|
 | **Round cap** — tool-call rounds per turn | End the turn, fixed message, record `faultKind=ROUND_CAP` |
 | **Deadline** — wall clock for the whole turn | End the turn, fixed message, record `faultKind=TIMEOUT` |
-| **Concurrency** — one permit (ADR-0010) | Second concurrent turn gets "busy, try again shortly"; it is not queued |
+| ~~Concurrency~~ | **Not the answerer's.** The permit is taken by the reply handler, after entitlement and before the gate (FR-010b), so a sender who may not be answered cannot consume it and no gate work is done for a message about to be turned away. See data-model.md "Order of operations" step 3 |
 
 Rounds and time are counted separately because the two faults mean different
 things: a round cap hit is a prompt defect, a timeout is a hosting one. Collapsing

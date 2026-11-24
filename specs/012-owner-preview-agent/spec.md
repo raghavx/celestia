@@ -275,9 +275,18 @@ form and have them marked.
   bound is exceeded, or the model is unreachable, the owner MUST receive a fixed
   message and the turn MUST be recorded as a fault.
 - **FR-010a**: The system MUST serve a bounded number of turns at once —
-  **one** for the preview — and MUST tell a sender to try again shortly rather
-  than queue them behind a turn in progress. An unbounded queue in front of a
-  single model is how a slow reply becomes an outage.
+  configurable, and **one** for the preview — and MUST tell a sender to try again
+  shortly rather than queue them behind a turn in progress. An unbounded queue in
+  front of a single model is how a slow reply becomes an outage.
+- **FR-010b**: The bound MUST be taken **after the entitlement check and before
+  the gate**. After entitlement, so a sender who may not be answered cannot
+  consume the one permit and lock the owner out — a denial-of-service costing
+  nothing. Before the gate, so no chart work or gate decision is done for a
+  message that will be turned away anyway.
+- **FR-010c**: A **turn begins when the bound is acquired.** A message turned
+  away for want of it is therefore not a turn, and FR-020 does not require a
+  turn record for it — but it MUST still be countable, or the product's busiest
+  failure mode is its least visible one.
 - **FR-011**: Birth data the owner supplies for a second person MUST be used for
   that reply only and MUST NOT be persisted.
 
@@ -333,13 +342,22 @@ form and have them marked.
 
 - **FR-019**: The owner's birth data MUST be seedable by an administrative
   action, without a conversational onboarding flow.
-- **FR-020**: Every turn MUST be recorded with its decision, its tool calls and
-  their sources, sufficient for a practitioner to review the answer and for an
-  operator to tell a fault from a refusal.
+- **FR-020**: Every turn — every message that acquired the bound of FR-010c —
+  MUST be recorded with its decision, its tool calls and their sources,
+  sufficient for a practitioner to review the answer and for an operator to tell
+  a fault from a refusal. Messages stopped before that point (no entitlement, not
+  text, no permit) produce no turn record, because no turn happened; they are
+  counted rather than recorded.
 - **FR-020a**: A turn record holds the owner's question, which is a message
   body and therefore personal data. It MUST be covered by the "forget me" hard
   delete, alongside the rows SPEC-008 FR-010 already enumerates. A deletion
   request that leaves every question a user ever asked is not a deletion.
+- **FR-020c**: The question column MUST be stored so that the deferred
+  column-encryption pass can reach it without a schema change — the same
+  position SPEC-008 took for its own PII columns, and what Constitution VII's
+  "encrypted at rest where feasible" amounts to while that pass is still
+  outstanding. Encryption itself is not in this feature's scope; being
+  encryptable later is.
 - **FR-020b**: Turn records MUST be purged once they pass a configurable
   retention age, **defaulting to 90 days**. A retention of `0` MUST mean *never
   purge on age* — and MUST NOT be read as disabling FR-020a, which is a standing
@@ -412,7 +430,7 @@ form and have them marked.
 ### Session 2026-11-24
 
 - Q: Does the model see the real toolkit source (`sheetId`, `sheetTitle`, `row`)
-  on every tool result, or an opaque handle? → A: **An opaque handle.** The real
+  on every tool result, or an opaque reference? → A: **An opaque reference.** The real
   source stays in the turn's tool-call record, resolvable by the eval harness and
   human review but never present in the model's context.
 
@@ -420,7 +438,7 @@ form and have them marked.
   until now that rested on the prompt asking the model not to repeat strings it
   was shown on every call, with SPEC-011's leak scan as the only mechanical
   control — and a catch there costs the entire reply, not just the citation. A
-  handle makes the disclosure impossible rather than improbable, for the cost of
+  reference makes the disclosure impossible rather than improbable, for the cost of
   one lookup. It preserves what the source was actually needed for in the model's
   context: distinct handles still let two findings be recognised as resting on
   the same rule (SPEC-010 `agent-tools.md` rule 3). The scan stays anyway

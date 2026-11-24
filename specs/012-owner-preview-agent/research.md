@@ -55,10 +55,10 @@ is settled: Ollama + Llama 4 Scout on a warm rented cloud GPU VM.
 - **Rationale**: Constitution X forbids the reply naming the toolkit. Keeping the
   strings out of the model's context converts that from a prompt instruction into
   a structural property. Per-turn numbering is deliberate: a stable global
-  handle would accumulate into a durable map of the toolkit's structure, which is
+  reference would accumulate into a durable map of the toolkit's structure, which is
   more to protect than the problem needs, and a reference is only ever needed
   within the turn that produced it.
-- **Why it must not be reversible**: encoding the sheet id into the handle (a
+- **Why it must not be reversible**: encoding the sheet id into the reference (a
   hash, a slug, base64) puts the string back in the model's context by another
   route. The reference is an index into a per-turn list, nothing more.
 - **What the model still gets**: everything it needs to reason. Two findings

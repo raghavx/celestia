@@ -91,10 +91,13 @@ model's own latency is the only variable.
 - ADR-0009: the fallback model is not optional, because this feature is almost
   entirely tool calling and Llama 4's tool-calling under Ollama is immature.
 
-**Scale/Scope**: one user. One permit of concurrency (ADR-0010), one prompt, two
-tool adapters exposing the five toolkit tools plus the engine tools, one new
-table, ten eval questions, one amended ArchUnit rule, one deleted class
-(`EchoReplyHandler`).
+**Scale/Scope**: one user. One permit of concurrency (ADR-0010), taken after
+entitlement and before the gate; one prompt; two tool adapters exposing the five
+toolkit tools plus the engine tools; one new table reached through an
+entity/repository/store trio, with a "forget me" delete and a scheduled purge on
+a 90-day default; ten eval questions; one amended ArchUnit rule; one deleted
+class (`EchoReplyHandler`). Eleven new test classes, of which one needs a real
+model and the rest run on a stub.
 
 ## Constitution Check
 
@@ -181,7 +184,13 @@ agent/src/test/java/com/celestia/agent/
 ├── entitlement/EntitlementServiceTest.java      # FR-001..FR-003, fail closed
 ├── llm/OwnerAnswererTest.java                   # stub model: tool loop, budgets, fallback
 ├── llm/SourceReferencesTest.java                # FR-013a..d, no toolkit string escapes
+├── llm/ModelContextLeakTest.java                # SC-010 + FR-018, asserted on what the model received
 ├── llm/SystemPromptTest.java                    # every obligation present
+├── llm/NoBasisTest.java                         # FR-014, the out-of-scope path
+├── llm/AsksRatherThanGuessesTest.java           # FR-018b, SC-012
+├── llm/TurnContextTest.java                     # FR-009, FR-011
+├── llm/tools/ToolSetClosedTest.java             # FR-007, the tool set is closed
+├── persistence/store/TurnRecordRetentionTest.java # FR-020a/b, SC-013
 ├── channel/GuardedReplyHandlerTest.java         # order: entitlement, gate, model, output
 ├── channel/GuardrailRegressionTest.java        # SC-006: SPEC-011's corpus through the REAL path, zero invocations
 └── architecture/DeterminismArchitectureTest.java # the amended single-path rule

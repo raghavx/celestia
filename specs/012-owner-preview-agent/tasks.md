@@ -80,7 +80,9 @@ written.
 
 - [ ] T005 `LlmConfig`: the `ChatClient` over `OllamaChatModel` from
       `LlmProperties`, a second client bound to the fallback model (ADR-0009),
-      and a **single-permit semaphore** for turn concurrency (ADR-0010), in
+      and the **turn permit** as a bean sized from `max-concurrent-turns`
+      (**FR-010a**, ADR-0010). The permit is **the handler's to take, not the
+      answerer's** — see T016 — so this task only provides it, in
       `agent/src/main/java/com/celestia/agent/llm/LlmConfig.java`.
       Keep-alive is the server's concern, not the client's — the VM stays warm
       (ADR-0010), so the client does not retry a cold start
@@ -100,14 +102,20 @@ written.
       to the entity. The record holds the question (a practitioner cannot review
       an answer without it) and **nothing else about the message body** —
       SPEC-011 kept the gate's decisions free of message text and this must not
-      add it back (FR-020)
+      add it back (FR-020). Give the question a column the **deferred
+      column-encryption pass can reach without a schema change** — a sized
+      `VARBINARY`-compatible shape rather than `TEXT` — which is the position
+      SPEC-008 took for its own PII columns and all Constitution VII's
+      "encrypted at rest where feasible" asks for while that pass is still
+      outstanding (**FR-020c**)
 - [ ] T007 [P] `SourceReferences`: the per-turn mapping from
       `{sheetId, sheetTitle, row}` to the **references** `s1`, `s2`, … — one
-      word for this throughout, the one FR-013a uses, not label or handle — in
+      word for this throughout, the one FR-013a uses — earlier drafts also said
+      "label" and "handle" for it — in
       `agent/src/main/java/com/celestia/agent/llm/SourceReferences.java`.
       **An index, never an encoding** — no hash, no slug, no base64, because a
-      reversible label puts the sheet id back in the model's context by another
-      route. The same source seen twice in a turn returns the **same** label, so
+      reversible reference puts the sheet id back in the model's context by another
+      route. The same source seen twice in a turn returns the **same** reference, so
       SPEC-010 `agent-tools.md` obligation 3 survives the swap (FR-013a–c,
       research.md §3)
 - [ ] T008 [P] `TurnContext` — `userId`, question, pre-fetched chart, running
@@ -122,7 +130,10 @@ written.
       a user ever asked is not a deletion** — Constitution VII makes the hard
       delete a MUST, and a new table holding message bodies does not get to opt
       out (depends on T006)
-- [ ] T006b `TurnRecordStore.purgeOlderThan(...)` plus a scheduled job and
+- [ ] T006b `TurnRecordStore.purgeOlderThan(...)` taking its "now" from an
+      **injected `Clock`** so SC-013 is testable without waiting ninety days,
+      plus a `@Scheduled` job — **reusing the `@EnableScheduling` already on
+      `ChannelConfig`** for SPEC-009's worker rather than adding a second — and
       `celestia.turn-record.retention-days` (**default 90**) in
       `agent/src/main/java/com/celestia/agent/persistence/store/TurnRecordStore.java`
       and `agent/src/main/resources/application.yaml`. **`0` means never purge
@@ -131,7 +142,8 @@ written.
 - [ ] T006c `TurnRecordRetentionTest`: a "forget me" request leaves **zero**
       turn records for that user; a record past the retention age is gone after a
       purge; one inside it survives; and with `retention-days: 0` **nothing is
-      purged on age while forget-me still deletes everything** (**SC-013**), in
+      purged on age while forget-me still deletes everything** (**SC-013**) —
+      driving the clock rather than the calendar, in
       `agent/src/test/java/com/celestia/agent/persistence/store/TurnRecordRetentionTest.java`
       (depends on T006a, T006b)
 - [ ] T009 `EntitlementService` + `EntitlementDecision` (`OWNER_ALLOW_LIST`,
@@ -179,7 +191,7 @@ as astrology rather than as a system report (spec.md US1).
       **`lookupToolkit` needs the most care of the five**: its SPEC-010 shape
       returns sheet `{id, title}`, which is exactly what must not reach the
       model, so this adapter returns the group, the kind and the matching rows
-      with the identity behind a label. One careless tool defeats the swap in a
+      with the identity behind a reference. One careless tool defeats the swap in a
       single call (contracts/llm-tools.md) (depends on T007)
 - [ ] T012a [US1] `ToolSetClosedTest`: the registered tool names equal an
       expected list exactly, so an accidentally-added `@Tool` fails the build
@@ -205,9 +217,17 @@ as astrology rather than as a system report (spec.md US1).
       (ADR-0009); never throw for model trouble (FR-010), in
       `agent/src/main/java/com/celestia/agent/llm/OwnerAnswerer.java`
       (depends on T005, T011, T012, T014)
-- [ ] T016 [US1] `GuardedReplyHandler implements ReplyHandler`: entitlement →
-      non-text check → pre-fetch → `GuardedPipeline.handle` → outbound message,
-      writing a `TurnRecord` **whatever happened, faults included**, in
+- [ ] T016 [US1] `GuardedReplyHandler implements ReplyHandler`, in the exact
+      order of data-model.md "Order of operations": entitlement → non-text →
+      **acquire the turn permit** → pre-fetch → `GuardedPipeline.handle` →
+      outbound → turn record → **release the permit in a `finally`** (one fault
+      otherwise locks the product permanently). The permit is taken **after
+      entitlement so a sender who may not be answered cannot consume it, and
+      before the gate so no chart or gate work is done for a message about to be
+      turned away** (**FR-010b**). A message turned away for want of a permit
+      gets "busy, try again shortly" and **no turn record** — no turn began
+      (**FR-010c**) — but is counted. Everything from the permit on is recorded
+      whatever happened, faults included, in
       `agent/src/main/java/com/celestia/agent/channel/GuardedReplyHandler.java`.
       The order is the requirement, not an implementation detail (FR-001,
       data-model "Order of operations") (depends on T006, T009, T015)
@@ -231,7 +251,11 @@ as astrology rather than as a system report (spec.md US1).
       `agent/src/test/java/com/celestia/agent/llm/OwnerAnswererTest.java`
       (depends on T015)
 - [ ] T020 [US1] `GuardedReplyHandlerTest`: the order holds — a non-text message
-      never reaches the gate; an allowed question reaches the answerer exactly
+      never reaches the gate **and takes no permit**, so a "text only" reply
+      cannot consume the one the owner is waiting for; a second turn while one
+      holds the permit gets "busy, try again shortly" with **no turn record** and
+      a counter incremented (FR-010a–c); the permit is released even when the
+      turn faults; an allowed question reaches the answerer exactly
       once; a `TurnRecord` is written for an answer, a refusal, a withheld reply
       and a fault; and the reply fits the channel budget without truncation
       (FR-017, SC-009), in
@@ -301,9 +325,9 @@ delivered reply names a source and nothing was withheld (spec.md US3).
 ### Implementation for User Story 3
 
 - [ ] T024 [US3] `SourceReferencesTest`: the same source twice in a turn returns
-      the same label; different sources get different labels; **a label cannot be
+      the same reference; different sources get different references; **a reference cannot be
       reversed to its source** (no substring of any sheet id, title or row
-      appears in a label); and labels restart per turn so no durable map of the
+      appears in a reference); and references restart per turn so no durable map of the
       toolkit's structure accumulates, in
       `agent/src/test/java/com/celestia/agent/llm/SourceReferencesTest.java`
       (depends on T007)
@@ -320,7 +344,7 @@ delivered reply names a source and nothing was withheld (spec.md US3).
       (depends on T012, T015)
 - [ ] T026 [US3] `SystemPromptTest`: every one of the nine obligations of
       contracts/system-prompt.md is present in the resource — including the
-      prohibition on naming **labels** as well as sources, which is a style rule
+      prohibition on naming **references** as well as sources, which is a style rule
       rather than a secrecy one ("per s3" discloses nothing but reads as a system
       quoting a document), in
       `agent/src/test/java/com/celestia/agent/llm/SystemPromptTest.java`.
@@ -423,13 +447,13 @@ form and have them marked (spec.md US6).
 - [ ] T034 [US6] `OwnerEvalHarness`: run each question through the real reply
       path and write one document per question to `agent/target/owner-eval/` —
       the question, the delivered reply, the tool calls, and the **resolved**
-      sources behind each label, in
+      sources behind each reference, in
       `agent/src/test/java/com/celestia/agent/eval/OwnerEvalHarness.java`.
       Tagged so it is **excluded from the default build** (it needs a reachable
       model), like the Testcontainers tests (depends on T016, T033)
 - [ ] T035 [US6] The harness's mechanical assertions — every reply has at least
       one tool call behind it (SC-002); no delivered reply names the toolkit, a
-      sheet or a row (SC-003); nothing was withheld (SC-004); every label
+      sheet or a row (SC-003); nothing was withheld (SC-004); every reference
       resolves to a real source (SC-011); answerable questions were answered and
       no-basis questions declined (SC-007) — in
       `agent/src/test/java/com/celestia/agent/eval/OwnerEvalHarness.java`.
@@ -484,7 +508,10 @@ thing code cannot judge is sitting in a folder waiting for a person.
 ### Phase Dependencies
 
 - **Setup (Phase 1)**: no dependencies — start immediately
-- **Foundational (Phase 2)**: depends on Setup — BLOCKS every user story
+- **Foundational (Phase 2)**: depends on Setup — BLOCKS every user story.
+  **T006a/b/c (the delete, the purge, their test) are sequential on T006**, and
+  they are in Foundational rather than a later phase deliberately: there must be
+  no window in which the table accumulates records nothing can delete
 - **User Stories (Phases 3–8)**:
   - **US1 and US2 are not independent in code**, though they are in testing.
     `GuardedReplyHandler` (T016) cannot be written without `EntitlementService`,
@@ -518,7 +545,11 @@ thing code cannot judge is sitting in a folder waiting for a person.
 
 - Setup: T002 and T003 are independent files; T004 follows both
 - Foundational: T006, T007, T008 and T010 are independent of each other; T005 and
-  T009 each depend only on their properties
+  T009 each depend only on their properties. **T006a and T006b both follow T006**
+  and can be written in parallel with each other; T006c follows both
+- US1: T012a (the closed tool set) follows T011 and T012 and is independent of
+  everything else in the phase
+- US4: T028a is a separate test class from T028 and can be written alongside it
 - US1: T011 and T014 are independent; T013 (the prompt) can be drafted alongside
   the code that will use it
 - US5: T030 is independent of T031's wiring
@@ -570,7 +601,7 @@ Foundational:
 ## Notes
 
 - [P] tasks touch different files with no unmet dependency
-- [Story] labels trace every task back to its spec.md user story
+- [Story] references trace every task back to its spec.md user story
 - **`guardrail/` and `core/` are not modified by any task here.** If a task seems
   to need it, the design has drifted — raise it rather than editing them
 - Tests split in two: the stub-model tests belong in the default build and prove
