@@ -10,10 +10,17 @@ need no model. Step 4 needs a reachable one. Step 5 needs a human.
 - SPEC-011's guardrail on the classpath — unchanged by this feature.
 - MySQL running for the turn record; Docker for the Testcontainers tests
   (ADR-0008).
-- **For step 4 only**: `celestia.llm.base-url` pointing at a reachable Ollama
-  with the configured model pulled. Until the GPU VM exists, a small local model
-  is fine and is the point — it exercises ADR-0009's fallback path as the primary
-  path.
+- **For step 4 only**, three things, and the harness refuses to run without
+  them:
+  - `celestia.llm.base-url` pointing at a reachable Ollama with the configured
+    model pulled. Until the GPU VM exists, a small local model is fine and is the
+    point — it exercises ADR-0009's fallback path as the primary path.
+  - **the owner's number on `celestia.entitlement.allow-list`** — otherwise
+    entitlement turns every question away before the gate and you get ten copies
+    of the not-open message;
+  - **the owner's birth data seeded** (T030) — otherwise every question returns
+    what is missing. Either way ten documents appear and none contains any
+    astrology, which is why the harness checks first.
 
 ## 1. The guarded path, without a model
 
@@ -125,7 +132,7 @@ substring of the first message (FR-018).
 
 Expected: ten questions answered against a real model, each written to
 `agent/target/owner-eval/` with the question, the delivered reply, the tool calls
-and — resolved from their labels — the real toolkit sources behind them.
+and — resolved from their references — the real toolkit sources behind them.
 
 Mechanically asserted in this run:
 

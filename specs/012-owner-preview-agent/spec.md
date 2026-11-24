@@ -370,8 +370,9 @@ form and have them marked.
 
 - **Entitlement decision**: whether this sender may be answered, and on what
   basis — the allow-list today, a subscription later.
-- **Turn**: one inbound question and everything that happened because of it —
-  the gate decision, the tool calls, the draft, the delivered reply.
+- **Turn**: a message that acquired the turn permit, and everything that
+  happened because of it — the gate decision, the tool calls, the draft, the
+  delivered reply. A message stopped before that point is not a turn (FR-010c).
 - **Tool call record**: which tool ran, what it was asked, and the sources it
   returned. Internal, and the raw material for review.
 - **Eval question**: one of the owner's questions with the practitioner's
@@ -440,7 +441,7 @@ form and have them marked.
   control — and a catch there costs the entire reply, not just the citation. A
   reference makes the disclosure impossible rather than improbable, for the cost of
   one lookup. It preserves what the source was actually needed for in the model's
-  context: distinct handles still let two findings be recognised as resting on
+  context: distinct references still let two findings be recognised as resting on
   the same rule (SPEC-010 `agent-tools.md` rule 3). The scan stays anyway
   (FR-013d) — two controls on a NON-NEGOTIABLE duty is not redundancy.
 

@@ -11,6 +11,12 @@ Wire the model in, between two halves of a path that already exist.
 - **Entitlement first.** A small check in `agent` answers "may this sender be
   answered?" from an allow-list, before the gate and before any chart work. An
   unknown sender costs nothing and reaches nothing (FR-001, research §8).
+- **One turn at a time, and the permit's position is the point.** The handler
+  takes it after entitlement and before the gate, so a sender who may not be
+  answered cannot consume the only permit, and no chart or gate work is done for
+  a message about to be told to retry. A turn begins at acquisition, which is
+  what makes "every turn is recorded" and "a busy rejection writes nothing"
+  consistent (FR-010a–c).
 - **The answerer.** `OwnerAnswerer` implements SPEC-011's `Answerer` over Spring
   AI's `OllamaChatModel`, and `GuardedPipeline` is the only thing that calls it.
   The single-path ArchUnit rule is amended to name exactly one more class rather
@@ -53,8 +59,10 @@ the layering SPEC-008 established and `PersistenceArchitectureTest` guards.
 under Constitution VII: `owner_turn_record` joins the rows SPEC-008 FR-010's
 "forget me" removes (FR-020a), and records are purged past a configurable
 retention age, default 90 days, where `0` means never purge on age without ever
-disabling the deletion obligation (FR-020b). The reference→source mapping is
-per-turn and dies with the turn.
+disabling the deletion obligation (FR-020b). The question column is shaped so the
+deferred column-encryption pass can reach it without a schema change (FR-020c),
+the position SPEC-008 took for its own PII columns. The reference→source mapping
+is per-turn and dies with the turn.
 
 **Testing**: JUnit 5 + AssertJ + Mockito, as `agent` already uses. The guarded
 path is tested with a stub `ChatModel` so the wiring, the reference swap and the

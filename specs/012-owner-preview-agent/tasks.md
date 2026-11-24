@@ -450,7 +450,12 @@ form and have them marked (spec.md US6).
       sources behind each reference, in
       `agent/src/test/java/com/celestia/agent/eval/OwnerEvalHarness.java`.
       Tagged so it is **excluded from the default build** (it needs a reachable
-      model), like the Testcontainers tests (depends on T016, T033)
+      model), like the Testcontainers tests. **It must fail loudly on its own
+      preconditions**: the owner allow-listed (or every question returns "not
+      open to you yet") and his birth data seeded (or every one returns what is
+      missing). Either way ten documents appear and the practitioner reviews no
+      astrology, so check both up front and refuse to run rather than writing
+      useless output (depends on T009, T016, T030, T033)
 - [ ] T035 [US6] The harness's mechanical assertions — every reply has at least
       one tool call behind it (SC-002); no delivered reply names the toolkit, a
       sheet or a row (SC-003); nothing was withheld (SC-004); every reference

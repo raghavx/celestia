@@ -122,9 +122,6 @@ is settled: Ollama + Llama 4 Scout on a warm rented cloud GPU VM.
   is indistinguishable from a slow model. Counting rounds separates "the model is
   confused" from "the model is slow", which matters because the first is a prompt
   defect and the second is a hosting one.
-- **Concurrency**: one permit, per ADR-0010 — the preview has one user, and an
-  unbounded queue in front of a single warm GPU is how a preview becomes an
-  outage. A second concurrent turn gets "busy, try again shortly".
 - **Fallback**: ADR-0009's fallback model is used when the primary returns
   malformed tool JSON or fails repeatedly. During development, before the VM
   exists, a small local model stands in — which exercises the fallback path as
@@ -178,7 +175,17 @@ is settled: Ollama + Llama 4 Scout on a warm rented cloud GPU VM.
   code, and "exactly one route" is the principle this whole feature serves.
 - **Non-text messages**: `ReplyHandler` must not throw for unrecognised content
   (SPEC-009 FR-006). A non-text message gets a fixed "text only for now" reply
-  without reaching the gate or the model.
+  without reaching the gate or the model, and **takes no permit** — a "text only"
+  reply must not consume the one the owner is waiting for.
+- **Concurrency is the handler's, not the answerer's.** One permit, per ADR-0010:
+  the preview has one user, and an unbounded queue in front of a single warm GPU
+  is how a preview becomes an outage. The handler takes it **after entitlement
+  and before the gate** (FR-010b) — after, so a sender who may not be answered
+  cannot consume the only permit and lock the owner out at no cost to themselves;
+  before, so no chart or gate work is done for a message about to be turned away.
+  A turn begins at acquisition (FR-010c), so a message turned away for want of a
+  permit is not a turn and writes no turn record, though it must still be
+  counted. Released in a `finally`, or one fault locks the product permanently.
 
 ## §11 Proving the guardrail did not regress (SC-006)
 
