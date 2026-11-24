@@ -56,14 +56,18 @@ purchase. Concurrency for the preview is one user.
   host, and the host treated as a processor rather than as part of the trust
   boundary. **These are open sub-decisions**, and they should be settled before
   real user traffic rather than before the owner preview.
-- **Cost and cold starts pull against each other, and SPEC-012 SC-008 is the
-  casualty.** An always-on 80 GB-class GPU VM is a continuing monthly cost for a
-  preview serving one person. Stopping it between sessions removes most of that
-  cost but adds VM boot plus the "tens of seconds" of cold model load named in
-  the Context above — which would blow SC-008's 30-second reply budget on the
-  first question of every session. The choice is explicit: keep it warm and pay,
-  or accept that the first question of a session is slow and say so in SC-008.
-  **Open.**
+- **The VM stays warm. Decided 2026-11-24.** Cost and cold starts pull against
+  each other: stopping the VM between sessions saves most of the money but adds
+  boot plus the "tens of seconds" of model load named in the Context above, which
+  would break SPEC-012 SC-008's 30-second reply budget on the first question of
+  every session. We pay for a continuously running 80 GB-class VM instead, so
+  that the preview is judged on whether the answers are good rather than on
+  whether the first one arrives. `OLLAMA_KEEP_ALIVE` is set so the model stays
+  resident between requests as well.
+
+  This makes the preview's cost a standing monthly figure rather than a usage
+  one — the thing to watch while the audience is a single person, and the first
+  reason to revisit options 1 and 2.
 - The guardrail classifier and embedding models of ADR-0023 (SPEC-021) would run
   on this host too, so its sizing is not only about the answering model.
 - Development does not need the VM: ADR-0009 makes model ids configuration, so a
