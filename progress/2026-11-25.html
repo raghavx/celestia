@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celestia map 2026-11-24e</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: plain, orienting, honest — a map for someone who lost the thread.
+   IDEA: a metro line map — one WhatsApp message riding from "in" to "reply", stopping at each part of the system.
+   PICTURE: the line itself; stations filled (done), ringed (built, not wired), hollow-dashed (not started).
+   COLOUR and TYPE: white paper / night ground; line ink; one saffron accent for "the gap"; Overpass (signage face).
+   LAYOUT: title + line in the first screen; then the gap, modules, decisions, reading order. Line turns vertical on phones. */
+:root{color-scheme:light dark;
+  --bg:light-dark(#fbfaf7,#121218);--ink:light-dark(#1b1b22,#ecebf2);--mute:light-dark(#5d5d6b,#a3a2b3);
+  --rule:light-dark(#e3e1da,#2a2a35);--card:light-dark(#ffffff,#1a1a22);
+  --done:light-dark(#16795f,#3fbf98);--wired:light-dark(#2f5bd3,#7c9cff);--todo:light-dark(#a7a6b2,#5b5a6a);
+  --gap:#e8a317}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Overpass,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px);max-width:1240px;margin:0 auto}
+h1{font-size:clamp(30px,4.4vw,48px);line-height:1.05;font-weight:800;margin:0 0 12px;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:26px;line-height:1.15;margin:0 0 14px;font-weight:800;text-wrap:balance}
+p{max-width:68ch;margin:0 0 12px}
+.lede{font-size:18px;color:var(--mute);max-width:62ch}
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin:22px 0 6px;font-size:14px;color:var(--mute)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.dot{width:16px;height:16px;border-radius:50%;display:inline-block;flex:none}
+.d-done{background:var(--done)}.d-wired{background:var(--card);border:4px solid var(--wired)}
+.d-todo{background:var(--card);border:3px dashed var(--todo)}.d-gap{background:var(--gap)}
+
+/* the line */
+.line{list-style:none;margin:26px 0 0;padding:0;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:0}
+.st{position:relative;padding:0 6px;text-align:center}
+.st::before{content:"";position:absolute;top:15px;left:0;right:0;height:8px;background:var(--seg,var(--todo))}
+.st:first-child::before{left:50%}.st:last-child::before{right:50%}
+.st.done{--seg:var(--done)}.st.wired{--seg:var(--wired)}.st.todo{--seg:repeating-linear-gradient(90deg,var(--todo) 0 10px,transparent 10px 18px)}
+.st .o{position:relative;z-index:1;width:38px;height:38px;margin:0 auto 12px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:800;font-size:14px}
+.st.done .o{background:var(--done);color:#fff}
+.st.wired .o{border:6px solid var(--wired);color:var(--wired)}
+.st.todo .o{border:3px dashed var(--todo);color:var(--mute)}
+.st.gap .o{box-shadow:0 0 0 6px var(--bg),0 0 0 10px var(--gap)}
+.st b{display:block;font-size:15px;line-height:1.2;margin-bottom:4px}
+.st small{display:block;font-size:13px;line-height:1.35;color:var(--mute)}
+.st .spec{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--ink);background:var(--rule);border-radius:4px;padding:1px 6px}
+.under{margin-top:26px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:16px 18px}
+.box h3{margin:0 0 6px;font-size:17px}
+.box p{font-size:15px;margin:0;color:var(--mute)}
+@media(max-width:860px){
+  .line{grid-template-columns:1fr}
+  .st{display:grid;grid-template-columns:52px minmax(0,1fr);text-align:left;padding:0 0 22px;column-gap:12px}
+  .st::before{top:0;bottom:0;left:21px;right:auto;width:8px;height:auto;background:var(--seg,var(--todo))}
+  .st.todo{--seg:repeating-linear-gradient(180deg,var(--todo) 0 10px,transparent 10px 18px)}
+  .st:first-child::before{top:19px;left:21px}.st:last-child::before{bottom:auto;height:19px;right:auto}
+  .st .o{margin:0 0 0 2px;grid-row:span 3}
+  .under{grid-template-columns:1fr}
+}
+
+/* gap band */
+.gapband{background:light-dark(#fff6e2,#241d10);border-block:1px solid light-dark(#f1dca8,#3b2e14)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0 18px;font-weight:600}
+.flow span{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:8px 12px}
+.flow .hot{border:2px solid var(--gap)}
+.flow i{font-style:normal;color:var(--mute)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:var(--rule);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-size:13px;color:var(--mute);font-weight:600}
+td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:14px}
+.tag .dot{width:11px;height:11px}.tag .d-wired{border-width:3px}.tag .d-todo{border-width:2px}
+.cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(20px,4vw,48px)}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+ol.read{padding-left:22px;margin:0}ol.read li{margin-bottom:10px}
+.foot{font-size:13px;color:var(--mute);border-top:1px solid var(--rule)}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--rule)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7em;margin-inline-start:-7.5em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}td.n{text-align:start}}
+@media(prefers-reduced-motion:no-preference){.st.gap .o{animation:pulse 2.4s ease-in-out infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px var(--bg),0 0 0 14px color-mix(in srgb,var(--gap) 35%,transparent)}}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+
+<section class="band">
+  <p style="margin:0 0 10px;font-size:14px;color:var(--mute)"><a href="index.html" style="color:inherit">All snapshots</a> · Snapshot of 25 Nov 2026 — SPEC-012 closed; Stage A’s exit criterion met</p>
+  <h1>A practitioner read ten answers from his own chart and accepted all ten. Stage A is over.</h1>
+  <p class="lede">The thing no test could settle is settled. Ten questions were put to the owner’s own chart on <code>claude-sonnet-5</code> and he marked <b>10 of 10 acceptable as astrology</b> — SC-001’s bar was 9. SC-008 was measured the same way and holds with room: <b>10 of 10 replies inside 30 seconds</b>, median <b>14.3s</b>, slowest 15.3s. SPEC-012 closes at <b>55 of 56 tasks</b> and <b>986 tests green across the reactor</b>; the one task still open is open <em>by decision</em>, scheduled after launch. Three defects were found not by review but by running the thing — including a framework assumption that had made <b>116 passing tests meaningless</b>. Both verdicts are <b>bound to the model that earned them</b>, so a self-hosted launch means asking again.</p>
+  <div class="legend">
+    <span><i class="dot d-done"></i>Built and tested</span>
+    <span><i class="dot d-wired"></i>Spec written, not built</span>
+    <span><i class="dot d-todo"></i>Not started</span>
+    <span><i class="dot d-gap"></i>The gap to close first</span>
+  </div>
+  <ol class="line" id="line"></ol>
+  <div class="under">
+    <div class="box"><h3>Today, end to end</h3><p>Complete, bounded, and now <b>judged</b>: entitlement, one turn permit, the pre-fetched chart, the gate, the model — given only the time the turn has left, driving its own tool loop — the output stage, the clamp, the turn record. A full reading costs three to eight tool calls and lands near <b>14 seconds</b> end to end; a single look-up answers in four. Half the 30-second budget is spare.</p></div>
+    <div class="box"><h3>What changed since the last snapshot</h3><p>Four commits, and <b>every one of them was written because something was run rather than reviewed</b>. The tool loop moved into our code (Spring AI does not run one), thinking was disabled as a documented workaround, a decline became something the model must <em>earn</em> by searching first, and the advisory stopped taking the worst class from every house a tool happened to sweep. Then the two measurements that close Stage A.</p></div>
+  </div>
+</section>
+
+<section class="gapband"><div class="band">
+  <h2>Stage A is finished. What it licensed, and what it did not</h2>
+  <p>Stage A ended with one real answer to the owner on WhatsApp, grounded in the toolkit but speaking as the astrologer and never naming its source (ADR-0025). That answer now exists, ten times over, and a practitioner has accepted all ten.</p>
+  <div class="flow">
+    <span>010 Toolkit ✓</span><i>→</i><span>011 Guardrail ✓</span><i>→</i><span>012 Agent ✓</span><i>→</i><span>SC-001 10/10 ✓</span><i>→</i><span class="hot">017 Onboarding</span>
+  </div>
+
+  <h3 style="margin-top:26px">The verdict, and the fine print on it</h3>
+  <p><b>10 of 10 acceptable as astrology</b>, none rejected, on the owner’s own chart — marriage timing and partner, career direction and change, money, health, property, education, a gemstone question and a horary number. The bar was 9. This is the precedent for every Stage B topic group: the prompt, the eleven-tool surface and the reference swap produce readings a practitioner will stand behind.</p>
+  <p><b>It is bound to <code>claude-sonnet-5</code> and to nothing else.</b> Principle III (v3.0.0) says a correctness verdict does not transfer between models, so when the preview moves to a self-hosted model at launch, both this verdict and the latency figure have to be earned again. That is written next to each of them in the spec rather than left to anyone’s memory. A second caveat, smaller and real: <b>Ghazipur’s coordinates were entered by hand</b> (25.58°N, 83.58°E) because no geocoder is wired, so the chart is accurate to about a town’s width — fine for judging method and tone, not for anything that turns on an exact cusp boundary.</p>
+
+  <h3 style="margin-top:26px">Thirty seconds holds, with half the budget spare</h3>
+  <p>SC-008 was measured end to end through the whole guarded path, not around the model call: <b>10 of 10 answers inside 30 seconds, median 14.3s, slowest 15.3s, fastest 3.9s</b>. The spread between slowest and median is one second — a system bounded by tool rounds rather than by a long tail. The harness times each question itself, so the figure is reproducible rather than a stopwatch reading, and it is <b>printed, not asserted</b>: this is a shared API over a home connection, and failing a build on a slow afternoon only teaches everyone to ignore a red bar. No amendment to the criterion was needed. Nothing measured before the turn bound was fixed means anything — one question had taken <b>24 minutes</b>.</p>
+
+  <h2 style="margin-top:30px">Three defects that only running it could find</h2>
+  <p>The last snapshot listed five. These three are worse, because two of them had a full green test suite sitting on top of them:</p>
+  <ol class="read">
+    <li><b>Spring AI does not run the tool loop, and the stub had pretended it did.</b> The framework returns a tool-call response and leaves the round to the caller. The test stub <em>emulated</em> a loop the framework never provided, so <b>116 tests passed over code that could not have worked in production at all</b>. The loop now lives in the answerer, which is also the only place the round cap and the deadline can be <em>enforced</em> rather than hoped for. A stub must be wrong in the same direction as reality or it is worse than no stub.</li>
+    <li><b>With thinking enabled, the reply is invisible.</b> Finish reason <code>end_turn</code>, <b>1,877 output tokens, zero readable characters</b>: Spring AI 2.0.1 puts the content in a package-private message type and neither the text nor the tool calls surface. No public accessor exists. Thinking is off as a <b>documented workaround</b> with the evidence attached, not as a preference — and part of the one remaining open task is the cost of that.</li>
+    <li><b>A decline nobody had to earn.</b> Two answerable questions came back “I have no basis” after <b>zero tool calls</b> — a gemstone question, though the gems sheet is answerable at manifest row 45, and a horary number, though the mindset table needs nothing but the number. The prompt told the model to decline when “the tools give you nothing” and <b>never said to look first</b>, so a decline could be an opening assumption rather than a finding. It now has to be earned by a search. A false decline is as damaging as an invention and much harder to see: it looks like modesty.</li>
+  </ol>
+
+  <h2 style="margin-top:30px">The advisory sentence: a fix, a measurement, and an accepted cost</h2>
+  <p>A marriage reading ended with <em>“consult a qualified doctor”</em>; an education reading ended with <em>“please consult a doctor about any health concern”</em>. <b>Eight of the ten carried a health or longevity tail</b>, mostly about something the querent never asked.</p>
+  <p>Half of that was a real divergence from the requirement. SPEC-011 FR-014 says the most severe class <em>used</em>, and the code read it as the class <em>returned</em> — and <code>getChartPromises</code> with no house returns <b>all twelve</b>, so the 8th house’s longevity matters attached themselves to any question asked broadly. Sensitivity is now attributed per house and counts only for the houses the model asked about by number; content with no house behind it still always counts, because asking for it <em>is</em> the evidence the answer is about it. FR-014 was amended to define the word that had been load-bearing while undefined.</p>
+  <p><b>And then the re-run came back eight of ten again.</b> The reason is structural to KP: the Lagna is read in every judgement, and <b>house 1 alone carries 12 longevity rules and 35 health rules</b> — among them <em>Strong Lagna</em> and <em>Long life (over 65 Yrs) for normal people</em>. A chart that promises a long life is what triggers the caution about death. The remaining cause is how those matters are classified in the licensed workbook, not how the code reads them.</p>
+  <p><b>Decided: accepted.</b> The tail stays — conservative, and correct in the narrow sense that the content it names really was among the results. Recorded as a <b>known, measured, accepted cost</b> rather than an open defect, with a pointer to the import for whoever reconsiders it. The plumbing fix stands on its own; accepting the tail accepts the residue, not the bug.</p>
+
+  <h2 style="margin-top:30px">What SPEC-012 measures, now that it has run</h2>
+  <table class="stack"><thead><tr><th>Criterion</th><th>Target</th><th>Measured</th></tr></thead><tbody id="gc"></tbody></table>
+
+  <h2 style="margin-top:30px">What waits on you, not on code</h2>
+  <p><b>Nothing in SPEC-012.</b> Its last two human tasks were given today, and the one task left open is open because you chose to defer it.</p>
+  <p><b>T047 — deferred to post-launch, by decision.</b> “Which lottery numbers should I pick?” takes the general out-of-scope redirect, though the toolkit does judge speculation. One allow-listed reader who knows the product’s subject can read past that; it becomes real when the preview widens, because then a reader cannot tell “outside astrology” from “we did not look”. It is labelled as deferred in the task list so a later analyze pass reads it as a choice. One trap is recorded with it: the eval set marks that question <em>no-basis</em> while the task calls the redirect a defect, so <b>the two artifacts contradict each other</b> — resolve them together or you only move which one is wrong.</p>
+  <p><b>SPEC-010 T048</b> — the KP-practitioner review of 10 readings per golden chart (SC-005), waiting in <code>core/target/promise-readings/</code>: 792 promised, 29 condition-to-check, 887 partly indicated. This is the same kind of reading you just did, on a different artifact.</p>
+  <p><b>SPEC-011 T043</b> — read the 15 in-scope questions as a user would really type them. Still the only task in that feature code cannot do.</p>
+  <p><b>Rotate the API key.</b> It was pasted into a session transcript to get today’s runs going. It lives in <code>~/.celestia-eval.env</code> at mode 600 and is only ever sourced, never echoed — but a key that has been in a transcript should not stay valid.</p>
+
+  <h2 style="margin-top:30px">What the import actually produced</h2>
+  <table class="stack"><thead><tr><th>Criterion</th><th>Target</th><th>Verified</th></tr></thead><tbody id="sc"></tbody></table>
+  <h2 style="margin-top:30px">The re-ordered roadmap</h2>
+  <table class="stack"><thead><tr><th>Stage</th><th>Specs</th><th>Outcome</th></tr></thead><tbody id="stages"></tbody></table>
+</div></section>
+
+<section class="band cols">
+  <div>
+    <h2>Code by module</h2>
+    <table class="stack">
+      <thead><tr><th>Module</th><th>What it does</th><th>Status</th><th class="n">Main / test lines</th></tr></thead>
+      <tbody id="mods"></tbody>
+    </table>
+  </div>
+  <div>
+    <h2>Read these five, in order</h2>
+    <ol class="read">
+      <li><b>.specify/memory/constitution.md</b> — v3.0.0; read Principles III, V and X first. III is why today's verdict does not travel to another model. X says plainly that the toolkit is internal, never named to the user (ADR-0025); and v2.2.0 defined "self-hosted" as <em>we run the weights</em>, which is what makes renting a GPU lawful rather than merely convenient (ADR-0010).</li>
+      <li><b>core/README.md</b> — one table listing every engine call. This is the part that works.</li>
+      <li><b>agent/…/channel/GuardedReplyHandler.java</b> — the reply path, in the order the requirement fixes: entitlement, permit, pre-fetch, gate, model, output stage, clamp, record. The order <em>is</em> the requirement.</li>
+      <li><b>core/src/main/java/com/celestia/core/toolkit/PromiseEvaluator.java</b> — the 40 lines that turn "the 7th sub lord connects to 2, 7, 11" into matched toolkit rules. This is why Constitution IV holds.</li>
+      <li><b>specs/012-owner-preview-agent/spec.md</b> — 33 requirements and 13 criteria; read FR-013a–d (why the model never sees a sheet id) and the Clarifications, which record a decision that was reversed the same day and what the discarded option proved. Then <b>research.md §12</b>, for the three SPEC-011 constants <code>agent</code> cannot name.</li>
+    </ol>
+    <h2 style="margin-top:28px">Decisions waiting on you</h2>
+    <table class="stack">
+      <thead><tr><th>ADR</th><th>Question</th><th>Blocks</th></tr></thead>
+      <tbody id="adrs"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="band foot">
+  <p>Sources: the repo at <code>~/celestia</code>, branch <code>012-owner-preview-agent</code> — four commits since the last snapshot: <code>e3c6a14</code> (the tool loop is ours to run, and thinking must be off on this provider), <code>fb7a199</code> (a decline must be earned by a search), <code>adb7ed8</code> (the advisory follows the houses asked about) and <code>72c6213</code> (SC-008 measured), plus <code>2bf5649</code> recording the verdict. Measurements are from <code>./mvnw -pl agent -am verify</code> with a container runtime up: <b>986 tests across the reactor, zero failures</b>, Spotless clean, all four ArchUnit suites included. <b>SC-001 and SC-008 are from live runs against <code>claude-sonnet-5</code></b> on the owner's own chart, under Constitution <b>v3.0.0</b>'s one-person exception and ADR-0026's six conditions; the thirteen documents the verdict was given on are outside the repository, since they are a reading of a real person's chart. Known and not <code>agent</code>'s: one flaky test in <code>channel-whatsapp</code>. The licensed workbook is not in the repository; only its imported content is.</p>
+</section>
+
+<script>
+{
+const st=[
+ ["1","WhatsApp in","Webhook, signature check, de-dup, inbox queue, worker","done","009"],
+ ["2","Who is this?","Phone → user record exists; consent + birth-detail questions don't — <b>the next thing to build</b>","todo gap","017"],
+ ["3","Place & time","Birth place → lat/lon, historical time zone → UTC","done","007"],
+ ["4","Allowed?","Entitlement before the gate: an allow-list of one, failing closed — paid plans later","done","012 · 018–020"],
+ ["5","On topic?","Injection/jailbreak rules, topic gate, advisory sentences, leak scan, crisis line — unchanged by SPEC-012, and re-proved against it","done","011"],
+ ["6","Agent (LLM)","Prompt + 11 tools + reference swap + turn record, driving its own tool loop. <b>Judged: 10 of 10 accepted as astrology</b>, 14.3s median","done","012"],
+ ["7","KP engine","Chart, cusps, sub lords, significators, RPs, dasha, horary, daily","done","001–006"],
+ ["8","Toolkit","75 sheets, 2,001 rules matched to the chart in code, 11 keyed look-ups, 72 tests","done","010"],
+ ["9","Reply out","Outbox, Graph API sender, 24-h window templates — now clamped to one message at a sentence boundary","done","009"]];
+document.getElementById('line').innerHTML=st.map(([n,t,d,c,s])=>`<li class="st ${c}"><span class="o">${n}</span><b>${t}</b><small>${d}</small><span class="spec">SPEC-${s}</span></li>`).join('');
+
+const tag={done:['d-done','Done'],wired:['d-wired','Spec only'],todo:['d-todo','Empty']};
+const stages=[
+ ["Done","001–009 · 010","Engine, geo, database, WhatsApp plumbing (echo reply), and the toolkit knowledge base"],
+ ["A — the toolkit answers the owner","<s>010 toolkit</s> · <s>011 guardrail</s> · <s>012 agent — built, bounded</s> · <b>a retention check → T041</b>","The owner gets a toolkit-grounded answer on WhatsApp, in the agent's own voice. Everything code can do is done; what is missing is a judged answer"],
+ ["B — grow the agent","013 natal · 014 timing &amp; methods · 015 horary &amp; others' charts · 016 remedies, Vastu, numerology","Each topic group passes a practitioner review (≥ 9/10)"],
+ ["C — open to the public","017 onboarding · 018–020 plans &amp; payments · 021 guardrail hardening · 022 ops · 023 daily push","Sign-up, payment, safe public launch"]];
+const sc=[
+ ["SC-001 every sheet stored","75 of 75","75 sheets, none empty"],
+ ["SC-002 structured promise rules","&ge; 2,000","<b>2,001</b>, each traceable to its sheet and row"],
+ ["SC-003 horary agrees with the engine","249 of 249","249/249, lord for lord"],
+ ["SC-004 star look-ups total","108 of 108","108/108 in both tables, no overlaps (+72 friendship pairs, 9 planets, 12 signs)"],
+ ["SC-005 practitioner review","&ge; 9 of 10 per chart","<b>waiting on you</b> — snapshots generated"],
+ ["SC-006 re-import is a no-op","zero differences","two runs byte-identical"],
+ ["SC-007 reading speed","well under 1 s","&lt; 50 ms mean for all 12 houses"]];
+const gc=[
+ ["SC-001 practitioner judges 9 of 10","&ge; 9 of 10 acceptable as astrology","<b>MET — 10 of 10</b>, none rejected, on the owner's own chart; binds to <code>claude-sonnet-5</code> alone"],
+ ["SC-002 every judgement grounded","100% behind a <i>toolkit</i> call","<b>verified on the real model</b> — 1 to 8 toolkit calls per answer, engine calls excluded"],
+ ["SC-003 no reply names a source","zero, eval set + adversarial corpus","<b>verified</b> — zero across thirteen real answers; the corpus half follows from SC-006, where no model is called"],
+ ["SC-004 nothing withheld","zero withheld replies","<b>verified</b> — nothing withheld across the thirteen-question set"],
+ ["SC-005 strangers get nothing","100% fixed message, zero model calls","<b>verified</b> — entitlement runs before the gate"],
+ ["SC-006 the guardrail did not regress","zero invocations, real wiring","<b>verified</b> — SPEC-011's corpus replayed through the real path"],
+ ["SC-008 a reply within 30 seconds","9 of 10 end to end","<b>MET — 10 of 10 inside 30s</b>, median 14.3s, slowest 15.3s; measured on the API, not ADR-0010's VM"],
+ ["SC-009 one WhatsApp message","&le; 4,096 chars, never mid-sentence","<b>verified</b> — longest real reply 2,828 of 4,096; trimmed at a sentence boundary, advisory kept"],
+ ["SC-010 no toolkit string reaches the model","zero, checked on the request","<b>verified</b> — 73 sources behind references, asserted on what the model received"],
+ ["SC-013 \"forget me\" leaves nothing","zero turn records, purge on age","<b>verified</b> against a real MySQL"]];
+document.getElementById('gc').innerHTML=gc.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join('');
+document.getElementById('sc').innerHTML=sc.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join('');
+document.getElementById('stages').innerHTML=stages.map(([a,b,c])=>`<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join('');
+const mods=[
+ ["ephemeris","Swiss Ephemeris wrapper: planet positions, houses, sunrise","done",1061,603],
+ ["core","KP rules: lords, chart, significators, dasha, horary, prediction, <b>toolkit</b>","done",4046,6603],
+ ["geo","Geocoding + time-zone resolution","done",937,1021],
+ ["agent","Spring Boot app: persistence, WhatsApp worker, <b>entitlement + the agent + the turn record + the provider seam + the eval harness</b>","done",6074,5457],
+ ["channel-whatsapp","WhatsApp payload types","done",659,463],
+ ["guardrail","Gate + output stage: 5 hostile families, 2,397 derived terms, 7 leak families — <b>unchanged by SPEC-012, as planned</b>","done",2166,1434],
+ ["billing","Plans & entitlements (placeholder)","todo",7,0],
+ ["payments-razorpay","Payment links & webhook (placeholder)","todo",7,0]];
+document.getElementById('mods').innerHTML=mods.map(([m,d,s,a,b])=>`<tr><td><code>${m}</code></td><td>${d}</td><td><span class="tag"><i class="dot ${tag[s][0]}"></i>${tag[s][1]}</span></td><td class="n">${a.toLocaleString()} / ${b.toLocaleString()}</td></tr>`).join('');
+
+const adrs=[
+ ["—","<b>Rotate the Claude API key</b> — it was pasted into a session transcript; stored at <code>~/.celestia-eval.env</code> (mode 600) and only ever sourced","Nothing, but it should not stay valid"],
+ ["—","T047: the lottery redirect — <b>deferred by decision</b>, not overlooked. The eval set and the task contradict each other; resolve both together","Widening the preview beyond one reader"],
+ ["—","A flaky WhatsApp sender test (random-port collision, not stub leakage) — SPEC-009's area","CI, intermittently"],
+ ["0010","Rent the GPU VM — <b>deferred, not superseded</b>: required again when a second number is allow-listed or sign-up opens","Public launch — and re-earning <b>both</b> SC-001 and SC-008 there"],
+ ["0024","Revisit: suicide-related rules shown like other rules (your Q2: B)","Public launch"],
+ ["—","T048: review 10 promise readings per golden chart (SC-005)","Calling SPEC-010 done"],
+ ["—","T043: read the 15 in-scope corpus questions as a user would type them","Trusting the gate not to refuse real questions"],
+ ["—","Re-enable Hindi/Hinglish (drafted work parked in <code>deferred-multilingual/</code>)","Public traffic — a Hinglish message is refused, and a Hinglish crisis message gets no helpline"],
+ ["0011 · 0012","Meta Business account, WhatsApp number, templates","Going live on WhatsApp"],
+ ["0013","Geocoder API key (OpenCage)","Real birth places"],
+ ["0017 · 0020","Billing model, grace period","Payments"],
+ ["0022","Terms / privacy / refund pages","Razorpay live, launch"],
+ ["0001","Swiss Ephemeris licence (buy at go-live)","Launch"]];
+document.getElementById('adrs').innerHTML=adrs.map(([a,q,b])=>`<tr><td style="white-space:nowrap">${a}</td><td>${q}</td><td>${b}</td></tr>`).join('');
+}
+</script>
+</body>
+</html>
