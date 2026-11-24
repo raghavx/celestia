@@ -1,4 +1,35 @@
 <!--
+Sync Impact Report — 2026-11-24
+Version change: 2.1.0 → 2.2.0 (MINOR: an ambiguous term is defined and new
+obligations are added; nothing is removed, and what the term protected is
+preserved and now stated outright)
+Modified sections:
+  - Technology Constraints, **LLM**: "self-hosted" is defined as *we run the
+    weights*, not *the machine is ours*. The substance it was protecting — no
+    prompt or user data to a third-party inference API, model ids ours and
+    configurable — is unchanged and now explicit. Rented infrastructure we
+    control is permitted, and carries three new obligations: encrypted transport,
+    a region chosen for the data, and no prompt logging on the host.
+Added sections: none
+Removed sections: none
+Rationale: ADR-0010 accepted option 3 (a rented cloud GPU VM) on 2026-11-24
+  because it needs no procurement and so does not gate Phase 6. That strained the
+  letter of this line while satisfying its purpose, and the ADR recorded the
+  amendment as outstanding rather than reinterpreting the constitution as a side
+  effect of a hosting choice. This is that amendment. The project had in fact
+  carried both readings — ADR-0009's context said "no external API" (the API
+  reading) while PROJECT_PLAN D10 said "over the LAN" (the premises reading) —
+  so the ambiguity was real and is now settled in favour of the one that names a
+  risk rather than a location.
+Scope note: the term is defined here and that definition governs its use
+  elsewhere, including the preamble, which is left as written.
+Templates: no principle-specific content in plan/spec/tasks templates ✅.
+Propagated: PROJECT_PLAN.md (overview, D9, the technology summary) and README.md
+  updated the same day.
+Decision ref: ADR-0010 (docs/adr/0010-ollama-hosting.md), accepted 2026-11-24
+-->
+
+<!--
 Sync Impact Report — 2026-11-22 (second amendment this date)
 Version change: 2.0.0 → 2.1.0 (MINOR: new, previously-unstated guidance added to a
 NON-NEGOTIABLE principle and the preamble; no existing requirement removed or weakened)
@@ -165,9 +196,18 @@ credentials are separated per environment and never committed.
 - **Language / build**: Java 25 LTS; Maven multi-module with the Maven Wrapper.
 - **Framework**: Spring Boot 4.1.x (Spring Framework 7), Spring MVC, Spring Data
   JPA, Spring Security — only in the `agent` module and the adapter modules.
-- **LLM**: Ollama, self-hosted; primary model Llama 4 (`llama4:scout`), with a
-  configured fallback tool-calling model and a small guardrail classifier model.
-  Integrated via Spring AI 2.0.x `OllamaChatModel`.
+- **LLM**: Ollama, **self-hosted — which means we run the weights, not that the
+  machine stands on our premises.** What that protects, and what no deployment
+  may give up: **no prompt and no user data reaches a third-party inference
+  API**, and the model is ours to name, pin and swap in configuration. The
+  inference host may therefore be our own hardware or infrastructure we rent and
+  control (ADR-0010).
+  **Where it is rented it is a processor, not part of the trust boundary**, and
+  three obligations follow: transport to it is encrypted; its region is chosen
+  for the personal data it will see; and it does not log prompts. Primary model
+  Llama 4 (`llama4:scout`), with a configured fallback tool-calling model and a
+  small guardrail classifier model. Integrated via Spring AI 2.0.x
+  `OllamaChatModel`.
 - **Ephemeris**: Swiss Ephemeris Java port. Its licence (AGPL vs. commercial) is
   an architecture decision recorded as an ADR before Phase 1.
 - **Toolkit data**: the licensed workbook is not committed. Its imported content is
@@ -205,4 +245,4 @@ compliance with these principles; deviations must be justified in writing in the
 PR description and approved by a maintainer, or the PR is not merged. Added
 complexity carries the burden of proof.
 
-**Version**: 2.1.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-11-22
+**Version**: 2.2.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-11-24

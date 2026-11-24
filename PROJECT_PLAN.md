@@ -3,7 +3,9 @@
 **Goal:** A conversational agent that answers Krishnamurti Paddhati (KP) astrology
 questions over **WhatsApp**. The user chats with the agent from WhatsApp; the message
 arrives at the backend via the WhatsApp webhook, is processed by an LLM
-(**self-hosted Llama 4 via Ollama**) that orchestrates a deterministic KP calculation
+(**self-hosted Llama 4 via Ollama** — self-hosted meaning we run the weights, on
+our own or on rented infrastructure we control; never a third-party inference
+API) that orchestrates a deterministic KP calculation
 engine as tools, and the reply is sent back to the same WhatsApp user. The user's
 **phone number is the identity**. After onboarding, the user must **subscribe to a
 configurable astrology plan** (shown and selected in WhatsApp) and pay via a
@@ -97,7 +99,7 @@ development (GitHub Spec Kit), Spring Boot 4.1.x, MySQL 8.x.
 | D6 | **Build tool** | **Maven multi-module** + Maven Wrapper (`./mvnw`). System Maven 3.6.3 is too old; Spring Boot 4 needs Maven ≥ 3.9. | Reproducible builds. |
 | D7 | **JDK** | Java 25 LTS (installed) via Maven toolchains. Spring Boot 4 baseline is Java 17. | — |
 | D8 | **Local MySQL for tests** | Docker not installed here → install **Colima + Docker CLI** for Testcontainers; alt. local MySQL 8.4 + CI service container. | Testcontainers is the clean path. |
-| D9 | **LLM runtime** | **Resolved 2026-11-24 (ADR-0009, option 1).** **Ollama**, self-hosted. Primary model **Llama 4** (`llama4:scout` ≈ 109B MoE / 17B active — fits on a single 80GB GPU or 64GB+ unified memory at 4-bit; `llama4:maverick` needs a multi-GPU box). Keep a **fallback tool-calling model** config (e.g. `llama3.3:70b` or `qwen3` — well-proven for function calling) because Llama 4 tool-calling reliability in Ollama is still maturing. | Determines hardware, latency, and how much you must lean on deterministic flows vs. LLM tool calls. |
+| D9 | **LLM runtime** | **Resolved 2026-11-24 (ADR-0009, option 1).** **Ollama**, self-hosted — in the sense the constitution now defines (we run the weights; no third-party inference API), with hosting settled by D10. Primary model **Llama 4** (`llama4:scout` ≈ 109B MoE / 17B active — fits on a single 80GB GPU or 64GB+ unified memory at 4-bit; `llama4:maverick` needs a multi-GPU box). Keep a **fallback tool-calling model** config (e.g. `llama3.3:70b` or `qwen3` — well-proven for function calling) because Llama 4 tool-calling reliability in Ollama is still maturing. | Determines hardware, latency, and how much you must lean on deterministic flows vs. LLM tool calls. |
 | D10 | **Ollama hardware / deployment** | **Resolved 2026-11-24 (ADR-0010, option 3): a rented cloud GPU VM** runs `ollama serve`, reached via `celestia.llm.base-url`. Chosen because it needs no procurement and so does not gate Phase 6. Warm-model keep-alive on, hard concurrency cap in the application, health check trips the fallback model. **The VM stays warm** (decided 2026-11-24) so SPEC-012 SC-008's 30-second budget holds on the first question of a session; the cost is therefore a standing monthly figure. Open sub-decision: provider and region (Constitution VII — personal data now leaves the premises). | Llama 4 is heavy; cold starts and OOM are the main ops risks. "Self-hosted" now means we run the weights, not that the machine is ours — the constitution's wording still needs a deliberate amendment. |
 | D11 | **WhatsApp provider** | **Meta WhatsApp Business Cloud API** directly (webhooks + Graph API send). Alternative: a BSP (Twilio / 360dialog) if you want them to own number registration and compliance. Abstract behind `MessagingChannel` either way. | Cloud API is free-tier friendly and first-party; BSP trades money for less setup. |
 | D12 | **WhatsApp number + templates** | Register a WhatsApp Business number; get **message templates approved** for anything sent outside the 24-hour customer-service window (re-engagement, daily prediction push). Inside 24h of the user's last message, free-form replies are allowed. | Meta blocks non-template messages outside the 24h window. |
@@ -487,7 +489,7 @@ Per spec: `/speckit.specify` → `/speckit.clarify` → `/speckit.plan` →
 |---------|--------|
 | Language / build | Java 25 LTS, Maven multi-module + wrapper |
 | Framework | Spring Boot 4.1.x (Spring Framework 7), Spring MVC, Spring Data JPA, Spring Security |
-| LLM runtime | **Ollama** (self-hosted), Spring AI 2.0 `OllamaChatModel` |
+| LLM runtime | **Ollama** (self-hosted: our weights, rented host permitted — constitution v2.2.0), Spring AI 2.0 `OllamaChatModel` |
 | Primary model | **Llama 4** (`llama4:scout`); fallback `llama3.3:70b` / `qwen3` for reliable tool calling |
 | Guardrail | `guardrail` module; deterministic rules + small classifier model (`llama3.2:3b`) or embedding similarity; adversarial corpus as a CI gate |
 | Ephemeris | Swiss Ephemeris Java port (AGPL — see D1), `.se1` data in `ephe/` |

@@ -109,7 +109,10 @@ model and the rest run on a stub.
 
 ## Constitution Check
 
-*GATE: checked before Phase 0 and re-checked after Phase 1 (v2.1.0).*
+*GATE: checked before Phase 0 and re-checked after Phase 1. Against **v2.2.0**,
+whose amendment of the "self-hosted" constraint is what makes this feature's own
+hosting decision lawful rather than merely recorded — see ADR-0010 and the Sync
+Impact Report for 2026-11-24.*
 
 | Principle | How this plan complies | Status |
 |-----------|------------------------|--------|
@@ -128,10 +131,14 @@ model and the rest run on a stub.
 satisfy, and the plan does not pretend otherwise. Accepting ADR-0010 option 3
 moved inference off the premises, so birth data, names and question text now
 travel to a machine in someone else's datacentre. For an owner preview of one
-known person that is a defensible exposure; for public traffic it is not, until
-the provider, the region, prompt-logging and the processor relationship are
-settled. Those are recorded as open in ADR-0010 with a due date of "before real
-traffic". **No violation to track here, but it is the reason this feature must
+known person that is a defensible exposure; for public traffic it is not.
+
+**Three of those obligations are now constitutional, not aspirational.**
+Constitution v2.2.0 defines "self-hosted" as *we run the weights* and, where the
+host is rented, requires encrypted transport, a region chosen for the personal
+data it will see, and no prompt logging on the host. What remains open in
+ADR-0010 is the choice of provider and region — a decision, not a question of
+whether it matters. **No violation to track here, but it is the reason this feature must
 not quietly become the public launch.**
 
 No violations, so no Complexity Tracking entries.
@@ -241,7 +248,7 @@ flagging `EchoReplyHandler` (§9), and what is deliberately deferred (§10).
 
 ### Post-design Constitution re-check
 
-Re-checked against v2.1.0 after the design above. All gates still pass, with
+Re-checked against v2.2.0 after the design above. All gates still pass, with
 four points worth stating explicitly:
 
 - **V:** the amended ArchUnit rule names two classes — `GuardedPipeline` and

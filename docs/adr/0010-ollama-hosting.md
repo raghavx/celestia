@@ -42,7 +42,12 @@ purchase. Concurrency for the preview is one user.
   ours, and the runtime is unchanged — but the wording is strained. **Amending
   that line is a separate, deliberate act** under the constitution's Governance
   section (dated ADR, version bump, PROJECT_PLAN update). This ADR is the dated
-  record; the amendment is still outstanding.
+  record, and **the amendment was made the same day: constitution v2.1.0 →
+  v2.2.0** defines "self-hosted" as *we run the weights*, permits a rented host
+  we control, and attaches three obligations to one — encrypted transport, a
+  region chosen for the personal data it will see, and no prompt logging. The
+  first two open sub-decisions below are therefore now constitutional
+  requirements rather than good intentions.
 - **PROJECT_PLAN D10 said "over the LAN" and "dedicated GPU host (or Apple
   Silicon 64GB+)".** Updated on the same date to match this decision.
 

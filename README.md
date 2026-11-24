@@ -1,6 +1,8 @@
 # Celestia
 
 A WhatsApp-based Krishnamurti Paddhati (KP) astrology agent. A self-hosted LLM
+— our own weights on infrastructure we control, never a third-party inference
+API —
 (Llama 4 via Ollama) answers questions about a user's natal chart by orchestrating
 a deterministic KP calculation engine, gated by a paid subscription.
 

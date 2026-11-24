@@ -500,11 +500,14 @@ thing code cannot judge is sitting in a folder waiting for a person.
       for the two failure modes quickstart.md names: a confident answer resting
       on a thin basis, and a decline that should have been an answer. No test can
       do this, and the verdict is the precedent for every Stage B topic group
-- [ ] T042 **DECISION — owner only**: amend the constitution's "Ollama,
+- [X] T042 **DECISION — owner only**: amend the constitution's "Ollama,
       self-hosted" wording, which ADR-0010 option 3 strained and left
-      outstanding. Governance requires a dated ADR (ADR-0010 is it), a version
-      bump and a matching `PROJECT_PLAN.md` update. Not blocking this feature;
-      blocking an honest claim that the constitution describes the system
+      outstanding. **Done 2026-11-24: constitution v2.1.0 → v2.2.0** defines the
+      term as *we run the weights*, permits a rented host we control, and
+      attaches three obligations to one — encrypted transport, a region chosen
+      for the data, no prompt logging. Propagated to `PROJECT_PLAN.md` (overview,
+      D9, technology summary) and `README.md`; ADR-0010 updated to record that
+      its outstanding item is closed
 
 ---
 
