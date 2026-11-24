@@ -19,8 +19,9 @@ Wire the model in, between two halves of a path that already exist.
   consistent (FR-010a–c).
 - **The answerer.** `OwnerAnswerer` implements SPEC-011's `Answerer` over Spring
   AI's `OllamaChatModel`, and `GuardedPipeline` is the only thing that calls it.
-  The single-path ArchUnit rule is amended to name exactly one more class rather
-  than loosened to a package — the tightest form that stays true once a model
+  The single-path ArchUnit rule splits in two rather than being loosened to a
+  package: only two classes may *invoke* a chat model, and only `agent.llm` may
+  *depend on* Spring AI at all — the tightest pair that stays true once a model
   exists (research §2).
 - **The model sees no toolkit strings.** Tool results pass through the
   application, which swaps each `{sheetId, sheetTitle, row}` for a per-turn
@@ -50,19 +51,21 @@ the only new dependency is the Spring AI starter.
 
 **Storage**: MySQL via the existing stores — `BirthDataStore` for the owner's
 seeded birth data, `ChartCacheService.natalChart(userId)` for the pre-fetched
-chart. One new table, `owner_turn_record` (Flyway `V6__`), holding the decision,
+chart. One new table, `owner_turn_record` (Flyway `V8__`), holding the decision,
 the tool calls and the resolved sources, reached through a new `TurnRecordStore`
 in `agent.persistence.store` with its entity in `agent.persistence.entity` —
 the layering SPEC-008 established and `PersistenceArchitectureTest` guards.
 
-**It holds a message body, so it is deleted.** The question is personal data
-under Constitution VII: `owner_turn_record` joins the rows SPEC-008 FR-010's
+**It holds message bodies, so it is deleted.** The record keeps two — the
+question and the delivered reply, because a practitioner cannot review an answer
+without knowing what was asked and what was received — and both are personal
+data under Constitution VII: `owner_turn_record` joins the rows SPEC-008 FR-010's
 "forget me" removes (FR-020a), and records are purged past a configurable
 retention age, default 90 days, where `0` means never purge on age without ever
-disabling the deletion obligation (FR-020b). The question column is shaped so the
-deferred column-encryption pass can reach it without a schema change (FR-020c),
-the position SPEC-008 took for its own PII columns. The reference→source mapping
-is per-turn and dies with the turn.
+disabling the deletion obligation (FR-020b). **Both** columns are shaped so the
+deferred column-encryption pass can reach them without a schema change
+(FR-020c), the position SPEC-008 took for its own PII columns. The
+reference→source mapping is per-turn and dies with the turn.
 
 **Testing**: JUnit 5 + AssertJ + Mockito, as `agent` already uses. **Three tiers,
 and knowing which proves what is the point:**
@@ -70,7 +73,7 @@ and knowing which proves what is the point:**
 1. **Stub `ChatModel`, default build** — the wiring, the reference swap,
    statelessness, the budgets, the permit, the leak scan. **This is where
    correctness lives**, and it needs no Ollama at all.
-2. **Local Ollama + smallest Qwen, by hand** — the round trip only: the client
+2. **Local Ollama + the smallest tool-capable model, by hand** — the round trip only: the client
    connects, a tool call is parsed, the output stage decorates, a reply comes
    back. A model this small will emit malformed tool JSON often, which exercises
    ADR-0009's fallback path as the normal path.
@@ -86,7 +89,7 @@ accident** (ADR-0009, ADR-0010):
 | | Production | Development |
 |---|---|---|
 | Host | warm rented GPU VM (AWS or OCI), `ollama serve` we administer | `ollama serve` on the dev machine — 2019 Intel MacBook Pro, **CPU-only** |
-| Model | Llama 4 Scout + fallback | the smallest Qwen that reports the `tools` capability |
+| Model | Llama 4 Scout + fallback | the smallest model that reports the `tools` capability — provisionally `qwen2.5:0.5b`, which T043 verifies and may replace |
 | Keep-alive | long — never pay the cold load | short — it is a laptop's RAM |
 | Proves | the answers (SC-001, SC-008) | the round trip, and nothing about answer quality |
 
@@ -108,8 +111,8 @@ model's own latency is the only variable.
 - Constitution IV: the model never calculates. Every number comes from a tool
   result; tool arguments never carry `userId`, coordinates or a clock.
 - Constitution V (NON-NEGOTIABLE): one route. `GuardedPipeline` calls the
-  answerer; the ArchUnit rule names the only two classes that may touch a
-  chat-model type.
+  answerer; two ArchUnit rules name the only two classes that may *invoke* a
+  chat model, and confine Spring AI types to `agent.llm`.
 - Constitution VII: personal data now crosses the public internet to the
   inference host (ADR-0010). Transport encryption to that host is required; its
   provider and region are an open sub-decision recorded in ADR-0010, due before
@@ -124,9 +127,9 @@ model's own latency is the only variable.
 entitlement and before the gate; one prompt; two tool adapters exposing the five
 toolkit tools plus the engine tools; one new table reached through an
 entity/repository/store trio, with a "forget me" delete and a scheduled purge on
-a 90-day default; ten eval questions; one amended ArchUnit rule; one deleted
-class (`EchoReplyHandler`). Eleven new test classes, of which one needs a real
-model and the rest run on a stub.
+a 90-day default; ten eval questions; two ArchUnit rules replacing one; one deleted
+class (`EchoReplyHandler`). Twelve new test classes plus the eval harness, which
+is the only one needing a real model; the other twelve run on a stub.
 
 ## Constitution Check
 
@@ -141,10 +144,10 @@ Impact Report for 2026-11-24.*
 | II Deterministic core | Nothing is added to `ephemeris`, `core`, `geo` or `guardrail`. Spring AI lives in `agent` alone, as the Technology Constraints require | ✅ |
 | III Correctness gated | The guarded path is covered with a stub model; the eval harness gates the prompt against a real one. A model or prompt change that drops below SC-001's bar is a regression | ✅ |
 | IV LLM never calculates | Every number comes from a tool result (FR-008). `userId`, coordinates and clock are injected server-side and never read from tool arguments (FR-006) | ✅ |
-| V Guarded single path (NON-NEGOTIABLE) | Entitlement → gate → model → output stage, in that order. `GuardedPipeline` is the only caller of `Answerer`; the ArchUnit rule is amended to name `OwnerAnswerer` explicitly rather than widened to a package (research §2) | ✅ |
+| V Guarded single path (NON-NEGOTIABLE) | Entitlement → gate → model → output stage, in that order. `GuardedPipeline` is the only caller of `Answerer`; the single rule becomes two — inference named at `GuardedPipeline` and `OwnerAnswerer`, containment at `agent.llm` — rather than widened to a package (research §2) | ✅ |
 | VI Deterministic flows | Not touched — onboarding is SPEC-017. Statelessness here means no flow state exists to keep in the model (FR-018) | n/a |
 | VII Data protection | Birth data is seeded, not collected; a supplied second person's data is used for the turn and not persisted (FR-011). The new turn record holds a message body, so it joins the "forget me" delete and carries a 90-day default retention (FR-020a, FR-020b) — the gap the first analysis pass caught. **Remaining exposure**: personal data now reaches a rented inference host, which ADR-0010 records with its open obligations | ⚠️ see note |
-| VIII Payments | Not touched. Entitlement is an allow-list, and the interface is what SPEC-018 plugs into | n/a |
+| VIII Payments | **Deliberately deviated, and tracked below.** VIII's last clause — every Q&A turn first checks an active subscription with remaining quota — is not satisfied: this feature answers an allow-listed owner with no subscription at all. Payment reconciliation itself is untouched, and `EntitlementService.check` is the seam SPEC-018 fills | ⚠️ tracked |
 | IX Adapters at the edge | `ReplyHandler` is unchanged as an interface; the webhook, worker and sender are untouched. Spring AI is a provider type and stays inside `agent.llm` | ✅ |
 | X Toolkit is the judgement (NON-NEGOTIABLE) | Interpretation comes only from tool results (FR-014); the answer obligations of `agent-tools.md` are prompt requirements (FR-015); and the toolkit's strings never enter the model's context (FR-013a) while the leak scan still runs | ✅ |
 
@@ -162,7 +165,7 @@ ADR-0010 is the choice of provider and region — a decision, not a question of
 whether it matters. **No violation to track here, but it is the reason this feature must
 not quietly become the public launch.**
 
-No violations, so no Complexity Tracking entries.
+One tracked deviation (Constitution VIII), recorded under Complexity Tracking.
 
 ## Project Structure
 
@@ -187,10 +190,12 @@ specs/012-owner-preview-agent/
 
 ```text
 agent/src/main/java/com/celestia/agent/
+├── AgentMessages.java               # the four fixed texts this feature adds
 ├── entitlement/
 │   ├── EntitlementService.java      # may this sender be answered? allow-list first
 │   └── EntitlementProperties.java   # celestia.entitlement.allow-list
 ├── llm/
+│   ├── package-info.java            # single path, reference swap, prompt-with-the-code
 │   ├── LlmConfig.java               # ChatClient, fallback, concurrency permit
 │   ├── LlmProperties.java           # base-url, model, fallback-model, budgets
 │   ├── OwnerAnswerer.java           # implements guardrail Answerer — the ONLY chat-model caller
@@ -205,16 +210,17 @@ agent/src/main/java/com/celestia/agent/
 │   └── GuardedReplyHandler.java     # entitlement -> GuardedPipeline -> outbound
 ├── admin/
 │   └── SeedOwnerBirthDataCommand.java  # FR-019
-└── eval/
-    └── OwnerEvalHarness.java        # ten questions -> reviewable documents
+├── eval/
+│   └── OwnerEvalHarness.java        # ten questions -> reviewable documents
+└── persistence/
+    ├── entity/OwnerTurnRecordEntity.java   # the JPA entity, where SPEC-008 says entities live
+    ├── repository/OwnerTurnRecordRepository.java
+    └── store/TurnRecordStore.java          # what llm/ and channel/ talk to; also the purge
 
-├── persistence/
-│   ├── entity/OwnerTurnRecordEntity.java   # the JPA entity, where SPEC-008 says entities live
-│   ├── repository/OwnerTurnRecordRepository.java
-│   └── store/TurnRecordStore.java          # what llm/ and channel/ talk to; also the purge
 agent/src/main/resources/
+├── application.yaml                 # edited: celestia.llm.*, .entitlement.*, .turn-record.*
 ├── com/celestia/agent/llm/system-prompt.md
-└── db/migration/V6__owner_turn_record.sql
+└── db/migration/V8__owner_turn_record.sql
 
 agent/src/test/java/com/celestia/agent/
 ├── entitlement/EntitlementServiceTest.java      # FR-001..FR-003, fail closed
@@ -223,13 +229,13 @@ agent/src/test/java/com/celestia/agent/
 ├── llm/ModelContextLeakTest.java                # SC-010 + FR-018, asserted on what the model received
 ├── llm/SystemPromptTest.java                    # every obligation present
 ├── llm/NoBasisTest.java                         # FR-014, the out-of-scope path
-├── llm/AsksRatherThanGuessesTest.java           # FR-018b, SC-012
+├── llm/AsksRatherThanGuessesTest.java           # FR-018a/b, SC-012 — both directions
 ├── llm/TurnContextTest.java                     # FR-009, FR-011
 ├── llm/tools/ToolSetClosedTest.java             # FR-007, the tool set is closed
 ├── persistence/store/TurnRecordRetentionTest.java # FR-020a/b, SC-013
 ├── channel/GuardedReplyHandlerTest.java         # order: entitlement, gate, model, output
 ├── channel/GuardrailRegressionTest.java        # SC-006: SPEC-011's corpus through the REAL path, zero invocations
-└── architecture/DeterminismArchitectureTest.java # the amended single-path rule
+└── architecture/DeterminismArchitectureTest.java # the two single-path rules: inference, containment
 
 agent/src/test/resources/com/celestia/agent/eval/owner-questions.tsv
 
@@ -258,7 +264,8 @@ prompt must do instead (§4), the prompt as a versioned classpath resource and
 the obligations it carries (§5), tool exposure with a round cap as well as a
 deadline (§6), what the eval harness can and cannot assert (§7), the entitlement
 check placed before the gate and failing closed (§8), replacing rather than
-flagging `EchoReplyHandler` (§9), and what is deliberately deferred (§10).
+flagging `EchoReplyHandler` (§9), what is deliberately deferred (§10), and how
+SC-006 is proved against the real wiring rather than a fake answerer (§11).
 
 ## Phase 1 — Design & Contracts
 
@@ -272,10 +279,19 @@ flagging `EchoReplyHandler` (§9), and what is deliberately deferred (§10).
 Re-checked against v2.2.0 after the design above. All gates still pass, with
 four points worth stating explicitly:
 
-- **V:** the amended ArchUnit rule names two classes — `GuardedPipeline` and
-  `OwnerAnswerer` — and nothing else may depend on a chat-model type. That is
-  tighter than a package allow-list and is the first time the rule does real
-  work rather than passing vacuously.
+- **V:** the amended rule is **two rules**, because "reaches the model" and
+  "imports Spring AI" are different claims and the single rule conflated them.
+  **(a) Inference** — only `GuardedPipeline` and `OwnerAnswerer` may *call*
+  `ChatModel.call`, `ChatModel.stream` or `ChatClient.prompt`. That is the single
+  path, named at two classes. **(b) Containment** — only
+  `com.celestia.agent.llm..` and `GuardedPipeline` may *depend on* a chat-model
+  package at all, so no controller, worker or handler can hold one. `LlmConfig`
+  builds the client and never invokes it, and the tool adapters carry `@Tool`
+  from `org.springframework.ai.tool.annotation`: both are lawful under (b) and
+  silent under (a). A single "exactly two classes may depend on Spring AI" rule
+  would have been red on the day `LlmConfig` was written, and the likely repair
+  under build pressure is widening it to a package — which is the second path
+  the rule exists to prevent.
 - **X:** two independent controls now hold the same duty. The reference swap
   means the model never receives a sheet id, title or row; the leak scan means a
   draft that somehow contains one is still withheld. Neither is removed on
@@ -289,4 +305,10 @@ four points worth stating explicitly:
 
 ## Complexity Tracking
 
-None.
+| Deviation | Why it is needed | Why the simpler, compliant path was rejected |
+|-----------|------------------|----------------------------------------------|
+| **Constitution VIII**: a turn is answered without an active subscription or quota check. An allow-list of one stands in for entitlement | Stage A's exit criterion is the first real answer, and PROJECT_PLAN stages SPEC-012 ahead of SPEC-018 (plan catalog and entitlements) precisely so the agent can be judged before the billing surface exists. An allow-list of one owner is not a payment path being bypassed — it is a payment path that does not exist yet | Building SPEC-018 first would gate the first real answer on plan CRUD, subscription lifecycle and quota arithmetic, none of which this audience of one needs. The deviation is bounded by construction: `EntitlementService.check` is the only entry point, it returns a basis rather than a boolean so "quota exhausted" is expressible without a second call, and SPEC-018 replaces the allow-list source without touching the reply path (contracts/entitlement-api.md). **This is the reason this feature must not quietly become the public launch**, alongside the Constitution VII note above |
+
+The constitution's preamble ("answering is gated by a paid subscription") is the
+end state, not a description of the preview. If the preview outlives Stage A,
+that is a governance conversation, not a configuration change.

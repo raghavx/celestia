@@ -14,7 +14,7 @@ need no model. Step 4 needs a reachable one. Step 5 needs a human.
   them:
   - `celestia.llm.base-url` pointing at a reachable Ollama with the configured
     model pulled. **On the dev machine that is a local `ollama serve` with the
-    smallest Qwen** (ADR-0009) — which proves the round trip and **nothing about
+    smallest tool-capable model** (ADR-0009, T043) — which proves the round trip and **nothing about
     answer quality**. See "Which tier proves what" below before drawing any
     conclusion from its output.
   - **the owner's number on `celestia.entitlement.allow-list`** — otherwise
@@ -27,14 +27,18 @@ need no model. Step 4 needs a reachable one. Step 5 needs a human.
 ## 1. The guarded path, without a model
 
 ```bash
-./mvnw -pl agent -am test -Dtest='OwnerAnswererTest,GuardedReplyHandlerTest,SourceReferencesTest'
+./mvnw -pl agent -am test -Dtest='OwnerAnswererTest,GuardedReplyHandlerTest,SourceReferencesTest,ModelContextLeakTest'
 ```
 
 Expected: green. These use a stub `ChatModel`, so they prove the wiring, the
 budgets and the reference swap without any inference. In particular
-`SourceReferencesTest` asserts the property that matters most here — **no sheet
-id, title or row reaches what the model is given** (SC-010), checked on the
-serialised request rather than on the reply.
+**`ModelContextLeakTest`** asserts the property that matters most here — **no
+sheet id, title or row reaches what the model is given** (SC-010), checked on the
+serialised request rather than on the reply. `SourceReferencesTest` proves the
+narrower thing the swap itself must do: a stable reference per source, and no
+reference reversible to the string it stands for. An earlier draft of this file
+credited SC-010 to `SourceReferencesTest`, which tests neither the request nor
+what the model received.
 
 ## 1b. Personal data is deleted when it should be
 
@@ -83,13 +87,19 @@ is work that should not have been done.
 ```
 
 Expected: green — and this is the first time the single-path rule does real work.
-Until now it passed vacuously because no chat model existed. It now names exactly
-two classes that may depend on a chat-model type: `GuardedPipeline` and
-`OwnerAnswerer`.
+Until now it passed vacuously because no chat model existed. It is now **two**
+rules, because "reaches the model" and "imports Spring AI" are different claims:
+**(a)** only `GuardedPipeline` and `OwnerAnswerer` may *invoke* a chat model
+(`ChatModel.call`, `ChatModel.stream`, `ChatClient.prompt`), and **(b)** only
+`com.celestia.agent.llm..` may *depend on* a chat-model package at all. The split
+is what admits `LlmConfig`, which must hold the client to build it, and the
+`@Tool` adapters, which import Spring AI's annotation — neither of which invokes
+anything.
 
-**Try breaking it.** Add a field of a Spring AI chat type to any other class and
-re-run: the build must fail. If it does not, the rule has been widened to a
-package somewhere and the guarantee is gone.
+**Try breaking both.** Add a `ChatClient.prompt(...)` call to `LlmConfig` and
+re-run: rule (a) must fail. Add a field of a Spring AI chat type to a class in
+`agent.channel`: rule (b) must fail. If either passes, the rule has been widened
+to a package somewhere and the guarantee is gone.
 
 ## 3b. The guardrail did not regress
 
@@ -158,7 +168,7 @@ Three environments, and a result from the wrong one is worse than no result:
 | Tier | How to run it | Proves | Does **not** prove |
 |---|---|---|---|
 | **Stub model** | steps 1–3b, default build | wiring, reference swap, statelessness, budgets, permit, leak scan — **correctness lives here** | that any real model behaves |
-| **Local Ollama + smallest Qwen** | `ollama serve` on the dev machine, then step 4 | the round trip: client connects, a tool call is parsed, the output stage decorates, a reply returns | **anything about answer quality**; a 0.5B model on a 2019 Intel CPU will emit malformed tool JSON often, exercising ADR-0009's fallback as the normal path |
+| **Local Ollama + the smallest tool-capable model** | `ollama serve` on the dev machine, then step 4 | the round trip: client connects, a tool call is parsed, the output stage decorates, a reply returns | **anything about answer quality**; a 0.5B model on a 2019 Intel CPU will emit malformed tool JSON often, exercising ADR-0009's fallback as the normal path |
 | **Production VM + Llama 4 Scout** | step 4 against `celestia.llm.base-url` on the warm VM | SC-001's practitioner verdict, SC-008's latency | — |
 
 Two things follow that are easy to get wrong:

@@ -278,12 +278,12 @@ form and have them marked.
   configurable, and **one** for the preview — and MUST tell a sender to try again
   shortly rather than queue them behind a turn in progress. An unbounded queue in
   front of a single model is how a slow reply becomes an outage.
-- **FR-010b**: The bound MUST be taken **after the entitlement check and before
-  the gate**. After entitlement, so a sender who may not be answered cannot
-  consume the one permit and lock the owner out — a denial-of-service costing
-  nothing. Before the gate, so no chart work or gate decision is done for a
-  message that will be turned away anyway.
-- **FR-010c**: A **turn begins when the bound is acquired.** A message turned
+- **FR-010b**: That bound is held as a **turn permit**, and the permit MUST be
+  taken **after the entitlement check and before the gate**. After entitlement,
+  so a sender who may not be answered cannot consume the one permit and lock the
+  owner out — a denial-of-service costing nothing. Before the gate, so no chart
+  work or gate decision is done for a message that will be turned away anyway.
+- **FR-010c**: A **turn begins when the permit is acquired.** A message turned
   away for want of it is therefore not a turn, and FR-020 does not require a
   turn record for it — but it MUST still be countable, or the product's busiest
   failure mode is its least visible one.
@@ -342,26 +342,27 @@ form and have them marked.
 
 - **FR-019**: The owner's birth data MUST be seedable by an administrative
   action, without a conversational onboarding flow.
-- **FR-020**: Every turn — every message that acquired the bound of FR-010c —
+- **FR-020**: Every turn — every message that acquired the turn permit of FR-010c —
   MUST be recorded with its decision, its tool calls and their sources,
   sufficient for a practitioner to review the answer and for an operator to tell
   a fault from a refusal. Messages stopped before that point (no entitlement, not
   text, no permit) produce no turn record, because no turn happened; they are
   counted rather than recorded.
-- **FR-020a**: A turn record holds the owner's question, which is a message
-  body and therefore personal data. It MUST be covered by the "forget me" hard
-  delete, alongside the rows SPEC-008 FR-010 already enumerates. A deletion
-  request that leaves every question a user ever asked is not a deletion.
-- **FR-020c**: The question column MUST be stored so that the deferred
-  column-encryption pass can reach it without a schema change — the same
-  position SPEC-008 took for its own PII columns, and what Constitution VII's
-  "encrypted at rest where feasible" amounts to while that pass is still
-  outstanding. Encryption itself is not in this feature's scope; being
-  encryptable later is.
+- **FR-020a**: A turn record holds the owner's question and the reply he
+  received — a message body and something derived from one, therefore personal
+  data both. The record MUST be covered by the "forget me" hard delete, alongside
+  the rows SPEC-008 FR-010 already enumerates. A deletion request that leaves
+  every question a user ever asked is not a deletion.
 - **FR-020b**: Turn records MUST be purged once they pass a configurable
   retention age, **defaulting to 90 days**. A retention of `0` MUST mean *never
   purge on age* — and MUST NOT be read as disabling FR-020a, which is a standing
   obligation no setting may switch off.
+- **FR-020c**: Both of those columns MUST be stored so that the deferred
+  column-encryption pass can reach them without a schema change — the same
+  position SPEC-008 took for its own PII columns, and what Constitution VII's
+  "encrypted at rest where feasible" amounts to while that pass is still
+  outstanding. Encryption itself is not in this feature's scope; being
+  encryptable later is.
 - **FR-021**: The system MUST carry an evaluation set of at least ten of the
   owner's own questions, run on demand, producing answers with their sources in
   a form a practitioner can mark without reading code.
@@ -413,9 +414,6 @@ form and have them marked.
   — ADR-0010 — which is why that decision blocks planning rather than this
   spec.)
 - **SC-009**: No reply exceeds 4,096 characters or is truncated mid-sentence.
-- **SC-013**: A "forget me" request for a user leaves **zero** turn records for
-  that user, and a record past the retention age is gone on the next purge —
-  both checked rather than assumed.
 - **SC-010**: Zero tool results presented to the model contain a sheet id, a
   sheet title or a row number, across the whole evaluation run — checked on what
   the model received, not on what it replied.
@@ -425,6 +423,9 @@ form and have them marked.
 - **SC-012**: A question that cannot be understood on its own is answered with a
   question rather than a guess in 100 % of cases, and no reply is composed
   against context from an earlier turn, since none is kept.
+- **SC-013**: A "forget me" request for a user leaves **zero** turn records for
+  that user, and a record past the retention age is gone on the next purge —
+  both checked rather than assumed.
 
 ## Clarifications
 
@@ -479,9 +480,11 @@ form and have them marked.
   SPEC-011's and SPEC-010's constants, consumed rather than restated.
 - The toolkit tools' behaviour is SPEC-010's; this feature exposes it to the
   model and does not re-derive it.
-- Where the model runs and which model it is are ADR-0009 and ADR-0010, both
-  still *proposed*. The spec is written to be independent of that choice; the
-  plan is not, and cannot be completed until those are accepted.
+- Where the model runs and which model it is are ADR-0009 and ADR-0010, **both
+  accepted 2026-11-24** — ADR-0010 as option 3, a rented GPU VM we administer,
+  which is what required constitution v2.2.0's definition of "self-hosted". The
+  spec is written to be independent of that choice and stays so; the plan is not,
+  and was blocked on those acceptances rather than on this document.
 - A reply is produced synchronously within one turn. Long-running or streamed
   answers are not in scope.
 - **Two requirements can only be checked by a person, and that is not an

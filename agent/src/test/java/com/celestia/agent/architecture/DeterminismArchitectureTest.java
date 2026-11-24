@@ -46,8 +46,24 @@ class DeterminismArchitectureTest {
         "com.anthropic.."
     };
 
-    /** The only type permitted to reach one (SPEC-011 contracts/guardrail-api.md). */
+    /** The only types permitted to invoke one (SPEC-012 T018, research.md §2). */
     private static final String GUARDED_PIPELINE = "com.celestia.guardrail.GuardedPipeline";
+
+    private static final String OWNER_ANSWERER = "com.celestia.agent.llm.OwnerAnswerer";
+
+    /**
+     * Where a chat model is actually <em>invoked</em>. Inference, not import: the
+     * call that sends a prompt and gets a completion back.
+     */
+    private static final List<String> INFERENCE_CALLS = List.of(
+            "org.springframework.ai.chat.model.ChatModel.call(",
+            "org.springframework.ai.chat.model.ChatModel.stream(",
+            "org.springframework.ai.ollama.OllamaChatModel.call(",
+            "org.springframework.ai.ollama.OllamaChatModel.stream(",
+            "org.springframework.ai.chat.client.ChatClient.prompt(");
+
+    /** The package Spring AI types may not escape (rule b). */
+    private static final String LLM_PACKAGE = "com.celestia.agent.llm..";
 
     private static final List<String> AMBIENT_CLOCK = List.of(
             "java.time.Instant.now(",
@@ -170,27 +186,70 @@ class DeterminismArchitectureTest {
     }
 
     /**
-     * Constitution V / SPEC-011 FR-003: there is exactly one route from a user
-     * message to an answer, and it is {@code GuardedPipeline}.
+     * Constitution V (NON-NEGOTIABLE), rule (a): there is exactly one route from a
+     * user message to an answer, and only two classes stand on it —
+     * {@code GuardedPipeline}, which calls the answerer, and
+     * {@code OwnerAnswerer}, which calls the model.
      *
-     * <p><b>This rule passes vacuously today</b> — there is no chat model in the
-     * build until SPEC-012 introduces one — and that is precisely the point. It
-     * is in place <em>before</em> a second path can be written, so the day
-     * someone wires an LLM call into a handler, a worker or a controller, the
-     * build says no instead of a reviewer having to notice.
+     * <p><b>Inference, not import.</b> SPEC-011 wrote this as "no class may
+     * depend on a chat-model type", which was exact while no model existed and
+     * became impossible the moment one did: {@code LlmConfig} cannot construct a
+     * {@code ChatClient} without naming {@code OllamaChatModel}, and the
+     * {@code @Tool} adapters carry a Spring AI annotation, which ArchUnit counts
+     * as a dependency. Naming the <em>call</em> keeps the guarantee that matters —
+     * only these two can send a prompt — without a rule that is red on the day the
+     * feature is written. Containment is rule (b), below.
      */
     @Test
-    void onlyTheGuardedPipelineMayReachAChatModel() {
+    void onlyTwoClassesMayInvokeAChatModel() {
+        DescribedPredicate<JavaCall<?>> inferenceCall = new DescribedPredicate<>("a chat-model invocation") {
+            @Override
+            public boolean test(JavaCall<?> call) {
+                String target = call.getTarget().getFullName();
+                return INFERENCE_CALLS.stream().anyMatch(target::startsWith);
+            }
+        };
+
         noClasses()
                 .that()
                 .resideInAPackage("com.celestia..")
                 .and()
                 .doNotHaveFullyQualifiedName(GUARDED_PIPELINE)
+                .and()
+                .doNotHaveFullyQualifiedName(OWNER_ANSWERER)
+                .should()
+                .callCodeUnitWhere(inferenceCall)
+                .as("Constitution V: only GuardedPipeline and OwnerAnswerer may invoke a chat model")
+                .allowEmptyShould(true)
+                .check(celestia);
+    }
+
+    /**
+     * Constitution V (NON-NEGOTIABLE), rule (b): Spring AI stays in
+     * {@code com.celestia.agent.llm}.
+     *
+     * <p>Rule (a) says who may call the model; this says where the model's types
+     * may be named at all, so no controller, worker, handler or domain class can
+     * hold one — which is how a second path would start. Together they are tighter
+     * than the single rule they replace, because that one could only ever have
+     * been satisfied by widening it to a package.
+     *
+     * <p>{@code GuardedPipeline} is exempt: it is the guardrail's own seam and
+     * lives outside {@code agent}.
+     */
+    @Test
+    void springAiStaysInTheLlmPackage() {
+        noClasses()
+                .that()
+                .resideInAPackage("com.celestia..")
+                .and()
+                .resideOutsideOfPackage(LLM_PACKAGE)
+                .and()
+                .doNotHaveFullyQualifiedName(GUARDED_PIPELINE)
                 .should()
                 .dependOnClassesThat()
                 .resideInAnyPackage(CHAT_MODEL_PACKAGES)
-                .as("Constitution V / SPEC-011 FR-003: no code path reaches the chat model except "
-                        + "through GuardedPipeline")
+                .as("Constitution V: a chat-model type may only be named inside com.celestia.agent.llm")
                 .allowEmptyShould(true)
                 .check(celestia);
     }

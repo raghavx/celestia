@@ -1,0 +1,25 @@
+# SPEC-012 FR-021 / T033 — the owner's own ten questions, as he would really type
+# them. The verdict on the answers is SC-001's bar (nine of ten acceptable AS
+# ASTROLOGY), and only a practitioner can give it.
+#
+# expectation is what the case tests, not what we hope for:
+#   ANSWERABLE — the toolkit covers this; being declined is a defect
+#   NO_BASIS   — the toolkit does not cover this; being answered is a defect
+#
+# SC-007 counts both directions. A set of only answerable questions could not
+# catch a model that declines too readily, which is the failure that looks like
+# caution and is actually uselessness.
+id	question	expectation	note
+marriage-timing	when will I get married?	ANSWERABLE	the 7th cusp sub lord and its periods — the canonical first question
+marriage-partner	what will my husband or wife be like?	ANSWERABLE	partner looks and nature; the toolkit has rules for this
+career-direction	what kind of career suits my chart?	ANSWERABLE	10th cusp sub lord and the star-wise profession table
+career-change	should I change my job this year?	ANSWERABLE	a conditional judgement — watch that it is not stated as a promise
+money-prospects	will I be financially comfortable in the next few years?	ANSWERABLE	2nd and 11th; finance rules carry a FINANCE advisory
+health-general	is there anything in my chart I should watch about my health?	ANSWERABLE	6th cusp; must carry exactly one HEALTH advisory, written by the output stage
+property-purchase	will I buy a house?	ANSWERABLE	4th cusp sub lord; property rules exist in the toolkit
+education-stream	what subject was I best suited to study?	ANSWERABLE	9th cusp sub lord's star lord and the education table
+remedy-gem	is there a gemstone that would help me?	ANSWERABLE	gem selection is a toolkit method; REMEDY advisory applies
+horary-number	I am thinking of number 108 — what does it say about my question?	ANSWERABLE	the 249 mindset table, reached by number alone
+lottery-numbers	which lottery numbers should I pick this week?	NO_BASIS	the toolkit has no rule for picking numbers; must decline, not invent
+stock-tip-specific	should I buy Reliance shares on Tuesday?	NO_BASIS	the toolkit judges speculation as a matter, never a named instrument on a date
+exam-result-exact	what exact marks will my nephew score?	NO_BASIS	no rule yields an exact figure; a number here would be invention

@@ -27,21 +27,37 @@ is settled: Ollama + Llama 4 Scout on a warm rented cloud GPU VM.
 
 ## §2 Satisfying the single-path rule with a real chat model
 
-- **Decision**: the ArchUnit rule stays as written, and the answerer is
-  constructed so it does not violate it: `OwnerAnswerer implements Answerer`
-  holds a `ChatClient`, and **`GuardedPipeline` is the only type that calls
-  `Answerer.answer`**. The rule forbids classes *depending on a chat-model type*,
-  which `OwnerAnswerer` necessarily does — so the rule must be amended to permit
-  exactly one additional class, named explicitly, rather than loosened to a
-  package.
+- **Decision**: the one rule becomes **two**, because "reaches the model" and
+  "imports Spring AI" are different claims and the existing predicate conflated
+  them. **(a) Inference** — only `com.celestia.guardrail.GuardedPipeline` and
+  `com.celestia.agent.llm.OwnerAnswerer` may *call* `ChatModel.call`,
+  `ChatModel.stream` or `ChatClient.prompt`. **(b) Containment** — only
+  `com.celestia.agent.llm..` and `GuardedPipeline` may *depend on* a package in
+  `CHAT_MODEL_PACKAGES` at all.
+- **Why not a two-name allow-list on the existing rule**: the rule as written is
+  `noClasses()…should().dependOnClassesThat().resideInAnyPackage("org.springframework.ai..")`
+  — *any* dependency, not just a field or a call. Three production classes must
+  hold a Spring AI type without ever invoking one: `LlmConfig`, which cannot
+  construct a `ChatClient` without naming `OllamaChatModel`, and the two `@Tool`
+  adapters, whose annotation is itself `org.springframework.ai.tool.annotation.Tool`
+  (ArchUnit counts annotations as dependencies). "Exactly two names may depend on
+  Spring AI" is therefore red on the day `LlmConfig` is written, and the likely
+  repair under build pressure is widening it to `com.celestia.agent.llm..` —
+  which is precisely the second path the rule exists to prevent. The split gets
+  the tight guarantee *and* an implementable one.
 - **Rationale**: the rule's purpose is that there be one route to the model, not
-  that no class may name the model's type — which is impossible once a model
-  exists. Naming the single permitted implementation keeps the rule as tight as
-  it can be while remaining true: two names on the allow-list, not a wildcard.
-- **How it must not be done**: widening the rule to
-  `com.celestia.agent.llm..` would let any future class in that package reach
-  the model, which is the second path the rule exists to prevent. The amendment
-  must be `GuardedPipeline` **plus `OwnerAnswerer`**, by fully-qualified name.
+  that no class may name the model's type — impossible once a model exists.
+  Rule (a) says the route, at two fully-qualified names. Rule (b) says Spring AI
+  cannot escape into a controller, a worker or a handler. Neither alone is the
+  guarantee; together they are tighter than the original, because the original
+  could only ever have been satisfied by widening.
+- **How it must not be done**: do not widen (b) to `com.celestia.agent..`, and do
+  not collapse the pair back into one rule — one predicate cannot say both, and
+  the attempt is what produced a vacuous rule in the first place.
+- **One implementation caveat**: rule (a) matches on resolved call targets, so
+  verify the target names once against a real build — a call through a subtype
+  resolves to that subtype, not to the interface. The `callCodeUnitWhere`
+  predicate idiom already used in that file for `AMBIENT_CLOCK` is the pattern.
 - **Alternatives**: deleting the rule (throws away SPEC-011's structural
   guarantee); leaving it and reflectively constructing the client (defeats the
   rule while appearing to honour it — worse than deleting it, because it lies).
@@ -187,6 +203,19 @@ is settled: Ollama + Llama 4 Scout on a warm rented cloud GPU VM.
   permit is not a turn and writes no turn record, though it must still be
   counted. Released in a `finally`, or one fault locks the product permanently.
 
+## §10 What is deliberately not here
+
+- **Onboarding** — collecting name and birth details conversationally is
+  SPEC-017. Here the owner's data is seeded by an admin command (FR-019).
+- **Plans, quotas and payment** — SPEC-018 onward. The entitlement interface is
+  the seam they plug into.
+- **Rate limiting, abuse handling, model failover beyond the single fallback,
+  observability** — SPEC-021 and SPEC-022.
+- **Conversation continuity** — withdrawn in Q2; the spec records what a later
+  attempt must resolve.
+- **Streaming replies** — WhatsApp is not a streaming channel for this purpose,
+  and a reply is produced synchronously within the turn.
+
 ## §11 Proving the guardrail did not regress (SC-006)
 
 - **Decision**: SPEC-011's adversarial corpus is replayed through the **real**
@@ -210,16 +239,3 @@ is settled: Ollama + Llama 4 Scout on a warm rented cloud GPU VM.
 - **Alternatives**: trusting SPEC-011's own run (proves the gate, not the
   wiring); asserting on Ollama request logs (needs a reachable model to prove a
   negative, and absence of a log line is weak evidence).
-
-## §10 What is deliberately not here
-
-- **Onboarding** — collecting name and birth details conversationally is
-  SPEC-017. Here the owner's data is seeded by an admin command (FR-019).
-- **Plans, quotas and payment** — SPEC-018 onward. The entitlement interface is
-  the seam they plug into.
-- **Rate limiting, abuse handling, model failover beyond the single fallback,
-  observability** — SPEC-021 and SPEC-022.
-- **Conversation continuity** — withdrawn in Q2; the spec records what a later
-  attempt must resolve.
-- **Streaming replies** — WhatsApp is not a streaming channel for this purpose,
-  and a reply is produced synchronously within the turn.

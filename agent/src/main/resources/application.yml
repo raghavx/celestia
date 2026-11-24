@@ -49,5 +49,34 @@ whatsapp:
     max-attempts: ${WHATSAPP_MAX_ATTEMPTS:5}
     reclaim-after: ${WHATSAPP_RECLAIM_AFTER:PT2M}
 
-# Phase-specific config (Spring AI / Ollama, Razorpay) is added in the spec
-# that introduces it. See PROJECT_PLAN.md.
+# SPEC-012: the owner-preview agent. These are **development** defaults
+# (ADR-0009, ADR-0010): a local `ollama serve` with the smallest tool-capable
+# model, which proves the round trip and nothing about answer quality. Production
+# values are supplied per environment, not committed.
+celestia:
+  llm:
+    base-url: ${CELESTIA_LLM_BASE_URL:http://localhost:11434}
+    # Provisional — T043 verifies this model can tool-call at all, and the answer
+    # may be another model entirely. Production is llama4:scout (ADR-0009).
+    model: "${CELESTIA_LLM_MODEL:qwen2.5:0.5b}"
+    fallback-model: "${CELESTIA_LLM_FALLBACK_MODEL:qwen2.5:1.5b}"
+    # Short on the dev machine — it is a laptop's RAM, not a dedicated VM. The
+    # warm VM sets this long and never pays the cold load (ADR-0010).
+    keep-alive: ${CELESTIA_LLM_KEEP_ALIVE:5m}
+    max-tool-rounds: ${CELESTIA_LLM_MAX_TOOL_ROUNDS:6}
+    # The fault boundary, not the service level: SC-008's 30 seconds is measured
+    # end to end on the warm VM (T040) and production tunes this against it.
+    turn-deadline: ${CELESTIA_LLM_TURN_DEADLINE:PT60S}
+    max-concurrent-turns: ${CELESTIA_LLM_MAX_CONCURRENT_TURNS:1}
+  entitlement:
+    # EMPTY DENIES EVERYONE (FR-003). The safe default for a key someone will
+    # forget to set — an empty list meaning "allow all" is how a configuration
+    # slip becomes an open service.
+    allow-list: ${CELESTIA_ENTITLEMENT_ALLOW_LIST:}
+  turn-record:
+    # 0 means never purge on age — which is NOT a way to switch off the
+    # "forget me" hard delete (FR-020a, FR-020b).
+    retention-days: ${CELESTIA_TURN_RECORD_RETENTION_DAYS:90}
+
+# Phase-specific config (Razorpay) is added in the spec that introduces it.
+# See PROJECT_PLAN.md.

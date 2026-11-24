@@ -48,6 +48,10 @@ These carry no toolkit source, so no reference applies. They exist so the model 
 computes: Constitution IV is enforced by there being a tool for every number and
 no arithmetic the model could do instead.
 
+Because these carry no source, an engine call alone never grounds an
+interpretation. SC-002 counts `ToolkitTools` calls, and the eval harness asserts
+on those.
+
 ## What the model may not call
 
 Anything else. No HTTP, no file access, no database, no `castChartFor` on a

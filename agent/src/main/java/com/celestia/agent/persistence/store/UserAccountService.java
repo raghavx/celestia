@@ -4,6 +4,7 @@ import com.celestia.agent.persistence.entity.AppUserEntity;
 import com.celestia.agent.persistence.repository.AppUserRepository;
 import com.celestia.agent.persistence.repository.BirthDataRepository;
 import com.celestia.agent.persistence.repository.ChartRepository;
+import com.celestia.agent.persistence.repository.OwnerTurnRecordRepository;
 import com.celestia.agent.persistence.repository.PredictionRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -25,13 +26,16 @@ public class UserAccountService {
     private final BirthDataRepository births;
     private final ChartRepository charts;
     private final PredictionRepository predictions;
+    private final OwnerTurnRecordRepository turnRecords;
 
     public UserAccountService(AppUserRepository users, BirthDataRepository births,
-            ChartRepository charts, PredictionRepository predictions) {
+            ChartRepository charts, PredictionRepository predictions,
+            OwnerTurnRecordRepository turnRecords) {
         this.users = users;
         this.births = births;
         this.charts = charts;
         this.predictions = predictions;
+        this.turnRecords = turnRecords;
     }
 
     /**
@@ -73,10 +77,16 @@ public class UserAccountService {
      * (SC-004). Payment/tax rows are exempt (ADR-0016; not in this schema yet).
      * Deleting the user's {@code inbound_event} / {@code outbox_message} payload
      * rows is SPEC-009's extension.
+     *
+     * <p>SPEC-012 added {@code owner_turn_record}, which holds the question a user
+     * asked and the reply he received. It joins this list rather than opting out:
+     * a deletion that leaves every question a user ever asked is not a deletion
+     * (SPEC-012 FR-020a).
      */
     @Transactional
     public void forget(long userId) {
         AppUserEntity u = users.findById(userId).orElseThrow();
+        turnRecords.deleteByUserId(userId);   // SPEC-012 FR-020a
         predictions.deleteByUserId(userId);
         charts.deleteByUserId(userId);   // dasha_period / horary_query cascade via FK
         births.deleteByUserId(userId);

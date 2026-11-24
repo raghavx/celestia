@@ -25,11 +25,20 @@ SPEC-011's record, filled as follows:
 
 | Field | Value |
 |-------|-------|
-| `recipientRef` | the owner's verified E.164 number, so the leak scan can tell his own identifier from anyone else's |
+| `recipientRef` | the owner's verified E.164 number, **in full and unobscured** |
 | `secrets` | the system prompt text and the tool names, so the leak scan can catch them if the model echoes them |
 
 Passing the prompt as a secret is deliberate: it is the string most worth
 scanning for, and only `agent` knows it.
+
+**`recipientRef` must be the real number**, despite `AnswerContext`'s javadoc
+calling it "an opaque reference". `OutputStage.otherPartyIdentifier` takes
+`digitsOf(recipientRef)` and compares it against every digit run in the draft, so
+an identifier the reply contains is only recognised as *the owner's own* if the
+reference still holds his digits. Pass a hash or a token and every phone-shaped
+number in a reply — his included — reads as another party's identifier, and the
+leak scan withholds replies it should deliver. The javadoc is loose; this
+contract is the one to follow.
 
 ## Turn budget
 

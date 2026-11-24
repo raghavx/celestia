@@ -79,21 +79,37 @@ codebase does.
 | userId | long | who asked |
 | receivedAt | timestamp | when the message arrived |
 | entitlement | `ALLOWED` · `DENIED` | the first decision made (FR-001) |
+| question | sized binary-compatible column | the inbound message. **Personal data** (FR-020a); shaped so the deferred column-encryption pass can reach it without a schema change (FR-020c) |
 | gateOutcome | `GateDecision.Outcome` or absent | absent when entitlement denied, because the gate never ran |
 | gateReason | `GateDecision.Reason` or absent | the operator's view, from SPEC-011 |
-| outcome | `ANSWERED` · `REFUSED` · `WITHHELD` · `FAULT` | what happened in the end |
+| outcome | `ANSWERED` · `AGENT_NO_BASIS` · `AGENT_REDIRECT` · `GATE_REFUSED` · `WITHHELD` · `FAULT` | what happened in the end. The three middle values are the ones a single `REFUSED` hid: **`AGENT_NO_BASIS`** is the agent declining in prose (FR-014), **`AGENT_REDIRECT`** is the model emitting `<<OUT_OF_SCOPE>>` and the output stage substituting the fixed redirect, and **`GATE_REFUSED`** is the gate never letting the question through. They have different owners — a prompt defect, a prompt defect, and a vocabulary gap — and collapsing them makes the wrong team look |
 | toolCalls | list of `ToolCallRecord` | in order |
 | sensitivityUsed | `Sensitivity` | what the advisory was chosen from |
-| deliveredLength | int | so an over-budget reply is visible (FR-017, SC-009) |
+| deliveredReply | sized binary-compatible column, or absent | what the owner actually received, after the output stage decorated it. Absent on a fault. A practitioner reviewing an answer reads this, not the draft — and it is derived from a message body, so it carries the same obligations as `question` |
+| deliveredLength | int | the reply's length kept alongside it, so an over-budget reply is queryable without reading any body (FR-017, SC-009) |
 | faultKind | text or absent | timeout, round cap, model unreachable, malformed tool JSON |
 
-**What it does not hold**: the gate's matched rule never carries message text
-(SPEC-011 keeps that true), and this record does not add it back. The question is
-stored because a practitioner cannot review an answer without it; nothing else
-about the message body is.
+**Why the declines are three values and not one.** SC-007 counts two directions
+— a question the toolkit covers that was declined, and one it does not cover
+that was answered — and neither is derivable from a single `REFUSED`. The
+direction itself is a *comparison*, not a field: the eval harness pairs this
+`outcome` against the question's `expectation` (`ANSWERABLE` | `NO_BASIS`) and
+counts the mismatches in each direction. Live traffic has no expectation to
+compare against, which is why the record stores the outcome and the harness
+derives the verdict. A product that declined everything would score perfectly on
+"invents nothing" and fail here, which is the point.
 
-**It is personal data, and it is deleted.** The question is a message body, so a
-turn record falls under Constitution VII. Two rules, and the second must not be
+**What it does not hold**: the gate's matched rule never carries message text
+(SPEC-011 keeps that true), and this record does not add it back. Two bodies are
+stored and both are load-bearing — the **question**, because a practitioner
+cannot review an answer without knowing what was asked, and the **delivered
+reply**, because the answer under review is the one the owner received rather
+than the model's draft. Nothing else about any message is kept: no normalised
+form, no intermediate draft, no earlier turn.
+
+**It is personal data, and it is deleted.** The question is a message body and
+the delivered reply is derived from one, so a turn record falls under
+Constitution VII — both columns, not just the question. Two rules, and the second must not be
 mistaken for a way round the first:
 
 1. **"Forget me" removes it** (FR-020a). SPEC-008 FR-010 enumerates the rows a
@@ -157,13 +173,25 @@ The sequence is fixed, and the order is the requirement (FR-001, FR-005):
                      no turn began (FR-010b, FR-010c).
    ── a turn starts here ──
 4. pre-fetch       → chart + running dasha (FR-009)
-5. GuardedPipeline → gate (SPEC-011)
+5. gate, for the   → GuardedPipeline.gate(request) — the decision the turn
+   record             record needs as gateOutcome + gateReason
+6. GuardedPipeline → handle(...): gates again, answers only if allowed
                    → OwnerAnswerer, only if allowed
                        → prompt + tools, references swapped on every result
                    → output stage (SPEC-011): marker, leak scan, support line, advisory
-6. turn record     → written whatever happened from step 3 on, faults included
-7. release permit  → in a finally, or one fault locks the product permanently
+7. turn record     → written whatever happened from step 3 on, faults included
+8. release permit  → in a finally, or one fault locks the product permanently
 ```
+
+**Why the gate runs twice.** `handle` returns an `OutputResult` — `delivered`,
+the text, and the withheld family — and deliberately does not hand back the
+`GateDecision`. But FR-020 requires the record to carry `gateOutcome` and
+`gateReason` so an operator can tell a refusal from a fault, and `guardrail` is
+not ours to change in this feature. `Gate.decide` is pure, allocates a decision
+and touches no I/O, so a second evaluation costs microseconds and buys the
+operator's view of every turn. The alternative — inferring "refused" from the
+answerer never being invoked — gives the outcome but loses the reason, which is
+the half an operator actually reads.
 
 **Why the permit sits at 3.** After entitlement, so a sender who may not be
 answered cannot take the only permit and lock the owner out — a
