@@ -12,11 +12,12 @@ need no model. Step 4 needs a reachable one. Step 5 needs a human.
   (ADR-0008).
 - **For step 4 only**, three things, and the harness refuses to run without
   them:
-  - `celestia.llm.base-url` pointing at a reachable Ollama with the configured
-    model pulled. **On the dev machine that is a local `ollama serve` with the
-    smallest tool-capable model** (ADR-0009, T043) — which proves the round trip and **nothing about
-    answer quality**. See "Which tier proves what" below before drawing any
-    conclusion from its output.
+  - **A reachable model.** Set `CELESTIA_LLM_PROVIDER=anthropic` and
+    `ANTHROPIC_API_KEY` (an API key, not a subscription). **Not a local Ollama**:
+    ADR-0009's laptop story was measured on 2026-11-24 and withdrawn — ~24
+    minutes a question, three faults in four. Constitution v3.0.0 permits the API
+    here, and its first condition is enforced at startup: the allow-list must hold
+    **exactly one** number or the application refuses to run.
   - **the owner's number on `celestia.entitlement.allow-list`** — otherwise
     entitlement turns every question away before the gate and you get ten copies
     of the not-open message;
@@ -168,16 +169,18 @@ Three environments, and a result from the wrong one is worse than no result:
 | Tier | How to run it | Proves | Does **not** prove |
 |---|---|---|---|
 | **Stub model** | steps 1–3b, default build | wiring, reference swap, statelessness, budgets, permit, leak scan — **correctness lives here** | that any real model behaves |
-| **Local Ollama + the smallest tool-capable model** | `ollama serve` on the dev machine, then step 4 | the round trip: client connects, a tool call is parsed, the output stage decorates, a reply returns | **anything about answer quality**; a 0.5B model on a 2019 Intel CPU will emit malformed tool JSON often, exercising ADR-0009's fallback as the normal path |
-| **Production VM + Llama 4 Scout** | step 4 against `celestia.llm.base-url` on the warm VM | SC-001's practitioner verdict, SC-008's latency | — |
+| **The Claude API** | `CELESTIA_LLM_PROVIDER=anthropic` + an API key, then step 4 | the round trip, and SC-001's verdict and SC-008's latency **for this provider** | that a self-hosted model would behave the same — Principle III says the verdict does not transfer |
+| **Self-hosted Llama 4 Scout** | `CELESTIA_LLM_PROVIDER=ollama` against a warm VM | the answers at public-launch scale | — (and SC-001 must be re-earned here before launch) |
 
 Two things follow that are easy to get wrong:
 
-- **Do not run step 5's practitioner review against the local model.** Ten
-  documents produced by a 0.5B model would waste a practitioner's time and
-  discredit a product that has not been shown yet.
-- **Do not tune anything to SC-008 on the laptop.** Latency there is CPU-bound
-  and means nothing; SC-008 is measured on the warm VM (T040).
+- **Do not run step 5's practitioner review against a laptop-sized model.** Ten
+  documents from a 0.5B model would waste a practitioner's time and discredit a
+  product that has not been shown yet. It was tried: three of four questions
+  faulted after ~24 minutes.
+- **Run T040 and T041 against whatever the preview is deployed on**, and nothing
+  else. Principle III (v3.0.0) ties a correctness verdict to the model that
+  produced it, so a verdict earned on one provider is not evidence about another.
 
 ## 5. What only you can judge
 

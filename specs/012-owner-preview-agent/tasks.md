@@ -585,17 +585,21 @@ thing code cannot judge is sitting in a folder waiting for a person.
       a field of a Spring AI chat type to a class in `agent.channel` and confirm
       the build fails. Revert both. A rule that cannot be shown to fail is not
       known to work, and these two fail for different reasons
-- [ ] T040 Measure SC-008 **on the real VM with the model warm** — not on a
-      laptop — and record the figure. If 30 seconds does not hold, the honest
+- [ ] T040 Measure SC-008 **against whatever the preview is deployed on** — the
+      Claude API under v3.0.0's exception, or a warm self-hosted VM — and never on
+      a laptop-sized model. Record the figure. If 30 seconds does not hold, the honest
       move is to amend SC-008 with the measured number rather than to leave a
       criterion the product misses. Record the figure in
       `specs/012-owner-preview-agent/spec.md` (SC-008) so the claim and the
       measurement live together
-- [ ] T041 **MANUAL — owner only**: run the eval harness **against the
-      production VM and Llama 4 Scout — not the dev machine's Qwen** (ADR-0009:
-      a 0.5B model on a 2019 Intel CPU proves the round trip and nothing about
-      answer quality, and ten documents from it would waste a practitioner's time
-      and discredit the product) and read the ten documents in
+- [ ] T041 **MANUAL — owner only**: run the eval harness **against whatever the
+      preview is deployed on** — reachable today on the Claude API under v3.0.0's
+      bounded exception, no procurement needed — and **never** against a
+      laptop-sized model (measured: ~24 minutes a question, three faults in four,
+      and ten such documents would waste a practitioner's time and discredit the
+      product). **The verdict binds to that model and no other**: Principle III
+      (v3.0.0) says a correctness verdict does not transfer, so moving to
+      self-hosted at launch means doing this again. Read the ten documents in
       `agent/target/owner-eval/`, marking each answer acceptable or not **as
       astrology** (SC-001, bar is 9 of 10). Watch
       for the two failure modes quickstart.md names: a confident answer resting
@@ -635,8 +639,10 @@ thing code cannot judge is sitting in a folder waiting for a person.
       hitting the 4,096-character reply budget, leak phrasings a small model is
       not fluent enough to generate. Both surface late and expensively. Exercise
       `system-prompt.md` (T013) and the tool adapters (T011, T012) against Scout
-      on the VM **before** T041 asks a practitioner to judge them, and record the
-      date it happened in `docs/adr/0009-llm-runtime-and-model.md` (open item 2).
+      against the deployed provider **before** T041 asks a practitioner to judge
+      them, and record the date it happened in
+      `docs/adr/0009-llm-runtime-and-model.md` (open item 2). Reachable today on
+      the Claude API — the VM is required only for public launch (ADR-0026).
       **This is no longer hypothetical.** The 2026-11-24 tier-2 run showed the dev
       model cannot answer this tool surface at all — not slowly, not badly: three
       of four questions timed out after ~24 minutes each. There is therefore

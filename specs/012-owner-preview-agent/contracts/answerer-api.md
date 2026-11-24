@@ -31,6 +31,16 @@ SPEC-011's record, filled as follows:
 Passing the prompt as a secret is deliberate: it is the string most worth
 scanning for, and only `agent` knows it.
 
+**The caller must keep the `Answer` it gets back.** `GuardedPipeline.handle`
+returns only an `OutputResult`, and the `sensitivityUsed` the output stage
+decorated with is on the `Answer` — so the reply handler wraps the answerer at
+this boundary to capture it. Two things depend on that: the turn record's
+`sensitivityUsed`, and the reply clamp, which must know **which** advisory
+sentence was appended or it trims away the one thing Constitution V makes
+obligatory. Reading the value off the turn scope instead is right only while the
+answerer happens to report the same number, and that coincidence is not a
+contract. Do not "simplify" the wrapper away.
+
 **`recipientRef` must be the real number**, despite `AnswerContext`'s javadoc
 calling it "an opaque reference". `OutputStage.otherPartyIdentifier` takes
 `digitsOf(recipientRef)` and compares it against every digit run in the draft, so

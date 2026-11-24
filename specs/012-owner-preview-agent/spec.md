@@ -499,11 +499,18 @@ form and have them marked.
   SPEC-011's and SPEC-010's constants, consumed rather than restated.
 - The toolkit tools' behaviour is SPEC-010's; this feature exposes it to the
   model and does not re-derive it.
-- Where the model runs and which model it is are ADR-0009 and ADR-0010, **both
-  accepted 2026-11-24** — ADR-0010 as option 3, a rented GPU VM we administer,
-  which is what required constitution v2.2.0's definition of "self-hosted". The
-  spec is written to be independent of that choice and stays so; the plan is not,
-  and was blocked on those acceptances rather than on this document.
+- Where the model runs and which model it is are ADR-0009, ADR-0010 and
+  **ADR-0026**, all accepted 2026-11-24. ADR-0010 chose a rented GPU VM we
+  administer; ADR-0009's amendment moved development to the Claude API after the
+  laptop story was measured and withdrawn; ADR-0026 then permitted the **preview
+  itself** on that API, under constitution **v3.0.0**'s bounded exception — an
+  allow-list of exactly one number, enforced at startup, with no other living
+  person's data processed (FR-011a).
+  The requirements here stay independent of the choice. **Two consequences are
+  not**: a second person's chart is unavailable on a third-party provider
+  (FR-011a), and SC-001's verdict is valid only for the model the preview is
+  deployed on, because Principle III ties a correctness verdict to the model that
+  produced it. Moving to self-hosted at public launch re-opens SC-001.
 - A reply is produced synchronously within one turn. Long-running or streamed
   answers are not in scope.
 - **Two requirements can only be checked by a person, and that is not an

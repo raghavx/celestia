@@ -33,7 +33,12 @@ a stranger from a broken config.
 ## What SPEC-018 must be able to do without touching the reply path
 
 - Replace the allow-list with a subscription lookup, keeping `check` as the only
-  entry point.
+  entry point. **This ends constitution v3.0.0's bounded exception**, whose first
+  condition is an allow-list of exactly one number and whose permission lapses
+  when sign-up opens. `OwnerOnlyAllowListGuard` will fail at startup at that
+  point — deliberately — so SPEC-018 must either move the deployment to a
+  self-hosted model or carry its own constitution amendment. It is not a bug to
+  route around (ADR-0026 conditions 1 and 4).
 - Add quota semantics by returning a denial the handler already knows how to
   render.
 - Keep the owner allow-list as a complementary source, which PROJECT_PLAN

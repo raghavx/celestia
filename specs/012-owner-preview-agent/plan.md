@@ -80,28 +80,39 @@ and knowing which proves what is the point:**
 1. **Stub `ChatModel`, default build** — the wiring, the reference swap,
    statelessness, the budgets, the permit, the leak scan. **This is where
    correctness lives**, and it needs no Ollama at all.
-2. **Local Ollama + the smallest tool-capable model, by hand** — the round trip only: the client
-   connects, a tool call is parsed, the output stage decorates, a reply comes
-   back. A model this small will emit malformed tool JSON often, which exercises
-   ADR-0009's fallback path as the normal path.
-3. **Production VM + Llama 4 Scout, `-Dtest=OwnerEvalHarness`** — the only tier where
-   SC-001's practitioner verdict and SC-008's latency mean anything.
+2. **Testcontainers + a real MySQL, `verify`** — the schema, the "forget me"
+   delete and the retention purge (SC-013). Needs Docker (ADR-0008); nothing about
+   the model.
+3. **The Claude API, `-Dtest=OwnerEvalHarness`** — the only tier where SC-001's
+   practitioner verdict and SC-008's latency mean anything. **And the verdict is
+   valid for this provider only**: Principle III (v3.0.0) ties a correctness
+   verdict to the model that produced it, so moving to self-hosted at launch
+   re-opens SC-001 rather than inheriting it.
 
-Tier 2 cannot fail in a way that condemns the product and tier 3 cannot run on
-the dev machine, so a result from the wrong tier is worse than no result.
+A result from the wrong tier is worse than no result: tier 1 cannot tell you
+whether any real model behaves, and tier 3 cannot tell you whether the wiring is
+right — it can only tell you whether *this* model answers well.
 
-**Target Platform**: JVM. **Two model environments, by decision rather than by
-accident** (ADR-0009, ADR-0010):
+**Target Platform**: JVM. **Three model environments**, selected by
+`celestia.llm.provider` (ADR-0009 as amended 2026-11-24, ADR-0010, ADR-0026):
 
-| | Production | Development |
-|---|---|---|
-| Host | warm rented GPU VM (AWS or OCI), `ollama serve` we administer | `ollama serve` on the dev machine — 2019 Intel MacBook Pro, **CPU-only** |
-| Model | Llama 4 Scout + fallback | the smallest model that reports the `tools` capability — provisionally `qwen2.5:0.5b`, which T043 verifies and may replace |
-| Keep-alive | long — never pay the cold load | short — it is a laptop's RAM |
-| Proves | the answers (SC-001, SC-008) | the round trip, and nothing about answer quality |
+| | Public launch | Preview & development | Default build |
+|---|---|---|---|
+| Provider | `ollama`, self-hosted | `anthropic` | none — a stub `ChatModel` |
+| Host | warm rented GPU VM we administer (ADR-0010) | the Claude API | the JVM running the tests |
+| Model | Llama 4 Scout + fallback | `claude-sonnet-5` | scripted |
+| Permitted by | the deployment rule | **v3.0.0's bounded exception**: allow-list of exactly one, enforced at startup (ADR-0026) | — |
+| Proves | the answers at scale | SC-001's verdict and SC-008's latency **for this provider** | wiring, the reference swap, statelessness, the budgets, the permit, the leak scan |
 
-Both are reached over `celestia.llm.base-url`, and model ids are configuration,
-so neither needs a code change.
+**The laptop is not on that list, and that is the point.** ADR-0009's original
+development story — a local `ollama serve` with the smallest tool-capable model —
+was measured on 2026-11-24 and withdrawn: ~24 minutes a question and three faults
+in four, teaching nothing about the prompt or the tools. Ollama remains the
+committed default so a clone with no credentials still builds and tests.
+
+The provider and the model are configuration, so none of the three needs a code
+change — `TurnOptions` is the only provider-specific type, and v3.0.0's sixth
+condition requires it stay that way.
 
 **Project Type**: Spring Boot application code in the existing `agent` module.
 
@@ -120,10 +131,13 @@ model's own latency is the only variable.
 - Constitution V (NON-NEGOTIABLE): one route. `GuardedPipeline` calls the
   answerer; two ArchUnit rules name the only two classes that may *invoke* a
   chat model, and confine Spring AI types to `agent.llm`.
-- Constitution VII: personal data now crosses the public internet to the
-  inference host (ADR-0010). Transport encryption to that host is required; its
-  provider and region are an open sub-decision recorded in ADR-0010, due before
-  real traffic rather than before this preview.
+- Constitution VII: personal data crosses the public internet to whichever
+  inference host serves. Self-hosted (ADR-0010): encrypted transport, a region
+  chosen for the data, no prompt logging — with provider and region still an open
+  sub-decision. Third-party API (v3.0.0's exception): ADR-0026's conditions
+  instead, of which **condition 3 — no training, minimum retention, a processing
+  agreement — is not yet confirmed** and must be before real birth details are
+  sent.
 - Constitution X (NON-NEGOTIABLE): no reply names the toolkit, a sheet or a row.
   Two controls: the reference swap keeps the strings out of the model's context,
   and SPEC-011's leak scan still runs on the draft.
@@ -154,10 +168,11 @@ entitlement and before the gate; one prompt; two tool adapters exposing the five
 toolkit tools plus the engine tools; one new table reached through an
 entity/repository/store trio, with a "forget me" delete and a scheduled purge on
 a 90-day default; ten eval questions; two ArchUnit rules replacing one; one deleted
-class (`EchoReplyHandler`). Thirteen new test classes plus the eval harness: one
-needs a real model, one needs MySQL, and the other twelve run on a stub — with
-three shared fixtures (`TurnFixtures`, `StubChatModel`, `AnswererHarness`) that
-give the stub tier a real chart, a real toolkit and a real tool loop.
+class (`EchoReplyHandler`). Fifteen new test classes plus the eval harness: one
+needs a real model, one needs MySQL, and the rest run on a stub — with three
+shared fixtures (`TurnFixtures`, `StubChatModel`, `AnswererHarness`) that give the
+stub tier a real chart, a real toolkit and a real tool loop. **116 unit tests and
+52 integration tests** as built.
 
 ## Constitution Check
 
@@ -255,6 +270,7 @@ agent/src/main/java/com/celestia/agent/
 ├── entitlement/
 │   ├── EntitlementService.java      # may this sender be answered? allow-list first
 │   ├── EntitlementDecision.java     # a basis, not a boolean — SPEC-018 plugs in here
+│   ├── OwnerOnlyAllowListGuard.java # v3.0.0's exception, enforced at startup (ADR-0026)
 │   └── EntitlementProperties.java   # celestia.entitlement.allow-list
 ├── llm/
 │   ├── package-info.java            # single path, reference swap, prompt-with-the-code
@@ -271,6 +287,9 @@ agent/src/main/java/com/celestia/agent/
 │   ├── ToolCallRecord.java          # one call, for the turn record
 │   ├── ToolNames.java               # the closed tool set, engine and toolkit named apart
 │   ├── TurnDetail.java              # the value handed to the store: decision, tool calls, sources
+│   ├── TurnOptions.java             # the provider seam: per-request options, nothing else
+│   ├── OllamaTurnOptions.java       # keep-alive, for a self-hosted deployment
+│   ├── AnthropicTurnOptions.java    # adaptive thinking + effort; never budget_tokens
 │   └── tools/
 │       ├── EngineTools.java         # @Tool over core: chart, lords, dasha, horary
 │       └── ToolkitTools.java        # @Tool over the five toolkit tools of SPEC-010
