@@ -152,9 +152,31 @@ deliberately left open — see below.
   single-path ArchUnit rules are expressed over chat-model packages and call
   sites. Swapping the provider adds one bean and changes no architecture.
 
+### Reconciled with constitution v2.3.0
+
+v2.3.0 (the same day) codified this amendment and **defined "deployment"** in the
+process: *any run reachable by an inbound message from outside the developer's
+machine*. Two consequences follow, and the second is stricter than this
+amendment's first draft implied:
+
+- **The evaluation harness is development.** It runs as a test on a developer's
+  machine against a throwaway database, with no webhook and no queue. Nothing
+  inbound can reach it. The permission above covers it.
+- **The owner preview is a deployment, so it may not run on a third-party API.**
+  Entitlement limits who it answers, not what it is, and the allow-list is one
+  property edit from admitting someone else. **Shipping the preview therefore
+  still needs a self-hosted model** — the rented GPU VM of ADR-0010 — or a
+  further amendment making the case for a single consenting user on a live
+  channel. That case is arguable and is not made here.
+
+So the API buys development speed and de-risks the hosting decision. It does not,
+on its own, let the preview go live.
+
 ### What this does not decide, and the trap to avoid
 
-**Production hosting is still open.** But the two questions interact, and the
+**Production hosting is still open** between self-hosted options (own hardware or
+rented, per ADR-0010); it is **not** open to a third-party API without the further
+amendment named above. But the two questions interact, and the
 interaction has a sharp edge: **a practitioner's verdict is tied to a model.**
 Tuning `system-prompt.md` against Sonnet 5 and then deploying Llama 4 Scout is
 T044's own warning in reverse — fitting one model's behaviour — and SC-001's
