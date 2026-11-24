@@ -6,8 +6,13 @@ model cannot reach it.
 ## Shared rules, enforced by the adapters rather than asked for in the prompt
 
 1. **No `@Tool` method accepts `userId`, a coordinate or a time.** All three are
-   injected from the authenticated sender (Constitution V, FR-006). A model that
-   tries to pass someone else's identity has nowhere to put it.
+   injected from the authenticated sender (Constitution V, FR-006), through the
+   per-turn `TurnScope` bound to the answering thread. A model that tries to pass
+   someone else's identity has nowhere to put it.
+1a. **Arguments bind by parameter name**, so `agent` is compiled with
+   `-parameters` (`maven.compiler.parameters=true`). `@ToolParam` has no name
+   attribute; without the flag every argument arrives null and a tool answers a
+   question the model never asked.
 2. **Every result is rewritten before serialisation.** Each `source`
    (`{sheetId, sheetTitle, row}`) becomes a per-turn reference (`s1`, `s2`), and the
    real values go to the turn record. The model never receives a toolkit string
@@ -42,11 +47,21 @@ call.
 | `getSignificators` | `house` | the significators for that house |
 | `getRulingPlanets` | — | the ruling planets now, clock injected |
 | `castHorary` | `number` 1..249 | the horary chart for that number |
-| `castChartFor` | birth date, time, place supplied **in this message** | a chart for a second person — not persisted (FR-011) |
+| `castChartFor` | birth date, time, place supplied **in this message** | **currently returns `{available: false, note}`** — see below |
 
 These carry no toolkit source, so no reference applies. They exist so the model never
 computes: Constitution IV is enforced by there being a tool for every number and
 no arithmetic the model could do instead.
+
+**`castChartFor` is not available yet, and says so rather than guessing.** Casting
+a chart from a place *name* needs a live geocoder and a zone resolution; `geo`
+defines the port (SPEC-007) and nothing implements it, and the model must never be
+handed coordinates to supply itself (FR-006, rule 1). So the tool returns
+`available: false` with a note the model can read, and the agent declines in its
+own voice. FR-011's plumbing is built and tested around it — a supplied chart is
+what the tools judge for that turn, is never persisted, and this tool's arguments
+are redacted from the turn record — but **US1 scenario 4 is not demonstrable until
+a geocoder exists.**
 
 Because these carry no source, an engine call alone never grounds an
 interpretation. SC-002 counts `ToolkitTools` calls, and the eval harness asserts

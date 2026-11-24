@@ -56,6 +56,8 @@ forward, because FR-011 forbids persisting that data. Any future continuity
 feature must ask again or reopen FR-011 — a Constitution VII conversation, not a
 design tweak.
 
-**A separate, non-blocking dependency**: ADR-0009 and ADR-0010 are both still
-*proposed*. The spec is deliberately independent of them; the plan cannot be,
-because it must name where the model runs. Accept both before `/speckit-plan`.
+**That dependency is discharged**: ADR-0009 and ADR-0010 were both **accepted on
+2026-11-24** — ADR-0010 as option 3, a rented GPU VM we administer, which is what
+required constitution v2.2.0's definition of "self-hosted". The spec was written
+to be independent of the choice and remains so; the plan, which could not be, was
+written after.

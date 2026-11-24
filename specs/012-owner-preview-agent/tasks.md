@@ -64,7 +64,7 @@ Dependencies section says so plainly rather than pretending otherwise.
 - [X] T003 [P] `EntitlementProperties` bound to `celestia.entitlement.allow-list`
       in `agent/src/main/java/com/celestia/agent/entitlement/EntitlementProperties.java`
 - [X] T004 Add the `celestia.llm.*` and `celestia.entitlement.*` keys to
-      `agent/src/main/resources/application.yaml` with **development** defaults
+      `agent/src/main/resources/application.yml` with **development** defaults
       (ADR-0009, ADR-0010): `base-url` a local `ollama serve`, `model`
       **`qwen2.5:0.5b`** (provisional — T043 verifies it can tool-call at all,
       and the answer may be another model entirely), the configured fallback, a **short** keep-alive because the dev machine is a
@@ -147,15 +147,15 @@ written.
       `ChannelConfig`** for SPEC-009's worker rather than adding a second — and
       `celestia.turn-record.retention-days` (**default 90**) in
       `agent/src/main/java/com/celestia/agent/persistence/store/TurnRecordStore.java`
-      and `agent/src/main/resources/application.yaml`. **`0` means never purge
+      and `agent/src/main/resources/application.yml`. **`0` means never purge
       on age** — implemented so it cannot be mistaken for disabling T006a, which
       no setting may switch off (**FR-020b**) (depends on T006)
-- [X] T006c `TurnRecordRetentionTest`: a "forget me" request leaves **zero**
+- [X] T006c `TurnRecordRetentionIT`: a "forget me" request leaves **zero**
       turn records for that user; a record past the retention age is gone after a
       purge; one inside it survives; and with `retention-days: 0` **nothing is
       purged on age while forget-me still deletes everything** (**SC-013**) —
       driving the clock rather than the calendar, in
-      `agent/src/test/java/com/celestia/agent/persistence/store/TurnRecordRetentionTest.java`
+      `agent/src/test/java/com/celestia/agent/persistence/TurnRecordRetentionIT.java`
       (depends on T006a, T006b)
       → **Written and compiling; not executed here — needs Docker (ADR-0008).** Named `TurnRecordRetentionIT`, not `…Test`: a `Test` that silently requires Docker breaks the default build on a machine without it.
 - [X] T009 `EntitlementService` + `EntitlementDecision` (`OWNER_ALLOW_LIST`,
@@ -282,8 +282,10 @@ as astrology rather than as a system report (spec.md US1).
       trim as a prompt defect on the turn — the same standing as a withheld
       reply, because the owner lost part of an answer. **Never trim the support
       line or the advisory**: if the decorated reply cannot fit with them, the
-      body is what gives way, since Constitution V makes both obligatory
-      (depends on T016)
+      body is what gives way, since Constitution V makes both obligatory.
+      **4,096 is a literal here**, for the same reason the prompt's marker is:
+      `Gate.MAX_MESSAGE_LENGTH` is package-private and unreachable from `agent`
+      (research.md §12) (depends on T016)
 - [X] T017 [US1] **Delete** `agent/src/main/java/com/celestia/agent/channel/EchoReplyHandler.java`
       and its test, rather than keeping it behind a flag. A second reply path in
       the code is the thing this whole feature exists to prevent (research.md §9)
@@ -613,7 +615,7 @@ thing code cannot judge is sitting in a folder waiting for a person.
       it is absent, find the smallest model that has it — **it may not be a
       Qwen**, which is why plan.md names a capability rather than a family —
       change `model` in
-      `agent/src/main/resources/application.yaml`, and record the outcome in
+      `agent/src/main/resources/application.yml`, and record the outcome in
       `docs/adr/0009-llm-runtime-and-model.md` (open item 1). Cheap, and worth
       doing before the first tier-2 smoke test rather than after an hour spent
       debugging the wrong layer: a model with **no tool template** fails inside

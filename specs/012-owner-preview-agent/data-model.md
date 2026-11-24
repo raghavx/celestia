@@ -87,7 +87,18 @@ codebase does.
 | sensitivityUsed | `Sensitivity` | what the advisory was chosen from |
 | deliveredReply | sized binary-compatible column, or absent | what the owner actually received, after the output stage decorated it. Absent on a fault. A practitioner reviewing an answer reads this, not the draft — and it is derived from a message body, so it carries the same obligations as `question` |
 | deliveredLength | int | the reply's length kept alongside it, so an over-budget reply is queryable without reading any body (FR-017, SC-009) |
-| faultKind | text or absent | timeout, round cap, model unreachable, malformed tool JSON |
+| faultKind | `TIMEOUT` · `ROUND_CAP` · `MODEL_UNREACHABLE` · `MALFORMED_TOOL_JSON`, or absent | an enum, like its siblings. **`MALFORMED_TOOL_JSON` means both models failed that way** — see the note below |
+| modelUsed | text or absent | which model answered. A practitioner's verdict on an answer is meaningless without it, and early on the fallback is the normal path (ADR-0009) |
+| fallbackSwitched | bool | whether the turn moved to `celestia.llm.fallback-model`. Not a fault: on a small model it is ordinary |
+| withheldFamily | text or absent | which disclosure family the leak scan caught, when `outcome` is `WITHHELD`. Present only then, and the thing that makes SC-004's zero diagnosable |
+| replyTrimmed | bool | whether the reply had to be brought inside the channel budget (FR-017). A prompt defect, not normal operation |
+
+**Malformed tool JSON is not a fault on its own.** It switches the turn to the
+fallback model (ADR-0009) and is recorded as `fallbackSwitched`. A 0.5B model emits
+unreadable tool arguments constantly, so treating that as a fault would mark the
+entire development path as broken while it was working as designed. It becomes
+`faultKind=MALFORMED_TOOL_JSON` only when the fallback failed the same way, which
+is the point at which nobody is going to answer the question.
 
 **Why the declines are three values and not one.** SC-007 counts two directions
 — a question the toolkit covers that was declined, and one it does not cover
@@ -134,8 +145,18 @@ all the same.
 | tool | text | the tool name |
 | arguments | text | as the model supplied them — **never containing a userId, coordinate or clock**, because those are injected (FR-006) |
 | references | list of text | the references this call produced |
-| resolvedSources | list of `{sheetId, sheetTitle, row}` | the real sources, resolvable here and nowhere the model can see |
 | truncated | bool | SPEC-010 caps results; this says when more existed |
+
+**Where the real sources live.** One resolved map per **turn**, on the turn record,
+rather than a copy per call: a reference is stable for the whole turn (FR-013c), so
+repeating the mapping on every call would store the same pair many times and invite
+two copies to disagree. A call lists the references it produced; the turn resolves
+them. Both are needed, and the harness reads them together (SC-011).
+
+**`castChartFor`'s arguments are redacted.** The turn record is persisted, and that
+tool's arguments are a second person's birth date, time and place — which FR-011
+forbids persisting at all. The tool receives the real values; the record receives a
+note saying why it does not.
 
 ## Entitlement decision
 

@@ -138,10 +138,24 @@ is settled: Ollama + Llama 4 Scout on a warm rented cloud GPU VM.
   is indistinguishable from a slow model. Counting rounds separates "the model is
   confused" from "the model is slow", which matters because the first is a prompt
   defect and the second is a hosting one.
+- **Where the budget is enforced** *(settled during implementation)*: Spring AI
+  2.0 runs the tool loop **inside** the chat model and removed the switch that
+  used to disable it; the model calls a `ToolCallingManager` once per round. So the
+  cap, the deadline and the per-call records live in a wrapper around that
+  manager, and the answerer holds a `ChatModel` rather than the fluent
+  `ChatClient`, whose loop is private. A turn budget that cannot be enforced is a
+  comment, so the interface that can be bounded is the one to use.
 - **Fallback**: ADR-0009's fallback model is used when the primary returns
   malformed tool JSON or fails repeatedly. During development, before the VM
   exists, a small local model stands in — which exercises the fallback path as
-  the primary path, exactly as ADR-0010 anticipated.
+  the primary path, exactly as ADR-0010 anticipated. It is recorded as a **switch,
+  not a fault**: on a small model it is ordinary, and a fault is only recorded when
+  the fallback fails the same way.
+- **Tool arguments bind by parameter name** *(settled during implementation)*:
+  `@ToolParam` carries a description but no name, so `agent` must be compiled with
+  `-parameters`. Without it every argument arrives null and the tools answer
+  questions the model never asked — silently, and in a way only the stub-model
+  tier makes legible.
 
 ## §7 The eval harness, and what it can and cannot assert
 
@@ -239,3 +253,23 @@ is settled: Ollama + Llama 4 Scout on a warm rented cloud GPU VM.
 - **Alternatives**: trusting SPEC-011's own run (proves the gate, not the
   wiring); asserting on Ollama request logs (needs a reachable model to prove a
   negative, and absence of a log line is weak evidence).
+
+## §12 Three SPEC-011 constants `agent` cannot name *(found during implementation)*
+
+- **Finding**: three things this feature depends on are package-private in
+  `guardrail`, so `agent` cannot reference them:
+  `OutputStage.OUT_OF_SCOPE_MARKER` (`<<OUT_OF_SCOPE>>`),
+  `Gate.MAX_MESSAGE_LENGTH` (4,096) and `LeakRule.LeakFamily`.
+- **What that cost**: the system prompt writes the marker as a **literal**
+  (obligation 5) and the reply clamp writes 4,096 as a **literal**, so prompt,
+  clamp and guardrail agree by convention rather than by compilation. If SPEC-011
+  ever changes the marker, every out-of-scope turn ships the raw marker text to the
+  owner and nothing fails first. The leak family is read as `Optional<?>` and kept
+  as its `toString()`, which is enough for the turn record but not type-safe.
+- **Why it was left**: `guardrail` is complete and this feature's whole premise is
+  that it plugs in without touching it — a task here that edits `guardrail/` is a
+  task that has gone wrong. `SystemPromptTest` pins the marker literal so the drift
+  is at least a build failure on this side.
+- **The cheap fix, when someone does open that module**: make all three `public`.
+  One line each, and it removes two literals and a wildcard from this feature.
+  Until then the duplication is deliberate and documented rather than accidental.

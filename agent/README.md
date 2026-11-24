@@ -121,3 +121,12 @@ A result from the wrong tier is worse than no result.
   one. Acceptable only because the audience is one known person.
 - **No conversation memory.** Each question is answered on its own (FR-018).
   "What about her?" is answered with a question, by design.
+- **Two literals agree with `guardrail` by convention, not by compilation.**
+  `OutputStage.OUT_OF_SCOPE_MARKER` and `Gate.MAX_MESSAGE_LENGTH` are
+  package-private, so `system-prompt.md` writes `<<OUT_OF_SCOPE>>` and the reply
+  clamp writes 4,096 as literals. `SystemPromptTest` pins the marker. If you are
+  editing `guardrail` anyway, making both `public` removes the duplication
+  (SPEC-012 research.md §12).
+- **`maven.compiler.parameters=true` is load-bearing.** Spring AI binds `@Tool`
+  arguments by parameter name; without the flag every tool argument arrives null
+  and the tools fail silently.

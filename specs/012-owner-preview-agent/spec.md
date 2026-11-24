@@ -322,7 +322,12 @@ form and have them marked.
   come from the output stage. The model MUST NOT write either.
 - **FR-017**: A reply MUST fit within **4,096 characters** — WhatsApp's own
   limit for a text body, and the same bound SPEC-011 applies to inbound messages
-  — without being truncated mid-sentence.
+  — without being truncated mid-sentence. A reply that would exceed the bound MUST
+  be trimmed at a sentence boundary, and **the advisory sentence and the support
+  line MUST NOT be what gives way** — Constitution V makes both obligatory, so the
+  body yields instead. A trim MUST be recorded: the model was asked to keep the
+  reply to one message and did not, which is a prompt defect rather than normal
+  operation.
 
 #### Memory and continuity
 
@@ -357,7 +362,7 @@ form and have them marked.
   retention age, **defaulting to 90 days**. A retention of `0` MUST mean *never
   purge on age* — and MUST NOT be read as disabling FR-020a, which is a standing
   obligation no setting may switch off.
-- **FR-020c**: Both of those columns MUST be stored so that the deferred
+- **FR-020c**: The question and reply columns of FR-020a MUST be stored so that the deferred
   column-encryption pass can reach them without a schema change — the same
   position SPEC-008 took for its own PII columns, and what Constitution VII's
   "encrypted at rest where feasible" amounts to while that pass is still
@@ -396,7 +401,9 @@ form and have them marked.
   toolkit tool call behind them; no reply states interpretation with no
   grounding.
 - **SC-003**: Zero delivered replies name the toolkit, a sheet id or title, or a
-  row number — across the evaluation set and the adversarial corpus.
+  row number — across the evaluation set and the adversarial corpus. The corpus
+  half follows from SC-006 rather than needing its own check: no model is invoked
+  for any case in it, so there is no composed reply that could name anything.
 - **SC-004**: Zero replies are withheld by the output stage's leak scan during
   the evaluation run. A withheld reply is a lost answer and a prompt defect.
 - **SC-005**: 100 % of messages from senders without entitlement produce the
@@ -413,7 +420,9 @@ form and have them marked.
   silence on WhatsApp. Whether it is achievable depends on where the model runs
   — ADR-0010 — which is why that decision blocks planning rather than this
   spec.)
-- **SC-009**: No reply exceeds 4,096 characters or is truncated mid-sentence.
+- **SC-009**: No reply exceeds 4,096 characters or is truncated mid-sentence, and
+  the count of replies that had to be trimmed to fit is reported rather than
+  assumed to be zero.
 - **SC-010**: Zero tool results presented to the model contain a sheet id, a
   sheet title or a row number, across the whole evaluation run — checked on what
   the model received, not on what it replied.
@@ -504,6 +513,17 @@ form and have them marked.
 - Nothing here weakens SPEC-011's leak scan. Keeping the toolkit's strings out of
   the model's context and scanning the draft anyway are two controls on the same
   duty, and Constitution X is NON-NEGOTIABLE enough to want both.
+- **A chart for a second person cannot actually be cast yet, and this is an open
+  item rather than a silent omission.** FR-011 and US1 scenario 4 describe it, and
+  the plumbing for it is built: a supplied chart is what the tools judge for that
+  turn, it is never persisted, and the arguments that carried it are redacted from
+  the turn record. What is missing is the step before all of that — resolving a
+  place name to coordinates and a zone. SPEC-007 defines the geocoder port and no
+  implementation is wired into the application, and handing the model coordinates
+  to supply itself is exactly what FR-006 forbids. The tool therefore reports
+  itself unavailable and the agent declines. **This needs a decision: defer
+  supplied-person charts to SPEC-017, or wire a geocoder here.** Recorded so the
+  next reader does not mistake a known limit for a bug.
 - Repeated-abuse handling, rate limiting and model failover are SPEC-021 and
   SPEC-022, not here.
 - Onboarding — collecting name, birth date, time and place conversationally — is

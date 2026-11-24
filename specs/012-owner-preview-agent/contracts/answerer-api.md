@@ -56,11 +56,20 @@ Rounds and time are counted separately because the two faults mean different
 things: a round cap hit is a prompt defect, a timeout is a hosting one. Collapsing
 them into one number makes the wrong team look.
 
+**Where the budget is enforced.** Not in the answerer's own loop — there isn't one.
+Spring AI 2.0 runs the tool loop inside the chat model and calls a
+`ToolCallingManager` once per round, so `TurnToolCallingManager` is where a round
+is counted, a deadline checked and a call recorded. This is also why the answerer
+holds a `ChatModel` rather than a `ChatClient`: the client's loop is private and
+cannot be bounded, and a turn budget that cannot be enforced is a comment.
+
 ## Fallback
 
 A malformed tool-call response or repeated failure from the primary model
 switches that turn to `celestia.llm.fallback-model` (ADR-0009). The switch is
-recorded on the turn. **Before the GPU VM exists, a small local model is the
+recorded on the turn as `modelUsed` and `fallbackSwitched` — **not as a fault**: on
+a small model it is the ordinary path, and a fault is only recorded when the
+fallback fails too. **Before the GPU VM exists, a small local model is the
 primary**, which exercises this path as the normal path — exactly as ADR-0010
 anticipated.
 

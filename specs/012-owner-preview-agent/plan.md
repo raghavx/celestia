@@ -49,6 +49,13 @@ it in a comment). **`agent` already depends on `core`, `guardrail` and
 `channel-whatsapp`** — verified, so the `Answerer` seam is reachable today and
 the only new dependency is the Spring AI starter.
 
+**One build setting is load-bearing**: `agent/pom.xml` sets
+`maven.compiler.parameters=true`. Spring AI binds `@Tool` arguments **by parameter
+name** and `@ToolParam` has no name attribute, so without `-parameters` every tool
+argument arrives null and the model's calls silently do nothing — the tool returns
+"no such table" for an argument the model supplied correctly. Removing the flag
+breaks the tools without breaking the build.
+
 **Storage**: MySQL via the existing stores — `BirthDataStore` for the owner's
 seeded birth data, `ChartCacheService.natalChart(userId)` for the pre-fetched
 chart. One new table, `owner_turn_record` (Flyway `V8__`), holding the decision,
@@ -77,7 +84,7 @@ and knowing which proves what is the point:**
    connects, a tool call is parsed, the output stage decorates, a reply comes
    back. A model this small will emit malformed tool JSON often, which exercises
    ADR-0009's fallback path as the normal path.
-3. **Production VM + Llama 4 Scout, `-Dgroups=eval`** — the only tier where
+3. **Production VM + Llama 4 Scout, `-Dtest=OwnerEvalHarness`** — the only tier where
    SC-001's practitioner verdict and SC-008's latency mean anything.
 
 Tier 2 cannot fail in a way that condemns the product and tier 3 cannot run on
@@ -123,13 +130,34 @@ model's own latency is the only variable.
 - ADR-0009: the fallback model is not optional, because this feature is almost
   entirely tool calling and Llama 4's tool-calling under Ollama is immature.
 
+**`ChatModel`, not `ChatClient`, and the reason is the budget.** Spring AI 2.0
+runs the tool loop *inside* the chat model and no longer exposes a switch to take
+it over; the model calls a `ToolCallingManager` once per round. That makes the
+manager the only place a round can be counted, a deadline checked and a tool call
+recorded with the arguments the model actually supplied — none of which is
+reachable through the fluent client, whose loop is private. So `TurnToolCallingManager`
+wraps Spring AI's default manager, and `OwnerAnswerer` drives `ChatModel.call`
+directly. One model bean serves both the primary and the fallback, which differ
+only in a per-request option, so a switch is an option set rather than a second
+client to keep in step.
+
+**`TurnScope` is where identity lives.** No `@Tool` method takes a `userId`, a
+coordinate or a clock, so they come from a per-turn scope bound to the answering
+thread — opened by the reply handler, closed in a `finally`. The enforcement is
+that there is *nowhere to put them*: a model that tries to pass someone else's
+identity has no parameter for it (FR-006). The same scope carries the tool calls,
+the references and the sensitivity the answer drew on, which is what makes a turn
+reviewable afterwards.
+
 **Scale/Scope**: one user. One permit of concurrency (ADR-0010), taken after
 entitlement and before the gate; one prompt; two tool adapters exposing the five
 toolkit tools plus the engine tools; one new table reached through an
 entity/repository/store trio, with a "forget me" delete and a scheduled purge on
 a 90-day default; ten eval questions; two ArchUnit rules replacing one; one deleted
-class (`EchoReplyHandler`). Twelve new test classes plus the eval harness, which
-is the only one needing a real model; the other twelve run on a stub.
+class (`EchoReplyHandler`). Thirteen new test classes plus the eval harness: one
+needs a real model, one needs MySQL, and the other twelve run on a stub — with
+three shared fixtures (`TurnFixtures`, `StubChatModel`, `AnswererHarness`) that
+give the stub tier a real chart, a real toolkit and a real tool loop.
 
 ## Constitution Check
 
@@ -150,6 +178,18 @@ Impact Report for 2026-11-24.*
 | VIII Payments | **Deliberately deviated, and tracked below.** VIII's last clause — every Q&A turn first checks an active subscription with remaining quota — is not satisfied: this feature answers an allow-listed owner with no subscription at all. Payment reconciliation itself is untouched, and `EntitlementService.check` is the seam SPEC-018 fills | ⚠️ tracked |
 | IX Adapters at the edge | `ReplyHandler` is unchanged as an interface; the webhook, worker and sender are untouched. Spring AI is a provider type and stays inside `agent.llm` | ✅ |
 | X Toolkit is the judgement (NON-NEGOTIABLE) | Interpretation comes only from tool results (FR-014); the answer obligations of `agent-tools.md` are prompt requirements (FR-015); and the toolkit's strings never enter the model's context (FR-013a) while the leak scan still runs | ✅ |
+
+**One piece of scope is specified and not deliverable.** `castChartFor` needs a
+place name resolved to coordinates and a zone, and **no geocoder is wired into
+this application**: `geo` defines the port (SPEC-007) but nothing implements it,
+and handing the model coordinates to supply itself is what FR-006 forbids. The
+tool therefore returns "unavailable" so the agent declines rather than inventing
+another person's chart. FR-011's plumbing is built and tested — a supplied chart
+is used for the turn and never persisted, and `castChartFor`'s arguments are
+redacted from the turn record — but **US1 scenario 4 cannot be demonstrated until
+a geocoder exists**. Constitution I makes this a defect to resolve rather than
+leave: either the spec defers supplied-person charts to SPEC-017, or a task wires
+a geocoder. **Open, and owed a decision.**
 
 **Note on VII.** This is the one principle this feature makes materially harder to
 satisfy, and the plan does not pretend otherwise. Accepting ADR-0010 option 3
@@ -193,15 +233,22 @@ agent/src/main/java/com/celestia/agent/
 ├── AgentMessages.java               # the four fixed texts this feature adds
 ├── entitlement/
 │   ├── EntitlementService.java      # may this sender be answered? allow-list first
+│   ├── EntitlementDecision.java     # a basis, not a boolean — SPEC-018 plugs in here
 │   └── EntitlementProperties.java   # celestia.entitlement.allow-list
 ├── llm/
 │   ├── package-info.java            # single path, reference swap, prompt-with-the-code
-│   ├── LlmConfig.java               # ChatClient, fallback, concurrency permit
+│   ├── LlmConfig.java               # the ChatModel, the toolkit beans, the turn permit
 │   ├── LlmProperties.java           # base-url, model, fallback-model, budgets
 │   ├── OwnerAnswerer.java           # implements guardrail Answerer — the ONLY chat-model caller
+│   ├── TurnToolCallingManager.java  # one round at a time: the cap, the deadline, the records
+│   ├── TurnScope.java               # the per-turn scope the tools read their identity from
+│   ├── TurnBoundExceeded.java       # a bound was passed; carries which one
 │   ├── SystemPrompt.java            # loads system-prompt.md once
 │   ├── TurnContext.java             # chart + running dasha, pre-fetched
 │   ├── SourceReferences.java        # per-turn {sheetId,sheetTitle,row} -> s1, s2 …
+│   ├── SourceRef.java               # a real toolkit source — never serialised to the model
+│   ├── ToolCallRecord.java          # one call, for the turn record
+│   ├── ToolNames.java               # the closed tool set, engine and toolkit named apart
 │   ├── TurnDetail.java              # the value handed to the store: decision, tool calls, sources
 │   └── tools/
 │       ├── EngineTools.java         # @Tool over core: chart, lords, dasha, horary
@@ -218,7 +265,7 @@ agent/src/main/java/com/celestia/agent/
     └── store/TurnRecordStore.java          # what llm/ and channel/ talk to; also the purge
 
 agent/src/main/resources/
-├── application.yaml                 # edited: celestia.llm.*, .entitlement.*, .turn-record.*
+├── application.yml                  # edited: celestia.llm.*, .entitlement.*, .turn-record.*, .seed-owner.*
 ├── com/celestia/agent/llm/system-prompt.md
 └── db/migration/V8__owner_turn_record.sql
 
@@ -232,7 +279,8 @@ agent/src/test/java/com/celestia/agent/
 ├── llm/AsksRatherThanGuessesTest.java           # FR-018a/b, SC-012 — both directions
 ├── llm/TurnContextTest.java                     # FR-009, FR-011
 ├── llm/tools/ToolSetClosedTest.java             # FR-007, the tool set is closed
-├── persistence/store/TurnRecordRetentionTest.java # FR-020a/b, SC-013
+├── persistence/TurnRecordRetentionIT.java       # FR-020a/b, SC-013 — needs MySQL, hence IT
+├── llm/LlmConfigContextTest.java                # exactly one ChatModel, and it is the bounded one
 ├── channel/GuardedReplyHandlerTest.java         # order: entitlement, gate, model, output
 ├── channel/GuardrailRegressionTest.java        # SC-006: SPEC-011's corpus through the REAL path, zero invocations
 └── architecture/DeterminismArchitectureTest.java # the two single-path rules: inference, containment

@@ -43,7 +43,7 @@ what the model received.
 ## 1b. Personal data is deleted when it should be
 
 ```bash
-./mvnw -pl agent -am test -Dtest=TurnRecordRetentionTest
+./mvnw -pl agent -am verify -Dit.test=TurnRecordRetentionIT
 ```
 
 Expected: a "forget me" request leaves **zero** turn records for that user; a
@@ -139,7 +139,7 @@ substring of the first message (FR-018).
 ## 4. A real answer, end to end
 
 ```bash
-./mvnw -pl agent -am verify -Dgroups=eval
+./mvnw -pl agent -am test -Dtest=OwnerEvalHarness
 ```
 
 Expected: ten questions answered against a real model, each written to
