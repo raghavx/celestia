@@ -6,6 +6,8 @@ import com.celestia.core.toolkit.PromiseEvaluator;
 import com.celestia.ephemeris.HouseProvider;
 import com.celestia.ephemeris.PositionProvider;
 import com.celestia.ephemeris.SunriseProvider;
+import com.celestia.agent.entitlement.EntitlementProperties;
+import com.celestia.agent.entitlement.OwnerOnlyAllowListGuard;
 import com.celestia.guardrail.GuardedPipeline;
 import java.time.Clock;
 import java.util.concurrent.Semaphore;
@@ -100,6 +102,18 @@ public class LlmConfig {
         @Bean
         TurnOptions anthropicTurnOptions(LlmProperties properties) {
             return new AnthropicTurnOptions(properties);
+        }
+
+        /**
+         * Constitution v3.0.0's bounded exception, enforced at startup (ADR-0026
+         * condition 1). Declared here because the condition applies <b>only</b>
+         * while a third-party provider is selected — a self-hosted deployment may
+         * allow-list whoever it likes.
+         */
+        @Bean
+        OwnerOnlyAllowListGuard ownerOnlyAllowListGuard(
+                LlmProperties properties, EntitlementProperties entitlement) {
+            return new OwnerOnlyAllowListGuard(properties.provider(), entitlement);
         }
     }
 

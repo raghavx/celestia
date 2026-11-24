@@ -1,6 +1,7 @@
 package com.celestia.agent.entitlement;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -63,6 +64,27 @@ class EntitlementServiceTest {
     void aBlankSenderIsDeniedRatherThanMatched() {
         assertThat(with(OWNER).check("")).isEqualTo(EntitlementDecision.DENIED_UNAVAILABLE);
         assertThat(with(OWNER).check(null)).isEqualTo(EntitlementDecision.DENIED_UNAVAILABLE);
+    }
+
+    @Test
+    @DisplayName("the guard of ADR-0026 condition 1: exactly one, or the application stops")
+    void aThirdPartyProviderIsBoundedToOneAllowListedNumber() {
+        // Constitution v3.0.0 permits a third-party inference API only for a
+        // deployment serving one person — the developer himself, who can consent
+        // for his own data. Cardinality is what code can check; whose number it is
+        // stays a human obligation under the ADR.
+        assertThat(new OwnerOnlyAllowListGuard("anthropic", new EntitlementProperties(List.of(OWNER))))
+                .isNotNull();
+
+        assertThatThrownBy(() -> new OwnerOnlyAllowListGuard(
+                        "anthropic", new EntitlementProperties(List.of(OWNER, STRANGER))))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("exactly one")
+                .hasMessageContaining("needs a constitution amendment");
+
+        assertThatThrownBy(() -> new OwnerOnlyAllowListGuard(
+                        "anthropic", new EntitlementProperties(List.of())))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test

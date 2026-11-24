@@ -1,4 +1,49 @@
 <!--
+Sync Impact Report — 2026-11-24 (fourth amendment this date)
+Version change: 2.3.0 → 3.0.0 (MAJOR: an existing prohibition is narrowed for a
+class of deployment that previously had it. This is a weakening, not a
+clarification, and it is versioned as one so that nobody can mistake it for
+housekeeping. v2.2.0 defined a term; v2.3.0 bounded development and added
+conditions; this removes a protection, under conditions.)
+Modified sections:
+  - Technology Constraints, **LLM — in deployment**: adds ONE bounded exception.
+    A deployment whose entitlement allow-list holds exactly one number — the
+    developer's own — may use a third-party inference API, under ADR-0026's six
+    conditions. Enforced at startup, not trusted: on a third-party API the
+    application refuses to run with any other allow-list. Lapses automatically
+    when a second number is added or public sign-up opens.
+  - Preamble: "self-hosted LLM" now carries the qualifier that this is the rule
+    for anything deployed, with the single exception named. v2.2.0's scope note
+    had left the preamble as written; a MAJOR change to what deployment permits
+    makes the document's first paragraph misleading if it is left alone.
+Added sections: none
+Removed sections: none
+Rationale: v2.3.0 defined the owner preview as a deployment, which is correct —
+  it is a live webhook and entitlement limits who it answers, not what it is. The
+  consequence was that shipping a preview for ONE person required renting a GPU
+  VM at a standing monthly cost before a single answer had been judged
+  acceptable. ADR-0026 argues the alternative on two grounds: the only personal
+  data at stake is the owner's own and he consents for himself, and Principle III
+  ties a correctness verdict to the model that produced it — so running the
+  preview and development on one model means the practitioner's verdict is earned
+  once rather than twice.
+What stops this becoming the public launch: the first condition is a startup
+  invariant rather than a sentence. Admitting a second person requires either
+  moving to a self-hosted model or a further amendment — the pressure that would
+  otherwise erode this is answered in code (OwnerOnlyAllowListGuard, asserted in
+  LlmConfigContextTest and EntitlementServiceTest).
+What this does NOT grant: public traffic, a second allow-listed person, or any
+  other living person's data. ADR-0010's rented GPU VM remains the decided answer
+  for public launch and is deferred, not superseded. SC-001's verdict will have to
+  be re-earned on the deployed model before launch, which Principle III already
+  requires.
+Templates: no principle-specific content in plan/spec/tasks templates ✅.
+Propagated: PROJECT_PLAN.md (overview, D9, D10) the same day.
+Decision ref: ADR-0026 (docs/adr/0026-owner-preview-on-a-third-party-api.md),
+  accepted 2026-11-24
+-->
+
+<!--
 Sync Impact Report — 2026-11-24 (third amendment this date)
 Version change: 2.2.0 → 2.3.0 (MINOR: previously-unstated guidance is added and a
 term is defined; no existing protection is removed or weakened)
@@ -112,6 +157,8 @@ The toolkit's rules and methods, applied to that chart by code, supply the judge
 the toolkit itself is an internal asset, used to build the agent's calculations and
 knowledge, never disclosed to the user. To the user, Celestia **is** the KP astrologer: a
 self-hosted LLM (Llama 4 via Ollama) explains that judgement the way an astrologer would —
+self-hosted being the rule for anything deployed, with the single bounded exception the
+Technology Constraints set out for a one-person allow-list (ADR-0026) —
 in houses, lords, stars, and timing — never as a system quoting a document. Every
 explanation stays internally traceable to its toolkit source, but that tracing is for the
 system, not the user. Answering is gated by a paid subscription. This constitution governs
@@ -267,6 +314,17 @@ credentials are separated per environment and never committed.
   allow-list currently permits and however few people it admits. **The owner
   preview is a deployment**: entitlement limits who it answers, not what it is,
   and an allow-list is one property edit away from admitting someone else.
+  **One bounded exception, and it is the only one** (ADR-0026). A deployment whose
+  entitlement allow-list contains **exactly one number — the developer's own** —
+  may use a third-party inference API, subject to that ADR's six conditions: no
+  other living person's data, no training or retention of prompts by the provider,
+  a processing agreement in place, the provider named in an ADR, and the provider
+  kept in configuration rather than code. **The exception is enforced at startup
+  rather than trusted**: on a third-party API the application refuses to run with
+  any other allow-list. It **lapses** when a second number is added or public
+  sign-up opens, whichever comes first, and lapsing restores this rule with no
+  further decision — a lapsed permission with a running service is a defect to
+  fix, not a grace period.
 - **LLM — in development and evaluation**: a third-party inference API **is
   permitted**, because a model small enough to run on a laptop cannot drive this
   product's tool surface at all and pretending otherwise produced a development
@@ -331,4 +389,4 @@ compliance with these principles; deviations must be justified in writing in the
 PR description and approved by a maintainer, or the PR is not merged. Added
 complexity carries the burden of proof.
 
-**Version**: 2.3.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-11-24
+**Version**: 3.0.0 | **Ratified**: 2026-09-02 | **Last Amended**: 2026-11-24

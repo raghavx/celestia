@@ -1,10 +1,10 @@
 # ADR 0026: Running the owner preview on a third-party inference API
 
-- **Status:** **proposed** — this ADR asks for a constitution amendment it does
-  not grant itself
-- **Date:** 2026-11-24 (proposed)
-- **Decision ref:** would require Constitution v2.3.0 → **v3.0.0** (see
-  "The amendment this requires"); follows ADR-0009's 2026-11-24 amendment, which
+- **Status:** **accepted** 2026-11-24 — constitution amended to v3.0.0 the same
+  day, and condition 1 enforced in code (`OwnerOnlyAllowListGuard`)
+- **Date:** 2026-11-24 (proposed) · 2026-11-24 (accepted)
+- **Decision ref:** Constitution v2.3.0 → **v3.0.0** (the amendment below, now
+  applied); follows ADR-0009's 2026-11-24 amendment, which
   covers development only; interacts with ADR-0010 (hosting)
 
 ## Context
@@ -51,7 +51,7 @@ run on the Claude API?
    can tell us whether the product is any good — which is the whole purpose of a
    preview.
 
-## Decision (proposed)
+## Decision
 
 **Permit the owner preview to run on a third-party inference API**, under six
 conditions, one of which is enforced in code rather than promised.
@@ -117,9 +117,9 @@ conditions, one of which is enforced in code rather than promised.
 6. **The provider stays configuration, never code** — v2.3.0's condition 5,
    unchanged and already satisfied.
 
-## The amendment this requires
+## The amendment this required — applied
 
-Acceptance means editing the **LLM — in deployment** bullet of Technology
+Acceptance meant editing the **LLM — in deployment** bullet of Technology
 Constraints to carry a bounded exception, and bumping to **v3.0.0**:
 
 > **One bounded exception, and it is the only one.** A deployment whose
